@@ -325,14 +325,68 @@
 <!-- ACCORDION WRAPPER -->
 <div class="accordion" style="max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:16px;">
 
-<!-- PANEL 1: WORKFLOW -->
+<!-- PANEL 1: HOW TO RUN -->
 <div class="panel">
-  <button class="panel-toggle open" onclick="togglePanel(this)">
+  <button class="panel-toggle" onclick="togglePanel(this)">
+    <span class="panel-icon">▶</span>
+    <span class="panel-label">How to Run</span>
+    <span class="panel-chevron">▼</span>
+  </button>
+  <div class="panel-body" style="display:none;">
+    <div class="run-steps">
+
+      <div class="run-step">
+        <div class="run-num">1</div>
+        <div class="run-content">
+          <div class="run-title">One-time setup</div>
+          <div class="run-desc">Install the required Python packages. Only needed once.</div>
+          <div class="code-block">pip install yfinance pandas requests lxml</div>
+        </div>
+      </div>
+
+      <div class="run-step">
+        <div class="run-num">2</div>
+        <div class="run-content">
+          <div class="run-title">Navigate to the project folder</div>
+          <div class="run-desc">Open a terminal (PowerShell or Command Prompt) and go to the scanner directory.</div>
+          <div class="code-block">cd "C:\Users\andre\Documents\stock scanner"</div>
+        </div>
+      </div>
+
+      <div class="run-step">
+        <div class="run-num">3</div>
+        <div class="run-content">
+          <div class="run-title">Run the scanner</div>
+          <div class="run-desc">This scans all 503 S&amp;P 500 stocks and takes 3–5 minutes to complete.</div>
+          <div class="code-block">python dividend_scanner.py</div>
+        </div>
+      </div>
+
+      <div class="run-step">
+        <div class="run-num">4</div>
+        <div class="run-content">
+          <div class="run-title">Review the output</div>
+          <div class="run-desc">The ranked shortlist prints in the terminal and is saved as a dated CSV in the same folder.</div>
+          <div class="code-block">candidates_YYYYMMDD.csv</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="run-note">
+      <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner.py</code> and can be adjusted at any time.
+    </div>
+  </div><!-- end panel-body: how to run -->
+</div><!-- end panel: how to run -->
+
+<!-- PANEL 2: WORKFLOW -->
+<div class="panel">
+  <button class="panel-toggle" onclick="togglePanel(this)">
     <span class="panel-icon">⚙</span>
     <span class="panel-label">Workflow</span>
-    <span class="panel-chevron">▲</span>
+    <span class="panel-chevron">▼</span>
   </button>
-  <div class="panel-body">
+  <div class="panel-body" style="display:none;">
 
 <div class="workflow" style="max-width:100%;margin:0;">
 
@@ -548,60 +602,6 @@
 
   </div><!-- end panel-body: workflow -->
 </div><!-- end panel: workflow -->
-
-<!-- PANEL 2: HOW TO RUN -->
-<div class="panel">
-  <button class="panel-toggle" onclick="togglePanel(this)">
-    <span class="panel-icon">▶</span>
-    <span class="panel-label">How to Run</span>
-    <span class="panel-chevron">▼</span>
-  </button>
-  <div class="panel-body" style="display:none;">
-    <div class="run-steps">
-
-      <div class="run-step">
-        <div class="run-num">1</div>
-        <div class="run-content">
-          <div class="run-title">One-time setup</div>
-          <div class="run-desc">Install the required Python packages. Only needed once.</div>
-          <div class="code-block">pip install yfinance pandas requests lxml</div>
-        </div>
-      </div>
-
-      <div class="run-step">
-        <div class="run-num">2</div>
-        <div class="run-content">
-          <div class="run-title">Navigate to the project folder</div>
-          <div class="run-desc">Open a terminal (PowerShell or Command Prompt) and go to the scanner directory.</div>
-          <div class="code-block">cd "C:\Users\andre\Documents\stock scanner"</div>
-        </div>
-      </div>
-
-      <div class="run-step">
-        <div class="run-num">3</div>
-        <div class="run-content">
-          <div class="run-title">Run the scanner</div>
-          <div class="run-desc">This scans all 503 S&amp;P 500 stocks and takes 3–5 minutes to complete.</div>
-          <div class="code-block">python dividend_scanner.py</div>
-        </div>
-      </div>
-
-      <div class="run-step">
-        <div class="run-num">4</div>
-        <div class="run-content">
-          <div class="run-title">Review the output</div>
-          <div class="run-desc">The ranked shortlist prints in the terminal and is saved as a dated CSV in the same folder.</div>
-          <div class="code-block">candidates_YYYYMMDD.csv</div>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="run-note">
-      <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner.py</code> and can be adjusted at any time.
-    </div>
-  </div><!-- end panel-body: how to run -->
-</div><!-- end panel: how to run -->
 
 </div><!-- end .accordion -->
 
