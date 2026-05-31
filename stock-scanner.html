@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dividend Capture Scanner — Workflow</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+
+  header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #f8fafc;
+  }
+
+  header p {
+    margin-top: 8px;
+    color: #94a3b8;
+    font-size: 0.95rem;
+  }
+
+  /* ── Workflow container ── */
+  .workflow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  /* ── Each step card ── */
+  .step {
+    width: 100%;
+    background: #1e2433;
+    border: 1px solid #2d3748;
+    border-radius: 14px;
+    padding: 28px 32px;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .step:hover {
+    border-color: #4a90d9;
+    transform: translateY(-2px);
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+
+  .step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .step-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+
+  .step-subtitle {
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .step-body {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    padding-left: 56px;
+  }
+
+  /* pill tags */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+    padding-left: 56px;
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+
+  /* ── Connector arrow ── */
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 6px 0;
+  }
+
+  .connector-line {
+    width: 2px;
+    height: 28px;
+    background: linear-gradient(to bottom, #2d3748, #4a90d9);
+  }
+
+  .connector-arrow {
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 10px solid #4a90d9;
+  }
+
+  /* ── Decision diamond ── */
+  .decision-wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .decision {
+    background: #1a2236;
+    border: 2px dashed #f59e0b;
+    border-radius: 14px;
+    padding: 22px 32px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .decision-icon { font-size: 1.6rem; margin-bottom: 6px; }
+
+  .decision-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fcd34d;
+  }
+
+  .decision-body {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin-top: 6px;
+  }
+
+  .decision-branches {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    margin-top: 0;
+  }
+
+  .branch {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .branch-line {
+    width: 2px;
+    height: 20px;
+  }
+
+  .branch-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+  }
+
+  .branch-arrow {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+  }
+
+  /* step colour schemes */
+  .s1 .step-number { background: #1d4ed8; color: #fff; }
+  .s1 .step-subtitle { color: #60a5fa; }
+  .s1 .tag { color: #60a5fa; border-color: #1d4ed8; background: #1e3a5f22; }
+
+  .s2 .step-number { background: #7c3aed; color: #fff; }
+  .s2 .step-subtitle { color: #a78bfa; }
+  .s2 .tag { color: #a78bfa; border-color: #7c3aed; background: #3b1e6022; }
+
+  .s3 .step-number { background: #0e7490; color: #fff; }
+  .s3 .step-subtitle { color: #22d3ee; }
+  .s3 .tag { color: #22d3ee; border-color: #0e7490; background: #0c3d4a22; }
+
+  .s4 .step-number { background: #15803d; color: #fff; }
+  .s4 .step-subtitle { color: #4ade80; }
+  .s4 .tag { color: #4ade80; border-color: #15803d; background: #14392222; }
+
+  .s5 .step-number { background: #b45309; color: #fff; }
+  .s5 .step-subtitle { color: #fbbf24; }
+  .s5 .tag { color: #fbbf24; border-color: #b45309; background: #3d250022; }
+
+  .s6 .step-number { background: #be123c; color: #fff; }
+  .s6 .step-subtitle { color: #fb7185; }
+  .s6 .tag { color: #fb7185; border-color: #be123c; background: #3d0a1822; }
+
+  /* filter grid */
+  .filter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding-left: 56px;
+    margin-top: 12px;
+  }
+
+  .filter-item {
+    background: #141927;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+
+  .filter-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .filter-value {
+    font-size: 0.88rem;
+    color: #e2e8f0;
+    margin-top: 2px;
+    font-weight: 500;
+  }
+
+  /* output table preview */
+  .output-preview {
+    padding-left: 56px;
+    margin-top: 14px;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+  }
+
+  th {
+    background: #141927;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.68rem;
+    padding: 7px 10px;
+    text-align: left;
+    border-bottom: 1px solid #2d3748;
+  }
+
+  td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #1a2236;
+    color: #cbd5e1;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  .yield-high { color: #4ade80; font-weight: 600; }
+  .yield-mid  { color: #fbbf24; font-weight: 600; }
+
+  /* footer legend */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 48px;
+    font-size: 0.78rem;
+    color: #64748b;
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Dividend Capture Scanner</h1>
+  <p>Automated workflow — S&amp;P 500 · Yahoo Finance · IBKR (coming soon)</p>
+</header>
+
+<div class="workflow">
+
+  <!-- STEP 1 -->
+  <div class="step s1">
+    <div class="step-header">
+      <div class="step-number">1</div>
+      <div>
+        <div class="step-title">Fetch S&amp;P 500 Universe</div>
+        <div class="step-subtitle">Data Ingestion</div>
+      </div>
+    </div>
+    <div class="step-body">
+      Pulls the current list of 503 S&amp;P 500 tickers from Wikipedia at run time,
+      so the universe always reflects the latest index composition — no manual updates needed.
+    </div>
+    <div class="tags">
+      <span class="tag">Wikipedia / pandas</span>
+      <span class="tag">503 tickers</span>
+      <span class="tag">Auto-refresh daily</span>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+  <!-- STEP 2 -->
+  <div class="step s2">
+    <div class="step-header">
+      <div class="step-number">2</div>
+      <div>
+        <div class="step-title">Pull Stock Data via Yahoo Finance</div>
+        <div class="step-subtitle">Per-ticker enrichment</div>
+      </div>
+    </div>
+    <div class="step-body">
+      For each ticker, fetches live fundamentals using <strong>yfinance</strong>:
+      ex-dividend date, dividend rate, current price, average daily volume, beta, and sector.
+      Data is pulled in parallel to keep runtime manageable.
+    </div>
+    <div class="tags">
+      <span class="tag">yfinance</span>
+      <span class="tag">Ex-dividend date</span>
+      <span class="tag">Price · Volume · Beta</span>
+      <span class="tag">Sector</span>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+  <!-- STEP 3 -->
+  <div class="step s3">
+    <div class="step-header">
+      <div class="step-number">3</div>
+      <div>
+        <div class="step-title">Apply Capture Filters</div>
+        <div class="step-subtitle">Candidate screening</div>
+      </div>
+    </div>
+    <div class="step-body">
+      Each stock is tested against five filters simultaneously. Any failure disqualifies the stock.
+      All thresholds are configurable at the top of the script.
+    </div>
+    <div class="filter-grid">
+      <div class="filter-item">
+        <div class="filter-label">Ex-date window</div>
+        <div class="filter-value">Next 14 days</div>
+      </div>
+      <div class="filter-item">
+        <div class="filter-label">Min yield / payment</div>
+        <div class="filter-value">&ge; 0.5%</div>
+      </div>
+      <div class="filter-item">
+        <div class="filter-label">Min avg daily volume</div>
+        <div class="filter-value">&ge; 500,000 shares</div>
+      </div>
+      <div class="filter-item">
+        <div class="filter-label">Stock price range</div>
+        <div class="filter-value">$10 – $500</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+  <!-- STEP 4 — DECISION -->
+  <div class="decision-wrap">
+    <div class="decision">
+      <div class="decision-icon">⚖️</div>
+      <div class="decision-title">Does the stock pass all filters?</div>
+      <div class="decision-body">All five criteria must be met to advance to scoring</div>
+    </div>
+    <div class="decision-branches">
+      <div class="branch">
+        <div class="branch-line" style="background:#ef4444;"></div>
+        <div class="branch-label" style="background:#3d0a18;color:#fb7185;border:1px solid #be123c;">No — Skip</div>
+        <div style="font-size:0.78rem;color:#64748b;text-align:center;padding-top:4px;">Stock discarded,<br>move to next ticker</div>
+      </div>
+      <div class="branch">
+        <div class="branch-line" style="background:#22c55e;"></div>
+        <div class="branch-label" style="background:#142208;color:#4ade80;border:1px solid #15803d;">Yes — Score it</div>
+        <div class="branch-arrow" style="border-top:10px solid #22c55e;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+  <!-- STEP 5 -->
+  <div class="step s4">
+    <div class="step-header">
+      <div class="step-number">4</div>
+      <div>
+        <div class="step-title">Score &amp; Rank Candidates</div>
+        <div class="step-subtitle">Prioritisation</div>
+      </div>
+    </div>
+    <div class="step-body">
+      Each passing stock receives a composite score. Higher yield and more days until
+      ex-date push the score up; higher beta (price volatility) pulls it down.
+      The shortlist is sorted best-first.
+    </div>
+    <div class="tags">
+      <span class="tag">Yield ×1000 (reward)</span>
+      <span class="tag">Days remaining ×0.5 (reward)</span>
+      <span class="tag">Beta ×2 (penalty)</span>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+  <!-- STEP 6 — OUTPUT -->
+  <div class="step s5">
+    <div class="step-header">
+      <div class="step-number">5</div>
+      <div>
+        <div class="step-title">Output Morning Shortlist</div>
+        <div class="step-subtitle">Review &amp; Export</div>
+      </div>
+    </div>
+    <div class="step-body">
+      Ranked table printed to the terminal and saved as a dated CSV
+      (<code>candidates_YYYYMMDD.csv</code>) for record keeping.
+    </div>
+    <div class="output-preview">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Ticker</th><th>Name</th><th>Price</th>
+            <th>Ex-Date</th><th>Days</th><th>Div/Share</th><th>Yield/Pmt</th><th>Beta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td><td><strong>KHC</strong></td><td>Kraft Heinz</td><td>$24.01</td>
+            <td>Jun 05</td><td>5</td><td>$0.40</td><td class="yield-high">1.67%</td><td>0.05</td>
+          </tr>
+          <tr>
+            <td>2</td><td><strong>LYB</strong></td><td>LyondellBasell</td><td>$66.65</td>
+            <td>Jun 01</td><td>1</td><td>$1.03</td><td class="yield-high">1.55%</td><td>0.35</td>
+          </tr>
+          <tr>
+            <td>3</td><td><strong>KMB</strong></td><td>Kimberly-Clark</td><td>$97.60</td>
+            <td>Jun 05</td><td>5</td><td>$1.28</td><td class="yield-mid">1.31%</td><td>0.31</td>
+          </tr>
+          <tr>
+            <td>4</td><td><strong>OMC</strong></td><td>Omnicom Group</td><td>$72.71</td>
+            <td>Jun 10</td><td>10</td><td>$0.80</td><td class="yield-mid">1.10%</td><td>0.68</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tags" style="margin-top:14px;">
+      <span class="tag">Terminal output</span>
+      <span class="tag">CSV export (dated)</span>
+      <span class="tag">Run each morning</span>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div><div class="connector-arrow"></div></div>
+
+  <!-- STEP 7 — IBKR -->
+  <div class="step s6">
+    <div class="step-header">
+      <div class="step-number">6</div>
+      <div>
+        <div class="step-title">Execute via IBKR API</div>
+        <div class="step-subtitle">Coming soon — Phase 2</div>
+      </div>
+    </div>
+    <div class="step-body">
+      Once Rick enables API access, the scanner will connect to Interactive Brokers via the
+      Client Portal API to check live bid/ask spread, available liquidity, and optionally
+      place orders directly — closing the loop from scan to trade to record.
+    </div>
+    <div class="tags">
+      <span class="tag">IBKR Client Portal API</span>
+      <span class="tag">Live bid/ask spread</span>
+      <span class="tag">Order placement</span>
+      <span class="tag">Trade log</span>
+    </div>
+  </div>
+
+</div><!-- end .workflow -->
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#1d4ed8;"></div> Data ingestion</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7c3aed;"></div> Enrichment</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#0e7490;"></div> Filtering</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#15803d;"></div> Scoring</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#b45309;"></div> Output</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#be123c;"></div> Phase 2</div>
+</div>
+
+</body>
+</html>
