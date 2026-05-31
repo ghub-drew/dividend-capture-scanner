@@ -534,5 +534,151 @@
   <div class="legend-item"><div class="legend-dot" style="background:#be123c;"></div> Phase 2</div>
 </div>
 
+<!-- HOW TO RUN -->
+<div class="how-to-run">
+  <h2>How to Run the Scanner</h2>
+  <p class="run-subtitle">Run this each morning to get a fresh shortlist of candidates.</p>
+
+  <div class="run-steps">
+
+    <div class="run-step">
+      <div class="run-num">1</div>
+      <div class="run-content">
+        <div class="run-title">One-time setup</div>
+        <div class="run-desc">Install the required Python packages. Only needed once.</div>
+        <div class="code-block">pip install yfinance pandas requests lxml</div>
+      </div>
+    </div>
+
+    <div class="run-step">
+      <div class="run-num">2</div>
+      <div class="run-content">
+        <div class="run-title">Navigate to the project folder</div>
+        <div class="run-desc">Open a terminal (PowerShell or Command Prompt) and go to the scanner directory.</div>
+        <div class="code-block">cd "C:\Users\andre\Documents\stock scanner"</div>
+      </div>
+    </div>
+
+    <div class="run-step">
+      <div class="run-num">3</div>
+      <div class="run-content">
+        <div class="run-title">Run the scanner</div>
+        <div class="run-desc">This scans all 503 S&amp;P 500 stocks and takes 3–5 minutes to complete.</div>
+        <div class="code-block">python dividend_scanner.py</div>
+      </div>
+    </div>
+
+    <div class="run-step">
+      <div class="run-num">4</div>
+      <div class="run-content">
+        <div class="run-title">Review the output</div>
+        <div class="run-desc">The ranked shortlist prints in the terminal and is also saved as a dated CSV file in the same folder.</div>
+        <div class="code-block">candidates_YYYYMMDD.csv</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="run-note">
+    <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner.py</code> and can be adjusted at any time.
+  </div>
+</div>
+
+<style>
+  .how-to-run {
+    max-width: 780px;
+    margin: 56px auto 0;
+    padding: 40px;
+    background: #1a1f2e;
+    border: 1px solid #252d3d;
+    border-radius: 16px;
+  }
+
+  .how-to-run h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 6px;
+  }
+
+  .run-subtitle {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin-bottom: 28px;
+  }
+
+  .run-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .run-step {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+  }
+
+  .run-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #1d4ed8;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .run-content { flex: 1; }
+
+  .run-title {
+    font-size: 0.95rem;
+    font-weight: 650;
+    color: #f1f5f9;
+    margin-bottom: 4px;
+  }
+
+  .run-desc {
+    font-size: 0.83rem;
+    color: #64748b;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  .code-block {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.82rem;
+    background: #0f1117;
+    border: 1px solid #252d3d;
+    border-radius: 8px;
+    padding: 10px 16px;
+    color: #60a5fa;
+    word-break: break-all;
+  }
+
+  .run-note {
+    margin-top: 24px;
+    padding: 12px 16px;
+    background: #0f1117;
+    border-left: 3px solid #4a90d9;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.83rem;
+    color: #64748b;
+    line-height: 1.6;
+  }
+
+  .run-note strong { color: #94a3b8; }
+  .run-note code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    color: #60a5fa;
+    font-size: 0.8rem;
+  }
+</style>
+
 </body>
 </html>
