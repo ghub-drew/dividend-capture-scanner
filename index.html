@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dividend Capture — How It Works</title>
+<title>Dividend Capture Scanner</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -17,7 +17,7 @@
 
   header {
     text-align: center;
-    margin-bottom: 60px;
+    margin-bottom: 48px;
   }
 
   .eyebrow {
@@ -34,99 +34,157 @@
     font-weight: 700;
     letter-spacing: -0.5px;
     color: #f8fafc;
-    line-height: 1.2;
   }
 
   header p {
     margin-top: 10px;
     color: #64748b;
     font-size: 0.95rem;
-    max-width: 480px;
+    max-width: 500px;
     margin-left: auto;
     margin-right: auto;
     line-height: 1.6;
   }
 
-  /* ── Workflow ── */
-  .workflow {
+  /* ── Accordion ── */
+  .accordion {
+    max-width: 780px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    max-width: 700px;
-    margin: 0 auto;
+    gap: 14px;
+    padding-bottom: 60px;
   }
 
-  /* ── Step card ── */
-  .step {
-    width: 100%;
+  .panel {
     background: #1a1f2e;
     border: 1px solid #252d3d;
-    border-radius: 16px;
-    padding: 30px 32px;
-    display: flex;
-    gap: 24px;
-    align-items: flex-start;
-    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
-  }
-
-  .step:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  }
-
-  /* icon column */
-  .step-icon {
-    width: 52px;
-    height: 52px;
     border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .panel-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 26px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #f1f5f9;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: left;
+    transition: background 0.15s;
+  }
+
+  .panel-toggle:hover { background: #1e2840; }
+
+  .panel-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #1d4ed8;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .panel-label { flex: 1; }
+
+  .panel-sub {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .panel-chevron {
+    font-size: 0.65rem;
+    color: #64748b;
+    transition: transform 0.2s;
+  }
+
+  .panel-toggle.open .panel-chevron { transform: rotate(180deg); }
+
+  .panel-body {
+    display: none;
+    padding: 0 26px 28px;
+    border-top: 1px solid #252d3d;
+  }
+
+  /* ────────────────────────────────
+     SECTION 1 — General Workflow
+  ──────────────────────────────── */
+  .strategy-steps {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding-top: 24px;
+    gap: 0;
+  }
+
+  .sstep {
+    background: #141927;
+    border: 1px solid #252d3d;
+    border-radius: 12px;
+    padding: 20px 22px;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    transition: border-color 0.2s;
+  }
+
+  .sstep:hover { border-color: var(--accent); }
+
+  .sstep-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
     background: var(--accent-bg);
     border: 1px solid var(--accent-border);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     flex-shrink: 0;
-    margin-top: 2px;
   }
 
-  /* text column */
-  .step-content { flex: 1; }
+  .sstep-content { flex: 1; }
 
-  .step-meta {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-
-  .step-label {
+  .sstep-label {
     font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--accent);
+    margin-bottom: 4px;
   }
 
-  .step-title {
-    font-size: 1.05rem;
+  .sstep-title {
+    font-size: 0.95rem;
     font-weight: 650;
     color: #f1f5f9;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   .bullets {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 5px;
   }
 
   .bullets li {
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     color: #94a3b8;
     line-height: 1.5;
-    padding-left: 16px;
+    padding-left: 14px;
     position: relative;
   }
 
@@ -138,193 +196,688 @@
     font-weight: 700;
   }
 
-  /* ── Connector ── */
-  .connector {
+  .profit-callout {
+    margin-top: 10px;
+    background: #0d2218;
+    border: 1px solid #166534;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    color: #4ade80;
+    font-weight: 600;
+  }
+
+  .sarrow {
+    display: flex;
+    justify-content: flex-start;
+    padding: 4px 0 4px 48px;
+  }
+
+  .sarrow-line {
+    width: 2px;
+    height: 18px;
+    background: linear-gradient(to bottom, #252d3d, var(--next-accent, #4a90d9));
+  }
+
+  .g1 { --accent:#60a5fa; --accent-bg:#1e3a5f22; --accent-border:#1d4ed844; }
+  .g2 { --accent:#a78bfa; --accent-bg:#3b1e6022; --accent-border:#7c3aed44; }
+  .g3 { --accent:#f59e0b; --accent-bg:#3d250022; --accent-border:#b4530944; }
+  .g4 { --accent:#4ade80; --accent-bg:#14392222; --accent-border:#15803d44; }
+  .g5 { --accent:#fb7185; --accent-bg:#3d0a1822; --accent-border:#be123c44; }
+
+  /* ────────────────────────────────
+     SECTION 2 — How to Run
+  ──────────────────────────────── */
+  .run-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding-top: 24px;
+  }
+
+  .run-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .run-num {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #0e7490;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .run-content { flex: 1; }
+
+  .run-title {
+    font-size: 0.93rem;
+    font-weight: 650;
+    color: #f1f5f9;
+    margin-bottom: 4px;
+  }
+
+  .run-desc {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+
+  .code-block {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.82rem;
+    background: #0f1117;
+    border: 1px solid #252d3d;
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #22d3ee;
+    word-break: break-all;
+  }
+
+  .run-note {
+    margin-top: 22px;
+    padding: 12px 14px;
+    background: #0f1117;
+    border-left: 3px solid #0e7490;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.82rem;
+    color: #64748b;
+    line-height: 1.6;
+  }
+
+  .run-note strong { color: #94a3b8; }
+  .run-note code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    color: #22d3ee;
+    font-size: 0.79rem;
+  }
+
+  /* ────────────────────────────────
+     SECTION 3 — Scanner Workflow
+  ──────────────────────────────── */
+  .scanner-workflow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 24px;
+    gap: 0;
+  }
+
+  .sw-step {
+    width: 100%;
+    background: #141927;
+    border: 1px solid #252d3d;
+    border-radius: 12px;
+    padding: 20px 22px;
+    transition: border-color 0.2s;
+  }
+
+  .sw-step:hover { border-color: var(--sw-accent); }
+
+  .sw-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+
+  .sw-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    background: var(--sw-accent);
+    color: #fff;
+  }
+
+  .sw-title {
+    font-size: 0.95rem;
+    font-weight: 650;
+    color: #f1f5f9;
+  }
+
+  .sw-sub {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sw-accent);
+    margin-top: 1px;
+  }
+
+  .sw-body {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    padding-left: 50px;
+  }
+
+  .sw-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    padding-left: 50px;
+  }
+
+  .sw-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--sw-accent);
+    color: var(--sw-accent);
+    background: var(--sw-bg);
+  }
+
+  .sw-connector {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 4px 0;
   }
 
-  .connector-line {
+  .sw-line {
     width: 2px;
-    height: 30px;
-    background: linear-gradient(to bottom, #252d3d, var(--next-accent, #4a90d9));
+    height: 22px;
+    background: linear-gradient(to bottom, #252d3d, var(--sw-next, #4a90d9));
   }
 
-  .connector-arrow {
+  .sw-arrow {
     width: 0; height: 0;
-    border-left: 7px solid transparent;
-    border-right: 7px solid transparent;
-    border-top: 10px solid var(--next-accent, #4a90d9);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 9px solid var(--sw-next, #4a90d9);
   }
 
-  /* ── Profit callout ── */
-  .profit-callout {
-    margin-top: 12px;
-    background: #0d2218;
-    border: 1px solid #166534;
-    border-radius: 10px;
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.85rem;
-    color: #4ade80;
-    font-weight: 600;
-  }
+  .n1 { --sw-accent:#60a5fa; --sw-bg:#1e3a5f22; }
+  .n2 { --sw-accent:#a78bfa; --sw-bg:#3b1e6022; }
+  .n3 { --sw-accent:#22d3ee; --sw-bg:#0c3d4a22; }
+  .n4 { --sw-accent:#4ade80; --sw-bg:#14392222; }
+  .n5 { --sw-accent:#fbbf24; --sw-bg:#3d250022; }
+  .n6 { --sw-accent:#fb7185; --sw-bg:#3d0a1822; }
 
-  .profit-callout span { font-size: 1.1rem; }
-
-  /* ── Step colour themes ── */
-  .s1 { --accent: #60a5fa; --accent-bg: #1e3a5f33; --accent-border: #1d4ed855; }
-  .s2 { --accent: #a78bfa; --accent-bg: #3b1e6033; --accent-border: #7c3aed55; }
-  .s3 { --accent: #f59e0b; --accent-bg: #3d250033; --accent-border: #b4530955; }
-  .s4 { --accent: #4ade80; --accent-bg: #14392233; --accent-border: #15803d55; }
-  .s5 { --accent: #fb7185; --accent-bg: #3d0a1833; --accent-border: #be123c55; }
-
-  /* ── Footer ── */
-  footer {
+  .sw-decision {
+    width: 100%;
+    background: #141927;
+    border: 2px dashed #f59e0b;
+    border-radius: 12px;
+    padding: 18px 22px;
     text-align: center;
-    margin-top: 56px;
-    font-size: 0.78rem;
-    color: #334155;
   }
 
-  footer a {
-    color: #4a90d9;
-    text-decoration: none;
+  .sw-decision-title {
+    font-size: 0.95rem;
+    font-weight: 650;
+    color: #fcd34d;
+    margin-bottom: 4px;
   }
 
-  footer a:hover { text-decoration: underline; }
+  .sw-decision-sub {
+    font-size: 0.82rem;
+    color: #94a3b8;
+  }
 
-  .scanner-link {
-    display: inline-flex;
+  .sw-branches {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .sw-branch {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 6px;
-    margin-top: 14px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #60a5fa;
-    text-decoration: none;
-    border: 1px solid #1d4ed855;
-    background: #1e3a5f33;
-    padding: 5px 12px;
-    border-radius: 20px;
-    transition: background 0.2s, border-color 0.2s;
   }
 
-  .scanner-link:hover {
-    background: #1e3a5f66;
-    border-color: #60a5fa;
+  .sw-branch-line { width: 2px; height: 18px; }
+
+  .sw-branch-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 4px;
   }
+
+  .sw-branch-arrow {
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+  }
+
+  .filter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding-left: 50px;
+    margin-top: 10px;
+  }
+
+  .filter-item {
+    background: #0f1117;
+    border: 1px solid #252d3d;
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
+
+  .filter-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .filter-value {
+    font-size: 0.85rem;
+    color: #e2e8f0;
+    margin-top: 2px;
+    font-weight: 500;
+  }
+
+  .sw-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 20px;
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+
+  .sw-legend-item { display: flex; align-items: center; gap: 6px; }
+  .sw-legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+  .output-preview {
+    padding-left: 50px;
+    margin-top: 12px;
+    overflow-x: auto;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.76rem; }
+  th {
+    background: #0f1117;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.65rem;
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid #252d3d;
+  }
+  td { padding: 6px 8px; border-bottom: 1px solid #141927; color: #cbd5e1; }
+  tr:last-child td { border-bottom: none; }
+  .yield-high { color: #4ade80; font-weight: 600; }
+  .yield-mid  { color: #fbbf24; font-weight: 600; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="eyebrow">Strategy Overview</div>
-  <h1>Dividend Capture</h1>
+  <h1>Dividend Capture Scanner</h1>
   <p>A systematic approach to collecting dividend income by timing stock purchases around ex-dividend dates.</p>
 </header>
 
-<div class="workflow">
+<div class="accordion">
 
-  <!-- STEP 1 -->
-  <div class="step s1">
-    <div class="step-icon">🔍</div>
-    <div class="step-content">
-      <div class="step-meta"><span class="step-label">Step 1</span></div>
-      <div class="step-title">Find a Good Stock</div>
-      <ul class="bullets">
-        <li>A company announces it will pay a dividend</li>
-        <li>The tool automatically identifies good capture candidates</li>
-        <li>Key filters: dividend amount, stock price, trading volume, and how quickly the stock historically recovers after the ex-date</li>
-      </ul>
-      <a href="stock-scanner.html" class="scanner-link">
-        <span>⚙</span> See how the scanner works
-      </a>
-    </div>
-  </div>
+  <!-- ══════════════════════════════════
+       PANEL 1 — Strategy Overview
+  ══════════════════════════════════ -->
+  <div class="panel">
+    <button class="panel-toggle" onclick="togglePanel(this)">
+      <div class="panel-num">1</div>
+      <div>
+        <div class="panel-label">Strategy Overview</div>
+        <div class="panel-sub">How dividend capture works — the 5-step process</div>
+      </div>
+      <span class="panel-chevron">▼</span>
+    </button>
+    <div class="panel-body">
+      <div class="strategy-steps">
 
-  <div class="connector" style="--next-accent: #a78bfa;">
-    <div class="connector-line"></div>
-    <div class="connector-arrow"></div>
-  </div>
+        <div class="sstep g1">
+          <div class="sstep-icon">🔍</div>
+          <div class="sstep-content">
+            <div class="sstep-label">Step 1</div>
+            <div class="sstep-title">Find a Good Stock</div>
+            <ul class="bullets">
+              <li>A company announces it will pay a dividend</li>
+              <li>The tool automatically identifies good capture candidates</li>
+              <li>Key filters: dividend amount, stock price, trading volume, and how quickly the stock historically recovers after the ex-date</li>
+            </ul>
+          </div>
+        </div>
 
-  <!-- STEP 2 -->
-  <div class="step s2">
-    <div class="step-icon">🛒</div>
-    <div class="step-content">
-      <div class="step-meta"><span class="step-label">Step 2</span></div>
-      <div class="step-title">Buy Before the Ex-Dividend Date</div>
-      <ul class="bullets">
-        <li>You buy the stock before the cutoff date to qualify for the dividend</li>
-      </ul>
-    </div>
-  </div>
+        <div class="sarrow" style="--next-accent:#a78bfa;"><div class="sarrow-line"></div></div>
 
-  <div class="connector" style="--next-accent: #f59e0b;">
-    <div class="connector-line"></div>
-    <div class="connector-arrow"></div>
-  </div>
+        <div class="sstep g2">
+          <div class="sstep-icon">🛒</div>
+          <div class="sstep-content">
+            <div class="sstep-label">Step 2</div>
+            <div class="sstep-title">Buy Before the Ex-Dividend Date</div>
+            <ul class="bullets">
+              <li>You buy the stock before the cutoff date to qualify for the dividend</li>
+            </ul>
+          </div>
+        </div>
 
-  <!-- STEP 3 -->
-  <div class="step s3">
-    <div class="step-icon">📅</div>
-    <div class="step-content">
-      <div class="step-meta"><span class="step-label">Step 3</span></div>
-      <div class="step-title">Ex-Dividend Date Passes</div>
-      <ul class="bullets">
-        <li>You officially receive the dividend</li>
-        <li>The stock price typically drops around this time</li>
-      </ul>
-    </div>
-  </div>
+        <div class="sarrow" style="--next-accent:#f59e0b;"><div class="sarrow-line"></div></div>
 
-  <div class="connector" style="--next-accent: #4ade80;">
-    <div class="connector-line"></div>
-    <div class="connector-arrow"></div>
-  </div>
+        <div class="sstep g3">
+          <div class="sstep-icon">📅</div>
+          <div class="sstep-content">
+            <div class="sstep-label">Step 3</div>
+            <div class="sstep-title">Ex-Dividend Date Passes</div>
+            <ul class="bullets">
+              <li>You officially receive the dividend</li>
+              <li>The stock price typically drops around this time</li>
+            </ul>
+          </div>
+        </div>
 
-  <!-- STEP 4 -->
-  <div class="step s4">
-    <div class="step-icon">💰</div>
-    <div class="step-content">
-      <div class="step-meta"><span class="step-label">Step 4</span></div>
-      <div class="step-title">Sell the Stock</div>
-      <ul class="bullets">
-        <li>You sell once the price recovers</li>
-      </ul>
-      <div class="profit-callout">
-        <span>✓</span>
-        If the dividend received is more than the price drop, you profit
+        <div class="sarrow" style="--next-accent:#4ade80;"><div class="sarrow-line"></div></div>
+
+        <div class="sstep g4">
+          <div class="sstep-icon">💰</div>
+          <div class="sstep-content">
+            <div class="sstep-label">Step 4</div>
+            <div class="sstep-title">Sell the Stock</div>
+            <ul class="bullets">
+              <li>You sell once the price recovers</li>
+            </ul>
+            <div class="profit-callout">If the dividend received is more than the price drop, you profit</div>
+          </div>
+        </div>
+
+        <div class="sarrow" style="--next-accent:#fb7185;"><div class="sarrow-line"></div></div>
+
+        <div class="sstep g5">
+          <div class="sstep-icon">📊</div>
+          <div class="sstep-content">
+            <div class="sstep-label">Step 5</div>
+            <div class="sstep-title">Track the Result</div>
+            <ul class="bullets">
+              <li>Record the trade: what was bought, when, how much capital deployed, and the outcome</li>
+            </ul>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
-  <div class="connector" style="--next-accent: #fb7185;">
-    <div class="connector-line"></div>
-    <div class="connector-arrow"></div>
-  </div>
+  <!-- ══════════════════════════════════
+       PANEL 2 — How to Run the Scanner
+  ══════════════════════════════════ -->
+  <div class="panel">
+    <button class="panel-toggle" onclick="togglePanel(this)">
+      <div class="panel-num" style="background:#0e7490;">2</div>
+      <div>
+        <div class="panel-label">How to Run the Scanner</div>
+        <div class="panel-sub">Step-by-step instructions to run the script each morning</div>
+      </div>
+      <span class="panel-chevron">▼</span>
+    </button>
+    <div class="panel-body">
+      <div class="run-steps">
 
-  <!-- STEP 5 -->
-  <div class="step s5">
-    <div class="step-icon">📊</div>
-    <div class="step-content">
-      <div class="step-meta"><span class="step-label">Step 5</span></div>
-      <div class="step-title">Track the Result</div>
-      <ul class="bullets">
-        <li>Record the trade: what was bought, when, how much capital deployed, and the outcome</li>
-      </ul>
+        <div class="run-step">
+          <div class="run-num">1</div>
+          <div class="run-content">
+            <div class="run-title">One-time setup</div>
+            <div class="run-desc">Install the required Python packages. Only needed once.</div>
+            <div class="code-block">pip install yfinance pandas requests lxml</div>
+          </div>
+        </div>
+
+        <div class="run-step">
+          <div class="run-num">2</div>
+          <div class="run-content">
+            <div class="run-title">Navigate to the project folder</div>
+            <div class="run-desc">Open PowerShell or Command Prompt and go to the scanner directory.</div>
+            <div class="code-block">cd "C:\Users\andre\Documents\stock scanner"</div>
+          </div>
+        </div>
+
+        <div class="run-step">
+          <div class="run-num">3</div>
+          <div class="run-content">
+            <div class="run-title">Run the scanner</div>
+            <div class="run-desc">Scans all 503 S&amp;P 500 stocks. Takes 3–5 minutes to complete.</div>
+            <div class="code-block">python dividend_scanner.py</div>
+          </div>
+        </div>
+
+        <div class="run-step">
+          <div class="run-num">4</div>
+          <div class="run-content">
+            <div class="run-title">Review the output</div>
+            <div class="run-desc">The ranked shortlist prints in the terminal and is saved as a dated CSV in the same folder.</div>
+            <div class="code-block">candidates_YYYYMMDD.csv</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="run-note">
+        <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner.py</code> and can be adjusted at any time.
+      </div>
     </div>
   </div>
 
-</div>
+  <!-- ══════════════════════════════════
+       PANEL 3 — Scanner Workflow
+  ══════════════════════════════════ -->
+  <div class="panel">
+    <button class="panel-toggle" onclick="togglePanel(this)">
+      <div class="panel-num" style="background:#7c3aed;">3</div>
+      <div>
+        <div class="panel-label">Scanner Workflow</div>
+        <div class="panel-sub">How the script works under the hood — from data pull to ranked output</div>
+      </div>
+      <span class="panel-chevron">▼</span>
+    </button>
+    <div class="panel-body">
+      <div class="scanner-workflow">
 
-<footer>
-  <p>Scanner workflow &rarr; <a href="stock-scanner.html">stock-scanner.html</a></p>
-</footer>
+        <div class="sw-step n1">
+          <div class="sw-header">
+            <div class="sw-num">1</div>
+            <div>
+              <div class="sw-title">Fetch S&amp;P 500 Universe</div>
+              <div class="sw-sub">Data Ingestion</div>
+            </div>
+          </div>
+          <div class="sw-body">Pulls the current list of 503 S&amp;P 500 tickers from Wikipedia at run time, so the universe always reflects the latest index composition.</div>
+          <div class="sw-tags">
+            <span class="sw-tag">Wikipedia / pandas</span>
+            <span class="sw-tag">503 tickers</span>
+            <span class="sw-tag">Auto-refresh daily</span>
+          </div>
+        </div>
+
+        <div class="sw-connector" style="--sw-next:#a78bfa;"><div class="sw-line"></div><div class="sw-arrow"></div></div>
+
+        <div class="sw-step n2">
+          <div class="sw-header">
+            <div class="sw-num">2</div>
+            <div>
+              <div class="sw-title">Pull Stock Data via Yahoo Finance</div>
+              <div class="sw-sub">Per-ticker enrichment</div>
+            </div>
+          </div>
+          <div class="sw-body">For each ticker, fetches live fundamentals using <strong>yfinance</strong>: ex-dividend date, dividend rate, current price, average daily volume, beta, and sector.</div>
+          <div class="sw-tags">
+            <span class="sw-tag">yfinance</span>
+            <span class="sw-tag">Ex-dividend date</span>
+            <span class="sw-tag">Price · Volume · Beta</span>
+          </div>
+        </div>
+
+        <div class="sw-connector" style="--sw-next:#22d3ee;"><div class="sw-line"></div><div class="sw-arrow"></div></div>
+
+        <div class="sw-step n3">
+          <div class="sw-header">
+            <div class="sw-num">3</div>
+            <div>
+              <div class="sw-title">Apply Capture Filters</div>
+              <div class="sw-sub">Candidate screening</div>
+            </div>
+          </div>
+          <div class="sw-body">Each stock is tested against four filters. Any failure disqualifies it.</div>
+          <div class="filter-grid">
+            <div class="filter-item">
+              <div class="filter-label">Ex-date window</div>
+              <div class="filter-value">Next 14 days</div>
+            </div>
+            <div class="filter-item">
+              <div class="filter-label">Min yield / payment</div>
+              <div class="filter-value">&ge; 0.5%</div>
+            </div>
+            <div class="filter-item">
+              <div class="filter-label">Min avg daily volume</div>
+              <div class="filter-value">&ge; 500,000 shares</div>
+            </div>
+            <div class="filter-item">
+              <div class="filter-label">Stock price range</div>
+              <div class="filter-value">$10 – $500</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sw-connector" style="--sw-next:#4ade80;"><div class="sw-line"></div><div class="sw-arrow"></div></div>
+
+        <!-- Decision -->
+        <div style="width:100%;">
+          <div class="sw-decision">
+            <div class="sw-decision-title">Does the stock pass all filters?</div>
+            <div class="sw-decision-sub">All criteria must be met to advance to scoring</div>
+          </div>
+          <div class="sw-branches">
+            <div class="sw-branch">
+              <div class="sw-branch-line" style="background:#ef4444;"></div>
+              <div class="sw-branch-label" style="background:#3d0a18;color:#fb7185;border:1px solid #be123c;">No — Skip</div>
+              <div style="font-size:0.75rem;color:#64748b;text-align:center;padding-top:4px;">Discarded, next ticker</div>
+            </div>
+            <div class="sw-branch">
+              <div class="sw-branch-line" style="background:#22c55e;"></div>
+              <div class="sw-branch-label" style="background:#142208;color:#4ade80;border:1px solid #15803d;">Yes — Score it</div>
+              <div class="sw-branch-arrow" style="border-top:9px solid #22c55e;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sw-connector" style="--sw-next:#fbbf24;"><div class="sw-line"></div><div class="sw-arrow"></div></div>
+
+        <div class="sw-step n5">
+          <div class="sw-header">
+            <div class="sw-num">4</div>
+            <div>
+              <div class="sw-title">Score &amp; Rank Candidates</div>
+              <div class="sw-sub">Prioritisation</div>
+            </div>
+          </div>
+          <div class="sw-body">Each passing stock receives a composite score. Higher yield and more days until ex-date push the score up; higher beta pulls it down. Sorted best-first.</div>
+          <div class="sw-tags">
+            <span class="sw-tag">Yield x1000 (reward)</span>
+            <span class="sw-tag">Days remaining x0.5 (reward)</span>
+            <span class="sw-tag">Beta x2 (penalty)</span>
+          </div>
+        </div>
+
+        <div class="sw-connector" style="--sw-next:#fbbf24;"><div class="sw-line"></div><div class="sw-arrow"></div></div>
+
+        <div class="sw-step n5">
+          <div class="sw-header">
+            <div class="sw-num">5</div>
+            <div>
+              <div class="sw-title">Output Morning Shortlist</div>
+              <div class="sw-sub">Review &amp; Export</div>
+            </div>
+          </div>
+          <div class="sw-body">Ranked table printed to the terminal and saved as a dated CSV for record keeping.</div>
+          <div class="output-preview">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Ticker</th><th>Name</th><th>Price</th><th>Ex-Date</th><th>Days</th><th>Div/Share</th><th>Yield/Pmt</th><th>Beta</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td><strong>KHC</strong></td><td>Kraft Heinz</td><td>$24.01</td><td>Jun 05</td><td>5</td><td>$0.40</td><td class="yield-high">1.67%</td><td>0.05</td></tr>
+                <tr><td>2</td><td><strong>LYB</strong></td><td>LyondellBasell</td><td>$66.65</td><td>Jun 01</td><td>1</td><td>$1.03</td><td class="yield-high">1.55%</td><td>0.35</td></tr>
+                <tr><td>3</td><td><strong>KMB</strong></td><td>Kimberly-Clark</td><td>$97.60</td><td>Jun 05</td><td>5</td><td>$1.28</td><td class="yield-mid">1.31%</td><td>0.31</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="sw-tags" style="margin-top:12px;">
+            <span class="sw-tag">Terminal output</span>
+            <span class="sw-tag">CSV export (dated)</span>
+            <span class="sw-tag">Run each morning</span>
+          </div>
+        </div>
+
+        <div class="sw-connector" style="--sw-next:#fb7185;"><div class="sw-line"></div><div class="sw-arrow"></div></div>
+
+        <div class="sw-step n6">
+          <div class="sw-header">
+            <div class="sw-num">6</div>
+            <div>
+              <div class="sw-title">Execute via IBKR API</div>
+              <div class="sw-sub">Coming soon — Phase 2</div>
+            </div>
+          </div>
+          <div class="sw-body">Once API access is enabled, the scanner will connect to Interactive Brokers to check live bid/ask spread, available liquidity, and optionally place orders directly.</div>
+          <div class="sw-tags">
+            <span class="sw-tag">IBKR Client Portal API</span>
+            <span class="sw-tag">Live bid/ask spread</span>
+            <span class="sw-tag">Order placement</span>
+            <span class="sw-tag">Trade log</span>
+          </div>
+        </div>
+
+        <div class="sw-legend">
+          <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#60a5fa;"></div> Data ingestion</div>
+          <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#a78bfa;"></div> Enrichment</div>
+          <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#22d3ee;"></div> Filtering</div>
+          <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#4ade80;"></div> Decision</div>
+          <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#fbbf24;"></div> Scoring / Output</div>
+          <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#fb7185;"></div> Phase 2</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .accordion -->
+
+<script>
+  function togglePanel(btn) {
+    const body = btn.nextElementSibling;
+    const chevron = btn.querySelector('.panel-chevron');
+    const isOpen = body.style.display === 'block';
+    body.style.display = isOpen ? 'none' : 'block';
+    chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+    btn.classList.toggle('open', !isOpen);
+  }
+</script>
 
 </body>
 </html>
