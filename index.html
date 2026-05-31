@@ -493,6 +493,37 @@
     font-weight: 500;
   }
 
+  .sw-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
+  }
+
+  .sw-note {
+    background: #0f1117;
+    border-left: 3px solid #4a90d9;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px;
+    font-size: 0.82rem;
+    color: #64748b;
+    line-height: 1.6;
+  }
+
+  .sw-note-title {
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-bottom: 4px;
+  }
+
+  .sw-note code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    color: #22d3ee;
+    font-size: 0.79rem;
+  }
+
   .sw-legend {
     display: flex;
     flex-wrap: wrap;
@@ -850,6 +881,17 @@
             <span class="sw-tag">Live bid/ask spread</span>
             <span class="sw-tag">Order placement</span>
             <span class="sw-tag">Trade log</span>
+          </div>
+        </div>
+
+        <div class="sw-notes">
+          <div class="sw-note">
+            <div class="sw-note-title">Why Yahoo Finance and not Dividend.com?</div>
+            Dividend.com has no public API. Their data is only accessible through their website, and scraping it is fragile and against most sites' terms of service. Yahoo Finance provides the same dividend calendar data cleanly through the <code>yfinance</code> library, making it the better starting point.
+          </div>
+          <div class="sw-note">
+            <div class="sw-note-title">Why is IBKR not connected yet?</div>
+            IBKR does have an API (Client Portal API and TWS API), but we are waiting for API access to be enabled on the account. Once credentials are shared, the scanner can check live bid/ask spreads, confirm liquidity before a trade, and optionally place orders directly from the shortlist.
           </div>
         </div>
 
