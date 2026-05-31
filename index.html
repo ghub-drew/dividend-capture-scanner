@@ -734,15 +734,14 @@
           <div class="sw-header">
             <div class="sw-num">1</div>
             <div>
-              <div class="sw-title">Fetch S&amp;P 500 Universe</div>
-              <div class="sw-sub">Data Ingestion</div>
+              <div class="sw-title">Load the Stock List</div>
+              <div class="sw-sub">Getting started</div>
             </div>
           </div>
-          <div class="sw-body">Pulls the current list of 503 S&amp;P 500 tickers from Wikipedia at run time, so the universe always reflects the latest index composition.</div>
+          <div class="sw-body">The scanner loads all 503 stocks in the S&amp;P 500. This list is always up to date so no manual updates are needed.</div>
           <div class="sw-tags">
-            <span class="sw-tag">Wikipedia / pandas</span>
-            <span class="sw-tag">503 tickers</span>
-            <span class="sw-tag">Auto-refresh daily</span>
+            <span class="sw-tag">503 stocks</span>
+            <span class="sw-tag">Always current</span>
           </div>
         </div>
 
@@ -752,15 +751,15 @@
           <div class="sw-header">
             <div class="sw-num">2</div>
             <div>
-              <div class="sw-title">Pull Stock Data via Yahoo Finance</div>
-              <div class="sw-sub">Per-ticker enrichment</div>
+              <div class="sw-title">Look Up Each Stock</div>
+              <div class="sw-sub">Pulling live data</div>
             </div>
           </div>
-          <div class="sw-body">For each ticker, fetches live fundamentals using <strong>yfinance</strong>: ex-dividend date, dividend rate, current price, average daily volume, beta, and sector.</div>
+          <div class="sw-body">For every stock, the tool checks Yahoo Finance for the upcoming ex-dividend date, the dividend amount, the current price, how many shares trade daily, and how volatile the stock is.</div>
           <div class="sw-tags">
-            <span class="sw-tag">yfinance</span>
+            <span class="sw-tag">Yahoo Finance</span>
             <span class="sw-tag">Ex-dividend date</span>
-            <span class="sw-tag">Price · Volume · Beta</span>
+            <span class="sw-tag">Price and volume</span>
           </div>
         </div>
 
@@ -770,27 +769,27 @@
           <div class="sw-header">
             <div class="sw-num">3</div>
             <div>
-              <div class="sw-title">Apply Capture Filters</div>
-              <div class="sw-sub">Candidate screening</div>
+              <div class="sw-title">Check if the Stock is a Good Candidate</div>
+              <div class="sw-sub">Applying the filters</div>
             </div>
           </div>
-          <div class="sw-body">Each stock is tested against four filters. Any failure disqualifies it.</div>
+          <div class="sw-body">Each stock must pass four checks. If it fails any one of them, it is skipped.</div>
           <div class="filter-grid">
             <div class="filter-item">
-              <div class="filter-label">Ex-date window</div>
-              <div class="filter-value">Next 14 days</div>
+              <div class="filter-label">Ex-dividend date</div>
+              <div class="filter-value">Within the next 14 days</div>
             </div>
             <div class="filter-item">
-              <div class="filter-label">Min yield / payment</div>
-              <div class="filter-value">&ge; 0.5%</div>
+              <div class="filter-label">Dividend size</div>
+              <div class="filter-value">At least 0.5% of stock price</div>
             </div>
             <div class="filter-item">
-              <div class="filter-label">Min avg daily volume</div>
-              <div class="filter-value">&ge; 500,000 shares</div>
+              <div class="filter-label">Daily trading volume</div>
+              <div class="filter-value">500,000+ shares per day</div>
             </div>
             <div class="filter-item">
-              <div class="filter-label">Stock price range</div>
-              <div class="filter-value">$10 – $500</div>
+              <div class="filter-label">Stock price</div>
+              <div class="filter-value">Between $10 and $500</div>
             </div>
           </div>
         </div>
@@ -800,18 +799,18 @@
         <!-- Decision -->
         <div style="width:100%;">
           <div class="sw-decision">
-            <div class="sw-decision-title">Does the stock pass all filters?</div>
-            <div class="sw-decision-sub">All criteria must be met to advance to scoring</div>
+            <div class="sw-decision-title">Does the stock pass all four checks?</div>
+            <div class="sw-decision-sub">It must pass all four to move forward</div>
           </div>
           <div class="sw-branches">
             <div class="sw-branch">
               <div class="sw-branch-line" style="background:#ef4444;"></div>
               <div class="sw-branch-label" style="background:#3d0a18;color:#fb7185;border:1px solid #be123c;">No - Skip</div>
-              <div style="font-size:0.75rem;color:#64748b;text-align:center;padding-top:4px;">Discarded, next ticker</div>
+              <div style="font-size:0.75rem;color:#64748b;text-align:center;padding-top:4px;">Move on to the next stock</div>
             </div>
             <div class="sw-branch">
               <div class="sw-branch-line" style="background:#22c55e;"></div>
-              <div class="sw-branch-label" style="background:#142208;color:#4ade80;border:1px solid #15803d;">Yes - Score it</div>
+              <div class="sw-branch-label" style="background:#142208;color:#4ade80;border:1px solid #15803d;">Yes - Keep it</div>
               <div class="sw-branch-arrow" style="border-top:9px solid #22c55e;"></div>
             </div>
           </div>
@@ -823,15 +822,15 @@
           <div class="sw-header">
             <div class="sw-num">4</div>
             <div>
-              <div class="sw-title">Score &amp; Rank Candidates</div>
-              <div class="sw-sub">Prioritisation</div>
+              <div class="sw-title">Rank the Best Options</div>
+              <div class="sw-sub">Sorting by opportunity</div>
             </div>
           </div>
-          <div class="sw-body">Each passing stock receives a composite score. Higher yield and more days until ex-date push the score up; higher beta pulls it down. Sorted best-first.</div>
+          <div class="sw-body">Each stock that passes gets a score. Stocks with a bigger dividend and more time before the ex-date rank higher. Stocks that tend to move around a lot rank lower.</div>
           <div class="sw-tags">
-            <span class="sw-tag">Yield x1000 (reward)</span>
-            <span class="sw-tag">Days remaining x0.5 (reward)</span>
-            <span class="sw-tag">Beta x2 (penalty)</span>
+            <span class="sw-tag">Bigger dividend = higher rank</span>
+            <span class="sw-tag">More time = higher rank</span>
+            <span class="sw-tag">More volatile = lower rank</span>
           </div>
         </div>
 
@@ -841,11 +840,11 @@
           <div class="sw-header">
             <div class="sw-num">5</div>
             <div>
-              <div class="sw-title">Output Morning Shortlist</div>
-              <div class="sw-sub">Review &amp; Export</div>
+              <div class="sw-title">Show the Morning Shortlist</div>
+              <div class="sw-sub">Ready to review</div>
             </div>
           </div>
-          <div class="sw-body">Ranked table printed to the terminal and saved as a dated CSV for record keeping.</div>
+          <div class="sw-body">The top candidates are displayed in a ranked table and saved to a file so you can review and compare them each day.</div>
           <div class="output-preview">
             <table>
               <thead>
@@ -859,8 +858,8 @@
             </table>
           </div>
           <div class="sw-tags" style="margin-top:12px;">
-            <span class="sw-tag">Terminal output</span>
-            <span class="sw-tag">CSV export (dated)</span>
+            <span class="sw-tag">Printed in terminal</span>
+            <span class="sw-tag">Saved as a file</span>
             <span class="sw-tag">Run each morning</span>
           </div>
         </div>
@@ -871,16 +870,16 @@
           <div class="sw-header">
             <div class="sw-num">6</div>
             <div>
-              <div class="sw-title">Execute via IBKR API</div>
+              <div class="sw-title">Place Trades via IBKR</div>
               <div class="sw-sub">Coming soon - Phase 2</div>
             </div>
           </div>
-          <div class="sw-body">Once API access is enabled, the scanner will connect to Interactive Brokers to check live bid/ask spread, available liquidity, and optionally place orders directly.</div>
+          <div class="sw-body">Once account access is set up, the scanner will connect directly to Interactive Brokers to check live prices and place trades without leaving the tool.</div>
           <div class="sw-tags">
-            <span class="sw-tag">IBKR Client Portal API</span>
-            <span class="sw-tag">Live bid/ask spread</span>
-            <span class="sw-tag">Order placement</span>
-            <span class="sw-tag">Trade log</span>
+            <span class="sw-tag">Interactive Brokers</span>
+            <span class="sw-tag">Live prices</span>
+            <span class="sw-tag">Place orders</span>
+            <span class="sw-tag">Trade history</span>
           </div>
         </div>
 
