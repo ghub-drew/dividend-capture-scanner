@@ -558,6 +558,39 @@
   tr:last-child td { border-bottom: none; }
   .yield-high { color: #4ade80; font-weight: 600; }
   .yield-mid  { color: #fbbf24; font-weight: 600; }
+
+  /* Tooltips */
+  .tip {
+    border-bottom: 1px dashed #4a90d9;
+    color: #93c5fd;
+    cursor: help;
+    position: relative;
+    white-space: nowrap;
+  }
+
+  .tip::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e2840;
+    border: 1px solid #4a90d9;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    color: #cbd5e1;
+    white-space: normal;
+    width: 220px;
+    text-align: center;
+    line-height: 1.5;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 10;
+  }
+
+  .tip:hover::after { opacity: 1; }
 </style>
 </head>
 <body>
@@ -565,7 +598,7 @@
 <header>
   <div class="eyebrow">Strategy Overview</div>
   <h1>Dividend Capture Scanner</h1>
-  <p>A systematic approach to collecting dividend income by timing stock purchases around ex-dividend dates.</p>
+  <p>A systematic approach to collecting <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span> income by timing stock purchases around <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend dates</span>.</p>
 </header>
 
 <div class="accordion">
@@ -591,9 +624,9 @@
             <div class="sstep-label">Step 1</div>
             <div class="sstep-title">Find a Good Stock</div>
             <ul class="bullets">
-              <li>A company announces it will pay a dividend</li>
+              <li>A company announces it will pay a <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span></li>
               <li>The tool automatically identifies good capture candidates</li>
-              <li>Key filters: dividend amount, stock price, trading volume, and how quickly the stock historically recovers after the ex-date</li>
+              <li>Key filters: dividend amount, stock price, <span class="tip" data-tip="How many shares of a stock are bought and sold in a single day. High volume means it is easy to buy and sell quickly.">trading volume</span>, and how quickly the stock historically recovers after the <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-date</span></li>
             </ul>
           </div>
         </div>
@@ -604,9 +637,9 @@
           <div class="sstep-icon">🛒</div>
           <div class="sstep-content">
             <div class="sstep-label">Step 2</div>
-            <div class="sstep-title">Buy Before the Ex-Dividend Date</div>
+            <div class="sstep-title">Buy Before the <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">Ex-Dividend Date</span></div>
             <ul class="bullets">
-              <li>You buy the stock before the cutoff date to qualify for the dividend</li>
+              <li>You buy the stock before the cutoff date to qualify for the <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span></li>
             </ul>
           </div>
         </div>
@@ -617,9 +650,9 @@
           <div class="sstep-icon">📅</div>
           <div class="sstep-content">
             <div class="sstep-label">Step 3</div>
-            <div class="sstep-title">Ex-Dividend Date Passes</div>
+            <div class="sstep-title"><span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">Ex-Dividend Date</span> Passes</div>
             <ul class="bullets">
-              <li>You officially receive the dividend</li>
+              <li>You officially receive the <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span></li>
               <li>The stock price typically drops around this time</li>
             </ul>
           </div>
@@ -675,7 +708,7 @@
           <div class="run-num">1</div>
           <div class="run-content">
             <div class="run-title">One-time setup</div>
-            <div class="run-desc">Install the required Python packages. Only needed once.</div>
+            <div class="run-desc">Install the required <span class="tip" data-tip="Python packages are ready-made tools that add extra features to the script. Think of them like apps you install on your phone.">Python packages</span>. Only needed once.</div>
             <div class="code-block">pip install yfinance pandas requests lxml</div>
           </div>
         </div>
@@ -702,7 +735,7 @@
           <div class="run-num">4</div>
           <div class="run-content">
             <div class="run-title">Review the output</div>
-            <div class="run-desc">The ranked shortlist prints in the terminal and is saved as a dated CSV in the same folder.</div>
+            <div class="run-desc">The ranked shortlist prints in the <span class="tip" data-tip="The text window where commands are typed and results are shown.">terminal</span> and is saved as a dated <span class="tip" data-tip="A simple spreadsheet file that can be opened in Excel or Google Sheets.">CSV</span> in the same folder.</div>
             <div class="code-block">candidates_YYYYMMDD.csv</div>
           </div>
         </div>
@@ -738,7 +771,7 @@
               <div class="sw-sub">Getting started</div>
             </div>
           </div>
-          <div class="sw-body">The S&amp;P 500 is a list of the 500 largest publicly traded companies in the United States — think Apple, Coca-Cola, Johnson &amp; Johnson. The scanner starts by loading all 503 of these stocks as its search pool. It focuses on the S&amp;P 500 because these are well-established companies with reliable dividend histories and enough daily trading activity to enter and exit a position cleanly. The list stays current automatically, so if a company is added or removed from the index, the scanner picks that up the next time it runs.</div>
+          <div class="sw-body">The <span class="tip" data-tip="A list of the 500 largest publicly traded companies in the US, like Apple, Coca-Cola, and Johnson and Johnson.">S&amp;P 500</span> is a list of the 500 largest publicly traded companies in the United States. Think Apple, Coca-Cola, Johnson and Johnson. The scanner starts by loading all 503 of these stocks as its search pool. It focuses on the S&amp;P 500 because these are well-established companies with reliable <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span> histories and enough daily <span class="tip" data-tip="How many shares of a stock are bought and sold in a single day. High volume means it is easy to buy and sell quickly.">trading activity</span> to enter and exit cleanly. The list stays current automatically, so if a company is added or removed from the <span class="tip" data-tip="A collection of stocks used to track overall market performance.">index</span>, the scanner picks that up the next time it runs.</div>
           <div class="sw-tags">
             <span class="sw-tag">503 stocks</span>
             <span class="sw-tag">Always current</span>
@@ -755,7 +788,7 @@
               <div class="sw-sub">Pulling live data</div>
             </div>
           </div>
-          <div class="sw-body">For every stock, the tool checks Yahoo Finance for the upcoming ex-dividend date, the dividend amount, the current price, how many shares trade daily, and how volatile the stock is.</div>
+          <div class="sw-body">For every stock, the tool checks <span class="tip" data-tip="A free financial data service that provides live stock prices, dividend dates, and other market information.">Yahoo Finance</span> for the upcoming <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend date</span>, the <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span> amount, the current price, how many shares trade daily, and how <span class="tip" data-tip="How much a stock's price tends to swing up and down. A volatile stock can drop sharply after you buy it.">volatile</span> the stock is.</div>
           <div class="sw-tags">
             <span class="sw-tag">Yahoo Finance</span>
             <span class="sw-tag">Ex-dividend date</span>
@@ -826,7 +859,7 @@
               <div class="sw-sub">Sorting by opportunity</div>
             </div>
           </div>
-          <div class="sw-body">Each stock that passes gets a score. Stocks with a bigger dividend and more time before the ex-date rank higher. Stocks that tend to move around a lot rank lower.</div>
+          <div class="sw-body">Each stock that passes gets a score. Stocks with a bigger <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span> and more time before the <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-date</span> rank higher. Stocks that tend to move around a lot rank lower.</div>
           <div class="sw-tags">
             <span class="sw-tag">Bigger dividend = higher rank</span>
             <span class="sw-tag">More time = higher rank</span>
@@ -874,7 +907,7 @@
               <div class="sw-sub">Coming soon - Phase 2</div>
             </div>
           </div>
-          <div class="sw-body">Once account access is set up, the scanner will connect directly to Interactive Brokers to check live prices and place trades without leaving the tool.</div>
+          <div class="sw-body">Once account access is set up, the scanner will connect directly to <span class="tip" data-tip="A brokerage platform used to buy and sell stocks online. One of the most popular among active traders.">Interactive Brokers</span> to check live prices and place trades without leaving the tool.</div>
           <div class="sw-tags">
             <span class="sw-tag">Interactive Brokers</span>
             <span class="sw-tag">Live prices</span>
@@ -886,21 +919,21 @@
         <div class="sw-notes">
           <div class="sw-note">
             <div class="sw-note-title">Why Yahoo Finance and not Dividend.com?</div>
-            Dividend.com has no public API. Their data is only accessible through their website, and scraping it is fragile and against most sites' terms of service. Yahoo Finance provides the same dividend calendar data cleanly through the <code>yfinance</code> library, making it the better starting point.
+            Dividend.com does not offer a public <span class="tip" data-tip="A way for two software systems to share data automatically, without having to visit a website manually.">API</span>. Their data can only be accessed by visiting their website, and automatically pulling data from it (called <span class="tip" data-tip="Automatically copying data from a website by reading its pages like a browser would. It can break if the site changes its layout.">scraping</span>) is unreliable and against most sites' terms of service. Yahoo Finance provides the same dividend calendar data through a clean, free connection, making it the better starting point.
           </div>
           <div class="sw-note">
-            <div class="sw-note-title">Why is IBKR not connected yet?</div>
-            IBKR does have an API (Client Portal API and TWS API), but we are waiting for API access to be enabled on the account. Once credentials are shared, the scanner can check live bid/ask spreads, confirm liquidity before a trade, and optionally place orders directly from the shortlist.
+            <div class="sw-note-title">Why is Interactive Brokers not connected yet?</div>
+            <span class="tip" data-tip="A brokerage platform used to buy and sell stocks online. One of the most popular among active traders.">Interactive Brokers</span> does have an <span class="tip" data-tip="A way for two software systems to share data automatically, without having to visit a website manually.">API</span>, but we are waiting for access to be enabled on the account. Once that is done, the scanner can check live prices, confirm there are enough shares available to trade, and place orders directly.
           </div>
         </div>
 
         <div class="sw-legend">
-          <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#60a5fa;"></div> Data ingestion</div>
-          <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#a78bfa;"></div> Enrichment</div>
+          <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#60a5fa;"></div> Loading stocks</div>
+          <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#a78bfa;"></div> Looking up data</div>
           <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#22d3ee;"></div> Filtering</div>
           <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#4ade80;"></div> Decision</div>
-          <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#fbbf24;"></div> Scoring / Output</div>
-          <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#fb7185;"></div> Phase 2</div>
+          <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#fbbf24;"></div> Ranking and output</div>
+          <div class="sw-legend-item"><div class="sw-legend-dot" style="background:#fb7185;"></div> Coming soon</div>
         </div>
 
       </div>
