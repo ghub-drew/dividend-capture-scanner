@@ -197,6 +197,27 @@
   }
 
   footer a:hover { text-decoration: underline; }
+
+  .scanner-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #60a5fa;
+    text-decoration: none;
+    border: 1px solid #1d4ed855;
+    background: #1e3a5f33;
+    padding: 5px 12px;
+    border-radius: 20px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .scanner-link:hover {
+    background: #1e3a5f66;
+    border-color: #60a5fa;
+  }
 </style>
 </head>
 <body>
@@ -220,6 +241,9 @@
         <li>The tool automatically identifies good capture candidates</li>
         <li>Key filters: dividend amount, stock price, trading volume, and how quickly the stock historically recovers after the ex-date</li>
       </ul>
+      <a href="stock-scanner.html" class="scanner-link">
+        <span>⚙</span> See how the scanner works
+      </a>
     </div>
   </div>
 
