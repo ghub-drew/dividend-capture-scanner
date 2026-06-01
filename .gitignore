@@ -1,0 +1,13 @@
+# Helper scripts containing secrets
+_encrypt_changelog.py
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Scanner output files
+candidates_*.csv
+stock_candidates_*.xlsx
+
+# Editor / tooling
+.claude/

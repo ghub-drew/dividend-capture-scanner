@@ -58,109 +58,109 @@
 
   header p { margin-top: 10px; color: #64748b; font-size: 0.95rem; }
 
-  /* Timeline */
-  .timeline { position: relative; padding-left: 28px; }
+  /* Lock screen */
+  .lock {
+    background: #1a1f2e;
+    border: 1px solid #252d3d;
+    border-radius: 16px;
+    padding: 44px 36px;
+    text-align: center;
+    max-width: 420px;
+    margin: 30px auto 0;
+  }
 
+  .lock-icon {
+    font-size: 2.4rem;
+    margin-bottom: 14px;
+  }
+
+  .lock h2 { font-size: 1.15rem; color: #f1f5f9; margin-bottom: 6px; }
+  .lock p { font-size: 0.86rem; color: #64748b; margin-bottom: 22px; }
+
+  .lock-form { display: flex; flex-direction: column; gap: 12px; }
+
+  .lock input {
+    background: #0f1117;
+    border: 1px solid #252d3d;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    text-align: center;
+    letter-spacing: 0.1em;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .lock input:focus { border-color: #4a90d9; }
+
+  .lock button {
+    background: #1d4ed8;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .lock button:hover { background: #1e40af; }
+
+  .lock-error {
+    font-size: 0.82rem;
+    color: #fb7185;
+    min-height: 18px;
+  }
+
+  /* Timeline (revealed after unlock) */
+  #content { display: none; }
+
+  .timeline { position: relative; padding-left: 28px; }
   .timeline::before {
     content: '';
     position: absolute;
-    left: 7px;
-    top: 6px;
-    bottom: 6px;
-    width: 2px;
-    background: #252d3d;
+    left: 7px; top: 6px; bottom: 6px;
+    width: 2px; background: #252d3d;
   }
-
   .release { position: relative; margin-bottom: 28px; }
-
   .release::before {
     content: '';
     position: absolute;
-    left: -28px;
-    top: 24px;
-    width: 16px;
-    height: 16px;
+    left: -28px; top: 24px;
+    width: 16px; height: 16px;
     border-radius: 50%;
     background: var(--dot, #4a90d9);
     border: 3px solid #0f1117;
   }
-
   .release-card {
     background: #1a1f2e;
     border: 1px solid #252d3d;
     border-radius: 14px;
     padding: 22px 26px;
   }
-
-  .release-head {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 6px;
-    flex-wrap: wrap;
-  }
-
-  .version {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #f1f5f9;
-  }
-
+  .release-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+  .version { font-size: 1.1rem; font-weight: 700; color: #f1f5f9; }
   .badge {
-    font-size: 0.66rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 2px 10px;
-    border-radius: 20px;
+    font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 2px 10px; border-radius: 20px;
   }
   .badge.current { background: #142208; color: #4ade80; border: 1px solid #15803d; }
   .badge.older   { background: #1e2433; color: #94a3b8; border: 1px solid #334155; }
-
   .release-date { font-size: 0.8rem; color: #64748b; margin-left: auto; }
-
   .release-title { font-size: 0.95rem; font-weight: 600; color: #cbd5e1; margin-bottom: 12px; }
-
   ul.changes { list-style: none; }
   ul.changes li {
-    font-size: 0.88rem;
-    color: #94a3b8;
-    padding-left: 22px;
-    position: relative;
-    margin-bottom: 8px;
-    line-height: 1.5;
+    font-size: 0.88rem; color: #94a3b8;
+    padding-left: 4px; margin-bottom: 8px; line-height: 1.5;
   }
-  ul.changes li .tag {
-    position: absolute;
-    left: 0;
-    top: 1px;
-    font-size: 0.7rem;
-  }
-
   .lbl {
-    display: inline-block;
-    font-size: 0.66rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 1px 7px;
-    border-radius: 4px;
-    margin-right: 6px;
-    vertical-align: middle;
+    display: inline-block; font-size: 0.66rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 1px 7px; border-radius: 4px; margin-right: 6px; vertical-align: middle;
   }
   .lbl.new  { background: #14392233; color: #4ade80; border: 1px solid #15803d55; }
   .lbl.imp  { background: #1e3a5f33; color: #60a5fa; border: 1px solid #1d4ed855; }
   .lbl.fix  { background: #3d250033; color: #fbbf24; border: 1px solid #b4530955; }
-
-  code {
-    font-family: 'Consolas', 'Courier New', monospace;
-    background: #0f1117;
-    border: 1px solid #252d3d;
-    border-radius: 5px;
-    padding: 1px 6px;
-    color: #22d3ee;
-    font-size: 0.85em;
-  }
 
   footer {
     text-align: center;
@@ -187,54 +187,79 @@
     <p>A record of what changed in each version of the scanner.</p>
   </header>
 
-  <div class="timeline">
-
-    <!-- v2 -->
-    <div class="release" style="--dot:#4ade80;">
-      <div class="release-card">
-        <div class="release-head">
-          <span class="version">v2</span>
-          <span class="badge current">Current</span>
-          <span class="release-date">June 1, 2026</span>
-        </div>
-        <div class="release-title">Built around Rick's three rules of thumb.</div>
-        <ul class="changes">
-          <li><span class="lbl new">New</span> Rebound-time metric: measures how many trading days each stock has historically taken to climb back to its pre-dividend price, using two years of history.</li>
-          <li><span class="lbl new">New</span> Recovery rate: shows how often each stock recovered within the test window.</li>
-          <li><span class="lbl new">New</span> Yield tiers: stocks are grouped by annual yield (Tier 1 = 8%+, Tier 2 = 7%+, Tier 3 = 5%+, Tier 4 = below 5%).</li>
-          <li><span class="lbl new">New</span> Expanded universe: added high-yield REITs and business development companies so 8%+ names actually appear. The S&amp;P 500 alone rarely has them.</li>
-          <li><span class="lbl imp">Improved</span> Scoring formula now weighs yield tier, rebound speed, recovery rate, liquidity, and volatility together.</li>
-          <li><span class="lbl imp">Improved</span> Switched the yield filter from per-payment to annual yield, matching how yields are normally quoted.</li>
-          <li><span class="lbl imp">Improved</span> Output now includes Tier, Annual Yield, Capture Yield, Rebound Days, Recovered, and Score columns.</li>
-          <li><span class="lbl fix">Fixed</span> Removed two delisted tickers that returned errors.</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- v1 -->
-    <div class="release" style="--dot:#64748b;">
-      <div class="release-card">
-        <div class="release-head">
-          <span class="version">v1</span>
-          <span class="badge older">Initial</span>
-          <span class="release-date">May 31, 2026</span>
-        </div>
-        <div class="release-title">First working scanner.</div>
-        <ul class="changes">
-          <li><span class="lbl new">New</span> Scans the S&amp;P 500 for upcoming ex-dividend dates using Yahoo Finance.</li>
-          <li><span class="lbl new">New</span> Basic filters for dividend size, stock price, trading volume, and ex-date window.</li>
-          <li><span class="lbl new">New</span> Simple ranking by yield, days remaining, and volatility.</li>
-          <li><span class="lbl new">New</span> Saves results to a dated spreadsheet file each run.</li>
-        </ul>
-      </div>
-    </div>
-
+  <!-- Lock screen -->
+  <div class="lock" id="lock">
+    <div class="lock-icon">🔒</div>
+    <h2>Protected Page</h2>
+    <p>Enter the password to view the version history.</p>
+    <form class="lock-form" id="lockForm" autocomplete="off">
+      <input type="password" id="pw" placeholder="Password" autofocus>
+      <button type="submit">Unlock</button>
+      <div class="lock-error" id="err"></div>
+    </form>
   </div>
+
+  <!-- Encrypted content gets injected here -->
+  <div id="content"></div>
 
   <footer>
     <p>Dividend Capture Scanner &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
   </footer>
 
 </div>
+
+<script>
+  // Encrypted changelog: base64( salt(16) + iv(12) + ciphertext+tag )
+  // PBKDF2-HMAC-SHA256, 150000 iterations, AES-256-GCM.
+  const PAYLOAD = "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";
+
+  const ITERATIONS = 150000;
+
+  function b64ToBytes(b64) {
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  }
+
+  async function unlock(password) {
+    const data = b64ToBytes(PAYLOAD);
+    const salt = data.slice(0, 16);
+    const iv = data.slice(16, 28);
+    const ct = data.slice(28);
+
+    const enc = new TextEncoder();
+    const baseKey = await crypto.subtle.importKey(
+      "raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]
+    );
+    const key = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: salt, iterations: ITERATIONS, hash: "SHA-256" },
+      baseKey,
+      { name: "AES-GCM", length: 256 },
+      false,
+      ["decrypt"]
+    );
+    const plainBuf = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, ct);
+    return new TextDecoder().decode(plainBuf);
+  }
+
+  document.getElementById("lockForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const pw = document.getElementById("pw").value;
+    const err = document.getElementById("err");
+    err.textContent = "";
+    try {
+      const html = await unlock(pw);
+      document.getElementById("content").innerHTML = html;
+      document.getElementById("content").style.display = "block";
+      document.getElementById("lock").style.display = "none";
+    } catch (_) {
+      err.textContent = "Incorrect password. Please try again.";
+      document.getElementById("pw").value = "";
+      document.getElementById("pw").focus();
+    }
+  });
+</script>
+
 </body>
 </html>
