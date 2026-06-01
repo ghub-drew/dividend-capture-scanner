@@ -1,7 +1,7 @@
 """
 Dividend Capture Scanner  (v2)
 Pulls upcoming ex-dividend dates from Yahoo Finance and ranks the best
-dividend-capture candidates using Rick's criteria:
+dividend-capture candidates using four criteria:
 
   1. Stock quality  - prefer stable stocks you'd be comfortable holding
                       if the price doesn't rebound right away (low beta).
@@ -14,7 +14,7 @@ dividend-capture candidates using Rick's criteria:
   4. Rebound time   - how many trading days the stock has historically taken
                       to climb back to its pre-ex-dividend price. Fewer days
                       = capital is freed up faster = better. This is the key
-                      metric Rick asked for.
+                      ranking metric.
 """
 
 import yfinance as yf
@@ -35,7 +35,7 @@ def get_sp500_tickers():
     return tables[0]["Symbol"].tolist()
 
 # ─── High-yield income names (mostly outside the S&P 500) ───
-# These are where the 8%+ yields Rick wants typically live: REITs, mortgage
+# These are where the 8%+ yields typically live: REITs, mortgage
 # REITs, and business development companies (BDCs). Curated for liquidity.
 HIGH_YIELD_TICKERS = [
     # Mortgage REITs (often 9-15% yield)
@@ -73,7 +73,7 @@ REBOUND_MAX_DAYS        = 60    # cap the search window per event (trading days)
 
 
 def yield_tier(annual_yield: float) -> int:
-    """Classify a stock by annual dividend yield (Rick's tiers)."""
+    """Classify a stock by annual dividend yield (yield tiers)."""
     if annual_yield >= 0.08:
         return 1
     if annual_yield >= 0.07:
@@ -144,7 +144,7 @@ def compute_rebound(hist: pd.DataFrame):
 
 def score(row: dict) -> float:
     """
-    Composite score honouring Rick's priorities:
+    Composite score honouring the strategy priorities:
       - Yield tier is the strongest factor (8%+ best).
       - Faster rebound adds points (frees up capital sooner).
       - Consistent recovery adds points.
