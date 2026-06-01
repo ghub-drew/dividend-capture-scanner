@@ -838,8 +838,8 @@
               <div class="filter-value">Within the next 14 days</div>
             </div>
             <div class="filter-item">
-              <div class="filter-label">Dividend size</div>
-              <div class="filter-value">At least 0.5% of stock price</div>
+              <div class="filter-label"><span class="tip" data-tip="The yearly dividend as a percentage of the stock price. A $100 stock paying $5 a year has a 5% yield.">Dividend yield</span></div>
+              <div class="filter-value">At least 3% per year</div>
             </div>
             <div class="filter-item">
               <div class="filter-label">Daily trading volume</div>
@@ -880,15 +880,15 @@
           <div class="sw-header">
             <div class="sw-num">4</div>
             <div>
-              <div class="sw-title">Rank the Best Options</div>
-              <div class="sw-sub">Sorting by opportunity</div>
+              <div class="sw-title">Measure the Rebound Time</div>
+              <div class="sw-sub">The key metric</div>
             </div>
           </div>
-          <div class="sw-body">Each stock that passes gets a score. Stocks with a bigger <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span> and more time before the <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-date</span> rank higher. Stocks that tend to move around a lot rank lower.</div>
+          <div class="sw-body">When a stock pays a <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span>, its price usually drops by about that amount the same day. The real question is: how long does it take to climb back to the price you paid? The scanner looks at the last two years of history and, for each past <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend date</span>, measures how many trading days the stock took to recover. A faster rebound means your money is freed up sooner and the trade finishes in profit quicker.</div>
           <div class="sw-tags">
-            <span class="sw-tag">Bigger dividend = higher rank</span>
-            <span class="sw-tag">More time = higher rank</span>
-            <span class="sw-tag">More volatile = lower rank</span>
+            <span class="sw-tag">Average rebound days</span>
+            <span class="sw-tag">How often it recovers</span>
+            <span class="sw-tag">Based on 2 years of history</span>
           </div>
         </div>
 
@@ -898,20 +898,40 @@
           <div class="sw-header">
             <div class="sw-num">5</div>
             <div>
+              <div class="sw-title">Score and Rank Each Stock</div>
+              <div class="sw-sub">Putting it all together</div>
+            </div>
+          </div>
+          <div class="sw-body">Every stock gets a score built from its yield tier and its rebound time. Higher-yielding stocks rank first, and a fast, reliable rebound pushes a stock further up. A lower-yielding stock can still rank well if it bounces back very quickly.</div>
+          <div class="sw-tags">
+            <span class="sw-tag">Tier 1: 8%+ yield (best)</span>
+            <span class="sw-tag">Tier 2: 7%+</span>
+            <span class="sw-tag">Tier 3: 5%+</span>
+            <span class="sw-tag">Faster rebound = higher rank</span>
+          </div>
+        </div>
+
+        <div class="sw-connector" style="--sw-next:#fbbf24;"><div class="sw-line"></div><div class="sw-arrow"></div></div>
+
+        <div class="sw-step n5">
+          <div class="sw-header">
+            <div class="sw-num">6</div>
+            <div>
               <div class="sw-title">Show the Morning Shortlist</div>
               <div class="sw-sub">Ready to review</div>
             </div>
           </div>
-          <div class="sw-body">The top candidates are displayed in a ranked table and saved to a file so you can review and compare them each day.</div>
+          <div class="sw-body">The top candidates are displayed in a ranked table and saved to a file so you can review and compare them each day. Each row shows the yield tier, the average rebound time, and how often the stock recovered.</div>
           <div class="output-preview">
             <table>
               <thead>
-                <tr><th>#</th><th>Ticker</th><th>Name</th><th>Price</th><th>Ex-Date</th><th>Days</th><th>Div/Share</th><th>Yield/Pmt</th><th>Beta</th></tr>
+                <tr><th>#</th><th>Ticker</th><th>Name</th><th>Price</th><th>Tier</th><th>Annual Yield</th><th>Rebound Days</th><th>Recovered</th><th>Score</th></tr>
               </thead>
               <tbody>
-                <tr><td>1</td><td><strong>KHC</strong></td><td>Kraft Heinz</td><td>$24.01</td><td>Jun 05</td><td>5</td><td>$0.40</td><td class="yield-high">1.67%</td><td>0.05</td></tr>
-                <tr><td>2</td><td><strong>LYB</strong></td><td>LyondellBasell</td><td>$66.65</td><td>Jun 01</td><td>1</td><td>$1.03</td><td class="yield-high">1.55%</td><td>0.35</td></tr>
-                <tr><td>3</td><td><strong>KMB</strong></td><td>Kimberly-Clark</td><td>$97.60</td><td>Jun 05</td><td>5</td><td>$1.28</td><td class="yield-mid">1.31%</td><td>0.31</td></tr>
+                <tr><td>1</td><td><strong>DOC</strong></td><td>Healthpeak</td><td>$19.15</td><td>3</td><td class="yield-high">6.37%</td><td>1.7</td><td>100%</td><td>111.4</td></tr>
+                <tr><td>2</td><td><strong>KHC</strong></td><td>Kraft Heinz</td><td>$24.01</td><td>3</td><td class="yield-high">6.66%</td><td>4.4</td><td>83%</td><td>108.8</td></tr>
+                <tr><td>3</td><td><strong>MO</strong></td><td>Altria Group</td><td>$69.58</td><td>3</td><td class="yield-high">6.09%</td><td>10.3</td><td>100%</td><td>103.6</td></tr>
+                <tr><td>4</td><td><strong>KMB</strong></td><td>Kimberly-Clark</td><td>$97.60</td><td>3</td><td class="yield-mid">5.25%</td><td>26.8</td><td>83%</td><td>85.5</td></tr>
               </tbody>
             </table>
           </div>
@@ -926,7 +946,7 @@
 
         <div class="sw-step n6">
           <div class="sw-header">
-            <div class="sw-num">6</div>
+            <div class="sw-num">7</div>
             <div>
               <div class="sw-title">Place Trades via IBKR</div>
               <div class="sw-sub">Coming soon - Phase 2</div>
