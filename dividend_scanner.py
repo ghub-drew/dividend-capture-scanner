@@ -34,6 +34,31 @@ def get_sp500_tickers():
     tables = pd.read_html(StringIO(resp.text))
     return tables[0]["Symbol"].tolist()
 
+# ─── High-yield income names (mostly outside the S&P 500) ───
+# These are where the 8%+ yields Rick wants typically live: REITs, mortgage
+# REITs, and business development companies (BDCs). Curated for liquidity.
+HIGH_YIELD_TICKERS = [
+    # Mortgage REITs (often 9-15% yield)
+    "AGNC", "NLY", "STWD", "ABR", "RITM", "DX", "CIM", "TWO", "PMT", "ARI",
+    "EFC", "MFA", "IVR", "ORC",
+    # Business Development Companies (BDCs, often 8-12%)
+    "ARCC", "MAIN", "FSK", "OBDC", "BXSL", "PSEC", "HTGC", "GBDC", "TSLX",
+    "CSWC", "GAIN", "PFLT", "BBDC", "TCPC",
+    # REITs (5-9% yield)
+    "O", "WPC", "STAG", "NNN", "EPR", "GLPI", "OHI", "LTC", "SBRA", "ADC",
+    "IRM", "VICI", "KRG", "GNL",
+    # Energy infrastructure (6-8%)
+    "KMI", "OKE", "WES", "ET", "EPD", "MPLX", "ENB",
+    # Other high-yield blue chips
+    "BTI", "VZ", "T", "MO", "PFE",
+]
+
+def get_universe():
+    """Combine the S&P 500 with the curated high-yield list, de-duplicated."""
+    sp500 = get_sp500_tickers()
+    combined = list(dict.fromkeys(sp500 + HIGH_YIELD_TICKERS))  # preserves order, dedupes
+    return combined
+
 # ─── Filter config (adjust to taste) ───
 MIN_ANNUAL_YIELD     = 0.03     # 3% floor. Tiers reward 5%/7%/8%+. Below 5%
                                 # only ranks well if the rebound is very fast.
@@ -223,9 +248,9 @@ def run_scanner():
     print(f"\nDividend Capture Scanner - {today.strftime('%Y-%m-%d')}")
     print(f"Looking for ex-dates within the next {EX_DATE_WINDOW_DAYS} days\n")
 
-    print("Fetching S&P 500 tickers...")
-    tickers = get_sp500_tickers()
-    print(f"Scanning {len(tickers)} stocks...")
+    print("Fetching S&P 500 tickers and high-yield income names...")
+    tickers = get_universe()
+    print(f"Scanning {len(tickers)} stocks (S&P 500 + high-yield REITs/BDCs)...")
     print("(Candidates that pass the basic filters also get a rebound-time")
     print(" analysis from 2 years of history, so this can take a few minutes.)\n")
 
