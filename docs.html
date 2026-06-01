@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentation - Dividend Capture Scanner</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+    line-height: 1.6;
+  }
+
+  .wrap { max-width: 820px; margin: 0 auto; }
+
+  /* Top nav */
+  .topnav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+
+  .topnav a {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-decoration: none;
+    padding: 6px 14px;
+    border: 1px solid #252d3d;
+    border-radius: 20px;
+    transition: all 0.15s;
+  }
+
+  .topnav a:hover { border-color: #4a90d9; color: #e2e8f0; }
+  .topnav a.active { background: #1e3a5f33; border-color: #1d4ed855; color: #60a5fa; }
+
+  header { margin-bottom: 40px; }
+
+  .eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #4a90d9;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f8fafc;
+    letter-spacing: -0.5px;
+  }
+
+  header p {
+    margin-top: 10px;
+    color: #64748b;
+    font-size: 0.95rem;
+  }
+
+  /* Table of contents */
+  .toc {
+    background: #1a1f2e;
+    border: 1px solid #252d3d;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 36px;
+  }
+
+  .toc-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 12px;
+  }
+
+  .toc ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .toc a { color: #93c5fd; text-decoration: none; font-size: 0.88rem; }
+  .toc a:hover { text-decoration: underline; }
+
+  /* Sections */
+  section {
+    background: #1a1f2e;
+    border: 1px solid #252d3d;
+    border-radius: 14px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+
+  section h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  section h2 .ic { font-size: 1.2rem; }
+
+  section h3 {
+    font-size: 0.98rem;
+    font-weight: 650;
+    color: #e2e8f0;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+
+  section p { color: #94a3b8; font-size: 0.9rem; margin-bottom: 10px; }
+
+  ul.list { margin: 8px 0 12px 0; padding-left: 0; list-style: none; }
+  ul.list li {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    padding-left: 18px;
+    position: relative;
+    margin-bottom: 6px;
+  }
+  ul.list li::before { content: '›'; position: absolute; left: 0; color: #4a90d9; font-weight: 700; }
+
+  code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    background: #0f1117;
+    border: 1px solid #252d3d;
+    border-radius: 5px;
+    padding: 1px 6px;
+    color: #22d3ee;
+    font-size: 0.85em;
+  }
+
+  .code-block {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.84rem;
+    background: #0f1117;
+    border: 1px solid #252d3d;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #60a5fa;
+    margin: 10px 0;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 12px 0; }
+  th {
+    background: #0f1117;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.68rem;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #252d3d;
+  }
+  td { padding: 8px 12px; border-bottom: 1px solid #141927; color: #cbd5e1; vertical-align: top; }
+  td:first-child { font-weight: 600; color: #e2e8f0; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+
+  .note {
+    background: #0f1117;
+    border-left: 3px solid #4a90d9;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 0.86rem;
+    color: #94a3b8;
+    margin: 12px 0;
+  }
+  .note strong { color: #cbd5e1; }
+
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 0.78rem;
+    color: #475569;
+  }
+  footer a { color: #4a90d9; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topnav">
+    <a href="index.html">Home</a>
+    <a href="docs.html" class="active">Documentation</a>
+    <a href="changelog.html">Changelog</a>
+    <a href="dividend_scanner_v2.py" download>Download Scanner</a>
+  </div>
+
+  <header>
+    <div class="eyebrow">Documentation</div>
+    <h1>Dividend Capture Scanner</h1>
+    <p>A complete guide to setting up, running, and understanding the scanner.</p>
+  </header>
+
+  <div class="toc">
+    <div class="toc-title">On this page</div>
+    <ul>
+      <li><a href="#overview">1. Overview</a></li>
+      <li><a href="#requirements">2. Requirements</a></li>
+      <li><a href="#running">3. Running the Scanner</a></li>
+      <li><a href="#universe">4. The Stock Universe</a></li>
+      <li><a href="#filters">5. Filters</a></li>
+      <li><a href="#rebound">6. The Rebound Metric</a></li>
+      <li><a href="#scoring">7. How Scoring Works</a></li>
+      <li><a href="#output">8. Reading the Output</a></li>
+      <li><a href="#config">9. Configuration</a></li>
+      <li><a href="#data">10. Data Sources</a></li>
+    </ul>
+  </div>
+
+  <section id="overview">
+    <h2><span class="ic">📘</span> 1. Overview</h2>
+    <p>The Dividend Capture Scanner finds and ranks stocks that are about to pay a dividend, so you can buy before the ex-dividend date, collect the dividend, and sell once the price recovers.</p>
+    <p>It scans a large list of stocks each morning, keeps only the ones worth considering, measures how quickly each one has historically rebounded after past dividends, and ranks them so the best opportunities sit at the top.</p>
+  </section>
+
+  <section id="requirements">
+    <h2><span class="ic">🧩</span> 2. Requirements</h2>
+    <ul class="list">
+      <li>Python 3.9 or newer installed on your computer</li>
+      <li>An internet connection (the scanner pulls live market data)</li>
+      <li>A few Python packages, installed with one command (see below)</li>
+    </ul>
+    <h3>One-time setup</h3>
+    <div class="code-block">pip install yfinance pandas requests lxml</div>
+  </section>
+
+  <section id="running">
+    <h2><span class="ic">▶️</span> 3. Running the Scanner</h2>
+    <p>Open PowerShell or Command Prompt, go to the folder where you saved the scanner, and run it. Replace the path with your actual folder location.</p>
+    <div class="code-block">cd "C:\Users\YourName\Documents\stock scanner"
+python dividend_scanner_v2.py</div>
+    <p>It scans roughly 548 stocks and runs a rebound analysis on every stock that passes the filters, so it takes about 4 to 6 minutes. When it finishes, the ranked list prints in the window and is also saved as a dated spreadsheet file in the same folder.</p>
+    <div class="note"><strong>Tip:</strong> Close any open <code>candidates_*.csv</code> file before running, otherwise the scanner cannot save the new one.</div>
+  </section>
+
+  <section id="universe">
+    <h2><span class="ic">🌐</span> 4. The Stock Universe</h2>
+    <p>The scanner searches two groups of stocks combined:</p>
+    <ul class="list">
+      <li><strong>The S&amp;P 500:</strong> the 500 largest US companies, loaded fresh each run so the list is always current.</li>
+      <li><strong>A curated high-yield list:</strong> REITs, mortgage REITs, and business development companies (BDCs). These are where yields of 8% or more usually live, which the S&amp;P 500 rarely offers on its own.</li>
+    </ul>
+    <p>Together this is about 548 stocks.</p>
+  </section>
+
+  <section id="filters">
+    <h2><span class="ic">🔎</span> 5. Filters</h2>
+    <p>Every stock must pass all four checks below. If it fails any one, it is skipped.</p>
+    <table>
+      <tr><th>Filter</th><th>Default</th><th>Why it matters</th></tr>
+      <tr><td>Ex-dividend date</td><td>Next 14 days</td><td>Only shows stocks with a dividend coming up soon.</td></tr>
+      <tr><td>Annual yield</td><td>3% or higher</td><td>Keeps the dividend worth the risk. Higher tiers rank better.</td></tr>
+      <tr><td>Avg daily volume</td><td>500,000+ shares</td><td>Enough liquidity to get in and out cleanly.</td></tr>
+      <tr><td>Stock price</td><td>$10 to $500</td><td>Avoids penny stocks and keeps position sizes manageable.</td></tr>
+    </table>
+  </section>
+
+  <section id="rebound">
+    <h2><span class="ic">📈</span> 6. The Rebound Metric</h2>
+    <p>This is the key part of the tool. When a stock pays a dividend, its price usually drops by about that amount on the ex-dividend date. The important question is how long it takes to climb back to the price you paid.</p>
+    <p>For each stock that passes the filters, the scanner looks at the last two years of price history. For every past ex-dividend date it measures:</p>
+    <ul class="list">
+      <li><strong>Rebound Days:</strong> how many trading days it took for the price to return to its pre-dividend level.</li>
+      <li><strong>Recovered:</strong> how often the stock managed to recover within 60 trading days.</li>
+    </ul>
+    <p>A faster, more reliable rebound means your capital is freed up sooner, so it pushes the stock higher in the ranking.</p>
+  </section>
+
+  <section id="scoring">
+    <h2><span class="ic">🏆</span> 7. How Scoring Works</h2>
+    <p>Each stock gets a single score so the list can be ranked best-first. The score combines several pieces, with yield tier being the strongest factor:</p>
+    <table>
+      <tr><th>Factor</th><th>Effect on score</th></tr>
+      <tr><td>Yield tier</td><td>Biggest factor. Tier 1 (8%+) scores highest, then Tier 2 (7%+), Tier 3 (5%+), Tier 4 (below 5%).</td></tr>
+      <tr><td>Rebound speed</td><td>Faster rebound adds points. A very fast bounce can lift a lower-yield stock.</td></tr>
+      <tr><td>Recovery rate</td><td>Stocks that recover more consistently get a small bonus.</td></tr>
+      <tr><td>Liquidity</td><td>Higher daily volume adds a small bonus.</td></tr>
+      <tr><td>Volatility (beta)</td><td>More volatile stocks lose a few points, as a stability check.</td></tr>
+    </table>
+    <div class="note">A lower-yielding stock can still rank well if it bounces back very quickly and reliably. That tradeoff is exactly what the score is designed to capture.</div>
+  </section>
+
+  <section id="output">
+    <h2><span class="ic">📊</span> 8. Reading the Output</h2>
+    <p>Each row in the results represents one candidate. Here is what every column means:</p>
+    <table>
+      <tr><th>Column</th><th>Meaning</th></tr>
+      <tr><td>Ticker</td><td>The stock's trading symbol.</td></tr>
+      <tr><td>Tier</td><td>Yield tier: 1 = 8%+, 2 = 7%+, 3 = 5%+, 4 = below 5%.</td></tr>
+      <tr><td>Annual Yield</td><td>The full year's dividend as a percentage of the stock price.</td></tr>
+      <tr><td>Capture Yield</td><td>The single dividend payment as a percentage of the price. This is what you actually collect per trade.</td></tr>
+      <tr><td>Div/Capture</td><td>The dollar amount of that single dividend payment per share.</td></tr>
+      <tr><td>Rebound Days</td><td>Average trading days to recover to the pre-dividend price. Lower is better.</td></tr>
+      <tr><td>Recovered</td><td>How often the stock recovered within the test window.</td></tr>
+      <tr><td>Avg Volume</td><td>Average shares traded per day.</td></tr>
+      <tr><td>Beta</td><td>How much the stock moves relative to the market. Lower is steadier.</td></tr>
+      <tr><td>Score</td><td>The overall ranking score. Higher is better.</td></tr>
+    </table>
+  </section>
+
+  <section id="config">
+    <h2><span class="ic">⚙️</span> 9. Configuration</h2>
+    <p>All the filter settings live at the top of <code>dividend_scanner_v2.py</code> and can be changed at any time:</p>
+    <div class="code-block">MIN_ANNUAL_YIELD     = 0.03     # 3% floor
+MIN_AVG_VOLUME       = 500_000  # shares per day
+MIN_STOCK_PRICE      = 10.0     # dollars
+MAX_STOCK_PRICE      = 500.0    # dollars
+EX_DATE_WINDOW_DAYS  = 14       # how far ahead to look</div>
+    <p>For example, to only see stocks paying 5% or more, change <code>MIN_ANNUAL_YIELD</code> to <code>0.05</code>.</p>
+  </section>
+
+  <section id="data">
+    <h2><span class="ic">🔌</span> 10. Data Sources</h2>
+    <h3>Why Yahoo Finance and not Dividend.com?</h3>
+    <p>Dividend.com does not offer a public data connection, and automatically pulling from its website is unreliable and against most sites' terms of service. Yahoo Finance provides the same dividend calendar data through a clean, free connection.</p>
+    <h3>Why is Interactive Brokers not connected yet?</h3>
+    <p>Interactive Brokers does have a data connection, but it has not been enabled on the account yet. Once it is, the scanner will be able to check live prices, confirm there are enough shares to trade, and place orders directly. That is planned for Stage 2.</p>
+  </section>
+
+  <footer>
+    <p>Dividend Capture Scanner v2 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

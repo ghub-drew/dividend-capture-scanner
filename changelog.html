@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Changelog - Dividend Capture Scanner</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+    line-height: 1.6;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  .topnav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+
+  .topnav a {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-decoration: none;
+    padding: 6px 14px;
+    border: 1px solid #252d3d;
+    border-radius: 20px;
+    transition: all 0.15s;
+  }
+  .topnav a:hover { border-color: #4a90d9; color: #e2e8f0; }
+  .topnav a.active { background: #1e3a5f33; border-color: #1d4ed855; color: #60a5fa; }
+
+  header { margin-bottom: 40px; }
+
+  .eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #4a90d9;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f8fafc;
+    letter-spacing: -0.5px;
+  }
+
+  header p { margin-top: 10px; color: #64748b; font-size: 0.95rem; }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 28px; }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: #252d3d;
+  }
+
+  .release { position: relative; margin-bottom: 28px; }
+
+  .release::before {
+    content: '';
+    position: absolute;
+    left: -28px;
+    top: 24px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--dot, #4a90d9);
+    border: 3px solid #0f1117;
+  }
+
+  .release-card {
+    background: #1a1f2e;
+    border: 1px solid #252d3d;
+    border-radius: 14px;
+    padding: 22px 26px;
+  }
+
+  .release-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  .version {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #f1f5f9;
+  }
+
+  .badge {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 10px;
+    border-radius: 20px;
+  }
+  .badge.current { background: #142208; color: #4ade80; border: 1px solid #15803d; }
+  .badge.older   { background: #1e2433; color: #94a3b8; border: 1px solid #334155; }
+
+  .release-date { font-size: 0.8rem; color: #64748b; margin-left: auto; }
+
+  .release-title { font-size: 0.95rem; font-weight: 600; color: #cbd5e1; margin-bottom: 12px; }
+
+  ul.changes { list-style: none; }
+  ul.changes li {
+    font-size: 0.88rem;
+    color: #94a3b8;
+    padding-left: 22px;
+    position: relative;
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+  ul.changes li .tag {
+    position: absolute;
+    left: 0;
+    top: 1px;
+    font-size: 0.7rem;
+  }
+
+  .lbl {
+    display: inline-block;
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1px 7px;
+    border-radius: 4px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .lbl.new  { background: #14392233; color: #4ade80; border: 1px solid #15803d55; }
+  .lbl.imp  { background: #1e3a5f33; color: #60a5fa; border: 1px solid #1d4ed855; }
+  .lbl.fix  { background: #3d250033; color: #fbbf24; border: 1px solid #b4530955; }
+
+  code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    background: #0f1117;
+    border: 1px solid #252d3d;
+    border-radius: 5px;
+    padding: 1px 6px;
+    color: #22d3ee;
+    font-size: 0.85em;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 0.78rem;
+    color: #475569;
+  }
+  footer a { color: #4a90d9; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topnav">
+    <a href="index.html">Home</a>
+    <a href="docs.html">Documentation</a>
+    <a href="changelog.html" class="active">Changelog</a>
+    <a href="dividend_scanner_v2.py" download>Download Scanner</a>
+  </div>
+
+  <header>
+    <div class="eyebrow">Changelog</div>
+    <h1>Version History</h1>
+    <p>A record of what changed in each version of the scanner.</p>
+  </header>
+
+  <div class="timeline">
+
+    <!-- v2 -->
+    <div class="release" style="--dot:#4ade80;">
+      <div class="release-card">
+        <div class="release-head">
+          <span class="version">v2</span>
+          <span class="badge current">Current</span>
+          <span class="release-date">June 1, 2026</span>
+        </div>
+        <div class="release-title">Built around Rick's three rules of thumb.</div>
+        <ul class="changes">
+          <li><span class="lbl new">New</span> Rebound-time metric: measures how many trading days each stock has historically taken to climb back to its pre-dividend price, using two years of history.</li>
+          <li><span class="lbl new">New</span> Recovery rate: shows how often each stock recovered within the test window.</li>
+          <li><span class="lbl new">New</span> Yield tiers: stocks are grouped by annual yield (Tier 1 = 8%+, Tier 2 = 7%+, Tier 3 = 5%+, Tier 4 = below 5%).</li>
+          <li><span class="lbl new">New</span> Expanded universe: added high-yield REITs and business development companies so 8%+ names actually appear. The S&amp;P 500 alone rarely has them.</li>
+          <li><span class="lbl imp">Improved</span> Scoring formula now weighs yield tier, rebound speed, recovery rate, liquidity, and volatility together.</li>
+          <li><span class="lbl imp">Improved</span> Switched the yield filter from per-payment to annual yield, matching how yields are normally quoted.</li>
+          <li><span class="lbl imp">Improved</span> Output now includes Tier, Annual Yield, Capture Yield, Rebound Days, Recovered, and Score columns.</li>
+          <li><span class="lbl fix">Fixed</span> Removed two delisted tickers that returned errors.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v1 -->
+    <div class="release" style="--dot:#64748b;">
+      <div class="release-card">
+        <div class="release-head">
+          <span class="version">v1</span>
+          <span class="badge older">Initial</span>
+          <span class="release-date">May 31, 2026</span>
+        </div>
+        <div class="release-title">First working scanner.</div>
+        <ul class="changes">
+          <li><span class="lbl new">New</span> Scans the S&amp;P 500 for upcoming ex-dividend dates using Yahoo Finance.</li>
+          <li><span class="lbl new">New</span> Basic filters for dividend size, stock price, trading volume, and ex-date window.</li>
+          <li><span class="lbl new">New</span> Simple ranking by yield, days remaining, and volatility.</li>
+          <li><span class="lbl new">New</span> Saves results to a dated spreadsheet file each run.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>Dividend Capture Scanner &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

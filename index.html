@@ -15,6 +15,28 @@
     padding: 48px 20px 64px;
   }
 
+  .topnav {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+
+  .topnav a {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-decoration: none;
+    padding: 6px 14px;
+    border: 1px solid #252d3d;
+    border-radius: 20px;
+    transition: all 0.15s;
+  }
+
+  .topnav a:hover { border-color: #4a90d9; color: #e2e8f0; }
+  .topnav a.active { background: #1e3a5f33; border-color: #1d4ed855; color: #60a5fa; }
+
   header {
     text-align: center;
     margin-bottom: 48px;
@@ -613,6 +635,12 @@
 </style>
 </head>
 <body>
+
+<div class="topnav">
+  <a href="index.html" class="active">Home</a>
+  <a href="docs.html">Documentation</a>
+  <a href="changelog.html">Changelog</a>
+</div>
 
 <header>
   <div class="eyebrow">Strategy Overview</div>
