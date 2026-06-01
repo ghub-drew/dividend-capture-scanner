@@ -58,63 +58,6 @@
 
   header p { margin-top: 10px; color: #64748b; font-size: 0.95rem; }
 
-  /* Lock screen */
-  .lock {
-    background: #1a1f2e;
-    border: 1px solid #252d3d;
-    border-radius: 16px;
-    padding: 44px 36px;
-    text-align: center;
-    max-width: 420px;
-    margin: 30px auto 0;
-  }
-
-  .lock-icon {
-    font-size: 2.4rem;
-    margin-bottom: 14px;
-  }
-
-  .lock h2 { font-size: 1.15rem; color: #f1f5f9; margin-bottom: 6px; }
-  .lock p { font-size: 0.86rem; color: #64748b; margin-bottom: 22px; }
-
-  .lock-form { display: flex; flex-direction: column; gap: 12px; }
-
-  .lock input {
-    background: #0f1117;
-    border: 1px solid #252d3d;
-    border-radius: 8px;
-    padding: 12px 16px;
-    color: #e2e8f0;
-    font-size: 0.95rem;
-    text-align: center;
-    letter-spacing: 0.1em;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .lock input:focus { border-color: #4a90d9; }
-
-  .lock button {
-    background: #1d4ed8;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 0.92rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .lock button:hover { background: #1e40af; }
-
-  .lock-error {
-    font-size: 0.82rem;
-    color: #fb7185;
-    min-height: 18px;
-  }
-
-  /* Timeline (revealed after unlock) */
-  #content { display: none; }
-
   .timeline { position: relative; padding-left: 28px; }
   .timeline::before {
     content: '';
@@ -187,79 +130,54 @@
     <p>A record of what changed in each version of the scanner.</p>
   </header>
 
-  <!-- Lock screen -->
-  <div class="lock" id="lock">
-    <div class="lock-icon">🔒</div>
-    <h2>Protected Page</h2>
-    <p>Enter the password to view the version history.</p>
-    <form class="lock-form" id="lockForm" autocomplete="off">
-      <input type="password" id="pw" placeholder="Password" autofocus>
-      <button type="submit">Unlock</button>
-      <div class="lock-error" id="err"></div>
-    </form>
-  </div>
+  <div class="timeline">
 
-  <!-- Encrypted content gets injected here -->
-  <div id="content"></div>
+    <!-- v2 -->
+    <div class="release" style="--dot:#4ade80;">
+      <div class="release-card">
+        <div class="release-head">
+          <span class="version">v2</span>
+          <span class="badge current">Current</span>
+          <span class="release-date">June 1, 2026</span>
+        </div>
+        <div class="release-title">Built around three key selection rules.</div>
+        <ul class="changes">
+          <li><span class="lbl new">New</span> Rebound-time metric: measures how many trading days each stock has historically taken to climb back to its pre-dividend price, using two years of history.</li>
+          <li><span class="lbl new">New</span> Recovery rate: shows how often each stock recovered within the test window.</li>
+          <li><span class="lbl new">New</span> Yield tiers: stocks are grouped by annual yield (Tier 1 = 8%+, Tier 2 = 7%+, Tier 3 = 5%+, Tier 4 = below 5%).</li>
+          <li><span class="lbl new">New</span> Expanded universe: added high-yield REITs and business development companies so 8%+ names actually appear. The S&amp;P 500 alone rarely has them.</li>
+          <li><span class="lbl imp">Improved</span> Scoring formula now weighs yield tier, rebound speed, recovery rate, liquidity, and volatility together.</li>
+          <li><span class="lbl imp">Improved</span> Switched the yield filter from per-payment to annual yield, matching how yields are normally quoted.</li>
+          <li><span class="lbl imp">Improved</span> Output now includes Tier, Annual Yield, Capture Yield, Rebound Days, Recovered, and Score columns.</li>
+          <li><span class="lbl fix">Fixed</span> Removed two delisted tickers that returned errors.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v1 -->
+    <div class="release" style="--dot:#64748b;">
+      <div class="release-card">
+        <div class="release-head">
+          <span class="version">v1</span>
+          <span class="badge older">Initial</span>
+          <span class="release-date">May 31, 2026</span>
+        </div>
+        <div class="release-title">First working scanner.</div>
+        <ul class="changes">
+          <li><span class="lbl new">New</span> Scans the S&amp;P 500 for upcoming ex-dividend dates using Yahoo Finance.</li>
+          <li><span class="lbl new">New</span> Basic filters for dividend size, stock price, trading volume, and ex-date window.</li>
+          <li><span class="lbl new">New</span> Simple ranking by yield, days remaining, and volatility.</li>
+          <li><span class="lbl new">New</span> Saves results to a dated spreadsheet file each run.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
 
   <footer>
     <p>Dividend Capture Scanner &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
   </footer>
 
 </div>
-
-<script>
-  // Encrypted changelog: base64( salt(16) + iv(12) + ciphertext+tag )
-  // PBKDF2-HMAC-SHA256, 150000 iterations, AES-256-GCM.
-  const PAYLOAD = "s4fb+7gXB+vkWCi4yQCtrIPcSbWx2n3nTzO/uqoEVRkNrjD9KKDGsxk7PY4CsTxDZ5em1gep8tZHVoYY5pT3SiLql0dWeSOlCjtMm3urygBFzV9PMJZEEhmcrf5d5nhbpEWy22Zp4lFwxk6Tys6RwZJzhTv9D/PTFqu9DlWW4VHMDkIfYhrG0DVsh3M6fD7WJVvHt8oqHuIEAIl6n7j2g9g3/R4e4gwQYVOrR9RYlCtYAfkWZfR/mc+4gg8qWACK3zcLfJ1XVuoqckCVgPJTYATZzYrZkM20zvXKNQI7RJz5kNISauh0+YFs1peabEqkcj2xNTNP08ix6u930lS+m1dHLxFN20UMk3q+5mYdx2Z1BNKaAnwvbo7efcBExPrHzOBqIb6SvYUm3UUvrE0lizFmOoTmsiN/PXs+Lyza+9zu728sqYpEGIIzk6jcsFpnHxlMY23HDcj4BMU1vQxsiUDJTIWZFoGNB8hsC48W+fuNVEYHc7Yjx/1u9A+NrI7bvpmu7i16XfOZnAW/HVZb8JtM2kxtaOkDUOJp6uUfAYuxmxqqVAVz5n+m2oyUE2fSq5zj+L20L1Ptr2TSUoJcnAJiXWQgLZ5eDELfNgUPPNvLiOBY8QkGuz2fWl+kBq5h80iar/bTkTdSxzCLoanfouQySkVJg2lQZz9KyNYYhZSOVpbtniO/Cy/dB6lqdKK1WKSiNYveu45RzNkWERU+OLSJ95oAQTn9AxzdcLdiPJy2Xq22gfStpZ8/AS6Eja1XCCLRBmhIuGYupabioU8CFAkxiKoywC13OiXAg+blCxY4886LbTs0ORosTEoJT5rrJXLdrFQzHB1KHs9zekz2UEhlZ50sP2iD4cdpBn4Up3uiL0fCR8SnfnDv/OVA4oiyfIEt3IM0WT2+h0BGI2A9fh62c/HGFEXXa8Rtr3wh4jLyUVMfMUk/I7XkQPTgAAFjpqGM1vygRxSEJ/TbRM11Bw65uRRwUv1WRq8dogKZNDyiX4+ukR42BeByCOyB5bN+n/wQY1uiqO3DTNcs0bX2zpzjliC75ZdySDw6c2z4xKTBjMv77OKBItShsot/yWc5ECbjjCDXP4BlhLUos5u4xG9cymVa9AIxbZyUjCBUezYy0Y7zjaImiQVz8byzCePDI+t4PHBNJma0/jAvY6C1XmnXh9Qr88+AKsthhe3SAMr76v0eoiOXE2Wof00xlxOu+a/UHGhOeSCHAtBKtFxNkNgjQZGdhCupMpLHRdbt8NsG9gh17lZekoKH9FLzxg81Ljx0c5RmoHyb7DhLFa96wfDmIZHPjgwsTuue3Pyn1fxdfyuWTg2vsF+0IrXaBTaoFmVGBPk/6KGvxITIbfFKt59ve1KJL3s2aUjejV2CQkUglcuP77FVP2m4ngY4zw7UlpD9PM3WFj3r5RQSXsH8KqdGWcQzahQSNyOlfQC4tq0PEy75tv5ZFxKfMwvot8t1KP9l3pKRIMD6MhXFwqFfzdCEAWH25v7GJkSxiVk2cmGTTgBruTtFCgvpHN8U+gFQz4rAYojnDWrdC8wryMciU5ww8G9+gUlnk7yFcETSkyfBob9EPX6PLrJ6JPqgkDAv8KmRVfakoFWFz1oCiILOKSx5nbymG5iCEEsNEWOdJ0uV3AbhE8Xmf7ckegcJ51pCL+FEoxR5FZB1EZy1WJPBpSR7L+uWGQMalzecCS8dCo6qli3QKTWALVfI4yz8jwU5+DTVSpB0tcA+f2pnVMmvvRVw8RjvFU5vklaFCaeYNvf0J/T/KwyphGUY9XcHCvYj17bMYOKJpyOeqE6pcK1Yu0GmuCkKT/K3oCZCOXZQXErS9/I1X2oLqKMk3zrr7SC6blfMaZjq9TqAimExhGo2S828FsHSrDSx4FSxO3L15meyHcMLe03cExIeQ6h8QR8aGGdk/1HtvW/NR9NgO+PwFzfkyBXTizL2EuQkF1iZ2uzPOCohgi8rnjFSKYHmuvc3jW14FTa/RS+zuWvHBl19TsZW3M8dK/8ieYs/BiRZ93OM4hYU3utJZabeqOmaNaEpcs+k9vvFtcfXfk9Zh6YlopcKxSbr071j4C5hEJ5ZE6SSmps0qxLFb2CjU/f7RehTUfU8GTA9JWU9JcIIiWcY8yaGiFZFt7Bk8ZqzRnb3txTljKPqgmmgOtiXGWQ/fnAF5cSSFVHJrN9mz3zrSvzD9m2raGB1K1PsJnEugWtdewAuMVNVyCgqSj0KEvtfk3fpg7vuSJ6jF3hC4hmFfjkFHbPMvkRwpVON2nqrxTqEUuHwcb2+7Ij12916jwU/cySDeeUSJFDK1dnkZ3p0AK/l8nnzKOXG+n7SOY6xZSsqhUS4WPRgWuYA3ltxvi4TgG0PvJWBiUP9xXUCuOpstqmctgayq6JoqZGtE/Cv7fHdZ41ZL2x4PL6dD4IBLdiBcF0L7bvXxew9QFZGFY7qfd86JHe6hGPlTjaL98zWskcMsCJpjIZhCVvLeStAIyiJQRrm3ifWypX3yI9dU/1NbjE4FJMKTiPqlH92miuzE6uMmFKVQlUSk8Fqy6kX63yx+WPdDXG3dkTs60+poIWTfSgfIpvg+LqxF5fHtJFU4/kGBXVi7LNJucK/xeDnJnRCU0Eibg6hG7sLiev1qA8/PoudvzDP9kveKv+hK786c4F+Gojmr10TfFWOEJ6Q71fSJZ6ljO7EFzVWkZrCjimNLKh1O5z7zl7XYt/VbqCPSzORbLhPJ4dzvpUft1WGe14CVWG5WWyxgyib8iK5L0Otq6UGlf1K912AWUDqG9mIhJnMla7oEyJ2RoI17Myy8a+FZR1wDmbP9muTg9H+cp8E0spQXn9yytQmKWiN35tlVzGntr6sc+b3CQFpclxrem0KIlJmVsLnVRQoWQK6g8KtH9d7ZVnQ7xNE6Uf00i0Zna433tTDm15L++xklcJp63HW4quR7bJoN0I1lvT56Op2Wd7V2vmBv0lsdlVmfAHYMaR+XjBkDItqHs5lYl4jHT1Nhq8ShmtIIt2QQ1Zc0Xd9zboLemtFL27TQTbzjmmbqf0PvkqRlx5llL8U0/X8mCS5L4nPTHBL0jnIcy2cgKwHA/bXLhfarbBeKXArSoRtdiDEDOhEZRBOttrLp3W0dgrONpxUyhcKERBi1xLzQXfQBPKMEIkEJzfYXg8uFri0lOnMycelQIxa4iUd3WkfDz3/Wf3qb2mzNLta+r9UWQ69WmedBtwuPAIUtprol8uB/K1RMbwLymf6wMwYHDV8xXpxmjmXfZNSEg/M9bhTYAF+oXT3QFdhIt1J2bzxK1r+HGndtKLk/ks04ykc7rfFtpG3eaYuT62/YC7m630yOofGPyd26+iHmxbGDyAks4xlQZX/mZ1BQxO7IMQiO+3VW+yLeqGdIlD6A/PZ4LTwlDN5VzSwI2ub+EggyDHGLPZ95pGKudEBwAosflpHwLdwLTNbVxWBA3gv8Fgk3FkugX3GjpWayUzKrosRi7ZwwSwWIAtD4DVYs6QTQBdvIzUynr2SzdlPMr0v/DuaEfKHgBrMcigHPn6RnynNK0+tolqBq3NGe84DUyvalg==";
-
-  const ITERATIONS = 150000;
-
-  function b64ToBytes(b64) {
-    const bin = atob(b64);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    return bytes;
-  }
-
-  async function unlock(password) {
-    const data = b64ToBytes(PAYLOAD);
-    const salt = data.slice(0, 16);
-    const iv = data.slice(16, 28);
-    const ct = data.slice(28);
-
-    const enc = new TextEncoder();
-    const baseKey = await crypto.subtle.importKey(
-      "raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]
-    );
-    const key = await crypto.subtle.deriveKey(
-      { name: "PBKDF2", salt: salt, iterations: ITERATIONS, hash: "SHA-256" },
-      baseKey,
-      { name: "AES-GCM", length: 256 },
-      false,
-      ["decrypt"]
-    );
-    const plainBuf = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, ct);
-    return new TextDecoder().decode(plainBuf);
-  }
-
-  document.getElementById("lockForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const pw = document.getElementById("pw").value;
-    const err = document.getElementById("err");
-    err.textContent = "";
-    try {
-      const html = await unlock(pw);
-      document.getElementById("content").innerHTML = html;
-      document.getElementById("content").style.display = "block";
-      document.getElementById("lock").style.display = "none";
-    } catch (_) {
-      err.textContent = "Incorrect password. Please try again.";
-      document.getElementById("pw").value = "";
-      document.getElementById("pw").focus();
-    }
-  });
-</script>
-
 </body>
 </html>
