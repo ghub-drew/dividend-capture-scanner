@@ -96,6 +96,12 @@
     font-size: 0.88rem; color: #94a3b8;
     padding-left: 4px; margin-bottom: 8px; line-height: 1.5;
   }
+  ul.changes em {
+    font-style: normal;
+    color: #60a5fa;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
   .lbl {
     display: inline-block; font-size: 0.66rem; font-weight: 700;
     text-transform: uppercase; letter-spacing: 0.05em;
@@ -142,14 +148,14 @@
         </div>
         <div class="release-title">Refined around capital rotation and after-tax results.</div>
         <ul class="changes">
-          <li><span class="lbl new">New</span> Worst-case rebound: alongside the average, the output now shows the longest it has ever taken a stock to recover.</li>
-          <li><span class="lbl new">New</span> Price trend signal: each stock is marked Up, Down, or Mixed. Downtrends are discouraged, since the price may not recover.</li>
-          <li><span class="lbl new">New</span> Round-lot economics: dividend dollars and capital required per 100-share lot, since round lots are far easier to sell.</li>
-          <li><span class="lbl new">New</span> After-tax figures: a configurable tax rate (default 35%) shows the dividend after tax, as these are short-term gains.</li>
-          <li><span class="lbl new">New</span> Annualised efficiency: a single number modelling continuous capital rotation, rewarding high yield plus a fast rebound.</li>
-          <li><span class="lbl new">New</span> Liquidity rating: thinly-traded names are flagged so they can be judged separately.</li>
+          <li><span class="lbl new">New</span> Worst-case rebound: alongside the average, the output now shows the longest it has ever taken a stock to recover. <em>(Columns: Avg Reb, Worst Reb)</em></li>
+          <li><span class="lbl new">New</span> Price trend signal: each stock is marked Up, Down, or Mixed. Downtrends are discouraged, since the price may not recover. <em>(Column: Trend)</em></li>
+          <li><span class="lbl new">New</span> Round-lot economics: dividend dollars and capital required per 100-share lot, since round lots are far easier to sell. <em>(Columns: Div/100sh, Capital)</em></li>
+          <li><span class="lbl new">New</span> After-tax figures: a configurable tax rate (default 35%) shows the dividend after tax, as these are short-term gains. <em>(Column: AfterTax/100)</em></li>
+          <li><span class="lbl new">New</span> Annualised efficiency: a single number modelling continuous capital rotation, rewarding high yield plus a fast rebound. It drives the final ranking. <em>(Columns: Ann.Eff%, Score)</em></li>
+          <li><span class="lbl new">New</span> Liquidity rating: thinly-traded names are flagged so they can be judged separately. <em>(Column: Liquidity)</em></li>
           <li><span class="lbl new">New</span> Universe expanded again to include closed-end funds (CEFs) and preferred stocks.</li>
-          <li><span class="lbl imp">Improved</span> Dropped the yield tier buckets in favour of a simple ranking by yield percentage.</li>
+          <li><span class="lbl imp">Improved</span> Dropped the yield tier buckets in favour of a simple ranking by yield percentage. <em>(Column: Annual Yield)</em></li>
         </ul>
       </div>
     </div>
