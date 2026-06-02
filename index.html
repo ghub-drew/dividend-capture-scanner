@@ -654,12 +654,12 @@
 <div class="topnav">
   <a href="index.html" class="active">Home</a>
   <a href="docs.html">Documentation</a>
-  <a href="dividend_scanner_v2.py" download>Download Scanner</a>
+  <a href="dividend_scanner_v3.py" download>Download Scanner</a>
 </div>
 
 <header>
   <div class="eyebrow">Strategy Overview</div>
-  <h1>Dividend Capture Scanner <span style="font-size:0.95rem;font-weight:700;color:#4a90d9;vertical-align:middle;background:#1e3a5f33;border:1px solid #1d4ed855;border-radius:20px;padding:2px 12px;letter-spacing:0.04em;">v2</span></h1>
+  <h1>Dividend Capture Scanner <span style="font-size:0.95rem;font-weight:700;color:#4a90d9;vertical-align:middle;background:#1e3a5f33;border:1px solid #1d4ed855;border-radius:20px;padding:2px 12px;letter-spacing:0.04em;">v3</span></h1>
   <div style="font-size:0.82rem;color:#d4a017;margin-top:6px;margin-bottom:2px;letter-spacing:0.06em;font-weight:500;">Developed by Andrew D.</div>
   <p>A systematic approach to collecting <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span> income by timing stock purchases around <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend dates</span>.</p>
 </header>
@@ -689,9 +689,10 @@
             <ul class="bullets">
               <li>A company announces it will pay a <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span></li>
               <li>The tool automatically identifies good capture candidates based on four key qualities:</li>
-              <li><strong>High yield:</strong> the <span class="tip" data-tip="The yearly dividend as a percentage of the stock price. A $100 stock paying $5 a year has a 5% yield.">dividend yield</span> should be worth the risk. Best above 8% or 7%, then 5%+, and anything lower only if it rebounds fast</li>
+              <li><strong>High yield:</strong> the higher the <span class="tip" data-tip="The yearly dividend as a percentage of the stock price. A $100 stock paying $5 a year has a 5% yield.">dividend yield</span>, the more the trade is worth the risk. Candidates are ranked by yield percentage</li>
               <li><strong>Fast rebound:</strong> how quickly the stock historically climbs back to its pre-<span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-date</span> price. The faster it recovers, the sooner your capital is free</li>
-              <li><strong>Plenty of liquidity:</strong> lots of <span class="tip" data-tip="How many shares of a stock are bought and sold in a single day. High volume means it is easy to buy and sell quickly.">daily trading volume</span> makes it easy to get in and out</li>
+              <li><strong>Healthy trend:</strong> stocks drifting downward are flagged, since the price may not recover after the dividend</li>
+              <li><strong>Plenty of liquidity:</strong> lots of <span class="tip" data-tip="How many shares of a stock are bought and sold in a single day. High volume means it is easy to buy and sell quickly.">daily trading volume</span> makes it easy to get in and out. Thinly-traded names are flagged</li>
               <li><strong>Solid quality:</strong> a stock you would be comfortable holding for a while in case the price takes time to bounce back</li>
             </ul>
             <div class="key-callout"><span>★</span> Rebound time is the most important factor. The stock that climbs back to the price you paid the fastest is ranked the highest.</div>
@@ -770,10 +771,10 @@
     </button>
     <div class="panel-body">
 
-      <a href="dividend_scanner_v2.py" download class="download-btn">
-        <span>&#8595;</span> Download dividend_scanner_v2.py
+      <a href="dividend_scanner_v3.py" download class="download-btn">
+        <span>&#8595;</span> Download dividend_scanner_v3.py
       </a>
-      <div style="font-size:0.76rem;color:#64748b;margin-bottom:8px;">Latest version. Includes yield tiers, the rebound-time metric, and the expanded high-yield list.</div>
+      <div style="font-size:0.76rem;color:#64748b;margin-bottom:8px;">Latest version. Adds rebound worst-case, trend signal, round-lot dollar gain, after-tax figures, and CEFs and preferreds.</div>
 
       <div class="run-steps">
 
@@ -800,7 +801,7 @@
           <div class="run-content">
             <div class="run-title">Run the scanner</div>
             <div class="run-desc">Scans all 503 S&amp;P 500 stocks. Takes 3–5 minutes to complete.</div>
-            <div class="code-block">python dividend_scanner_v2.py</div>
+            <div class="code-block">python dividend_scanner_v3.py</div>
           </div>
         </div>
 
@@ -816,7 +817,7 @@
       </div>
 
       <div class="run-note">
-        <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner_v2.py</code> and can be adjusted at any time.
+        <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner_v3.py</code> and can be adjusted at any time.
       </div>
     </div>
   </div>
@@ -844,10 +845,10 @@
               <div class="sw-sub">Getting started</div>
             </div>
           </div>
-          <div class="sw-body">The scanner starts with the <span class="tip" data-tip="A list of the 500 largest publicly traded companies in the US, like Apple, Coca-Cola, and Johnson and Johnson.">S&amp;P 500</span>, the 500 largest US companies (think Apple, Coca-Cola, Johnson and Johnson). On its own, the S&amp;P 500 rarely has stocks paying 8% or more, so the scanner also adds a curated list of high-yield income stocks like <span class="tip" data-tip="Real Estate Investment Trusts. Companies that own income-producing property and pay most of their profit out as dividends, often at high yields.">REITs</span> and <span class="tip" data-tip="Business Development Companies. Firms that lend to mid-sized businesses and pass the interest income to shareholders, often yielding 8% or more.">BDCs</span>. This is where the highest yields usually live. The list stays current automatically.</div>
+          <div class="sw-body">The scanner starts with the <span class="tip" data-tip="A list of the 500 largest publicly traded companies in the US, like Apple, Coca-Cola, and Johnson and Johnson.">S&amp;P 500</span>, the 500 largest US companies (think Apple, Coca-Cola, Johnson and Johnson). On its own, the S&amp;P 500 rarely has stocks paying 8% or more, so the scanner also adds high-yield income names: <span class="tip" data-tip="Real Estate Investment Trusts. Companies that own income-producing property and pay most of their profit out as dividends, often at high yields.">REITs</span>, <span class="tip" data-tip="Business Development Companies. Firms that lend to mid-sized businesses and pass the interest income to shareholders, often yielding 8% or more.">BDCs</span>, <span class="tip" data-tip="Closed-End Funds. Investment funds that trade like a stock and often pay high monthly or quarterly distributions.">closed-end funds</span>, and <span class="tip" data-tip="Preferred stocks sit between bonds and common stock and tend to pay steady, higher dividends. Accessed here through preferred-stock funds.">preferreds</span>. This is where the highest yields usually live. The list stays current automatically.</div>
           <div class="sw-tags">
             <span class="sw-tag">S&amp;P 500 plus high-yield names</span>
-            <span class="sw-tag">REITs and BDCs included</span>
+            <span class="sw-tag">REITs, BDCs, CEFs, preferreds</span>
             <span class="sw-tag">Always current</span>
           </div>
         </div>
@@ -892,11 +893,11 @@
             </div>
             <div class="filter-item">
               <div class="filter-label">Daily trading volume</div>
-              <div class="filter-value">500,000+ shares per day</div>
+              <div class="filter-value">100,000+ shares per day (thin ones flagged)</div>
             </div>
             <div class="filter-item">
               <div class="filter-label">Stock price</div>
-              <div class="filter-value">Between $10 and $500</div>
+              <div class="filter-value">Between $5 and $500</div>
             </div>
           </div>
         </div>
@@ -933,9 +934,10 @@
               <div class="sw-sub">The key metric</div>
             </div>
           </div>
-          <div class="sw-body">When a stock pays a <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span>, its price usually drops by about that amount the same day. The real question is: how long does it take to climb back to the price you paid? The scanner looks at the last two years of history and, for each past <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend date</span>, measures how many trading days the stock took to recover. A faster rebound means your money is freed up sooner and the trade finishes in profit quicker.</div>
+          <div class="sw-body">When a stock pays a <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span>, its price usually drops by about that amount the same day. The real question is: how long does it take to climb back to the price you paid? The scanner looks at the last two years of history and, for each past <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend date</span>, measures how many trading days the stock took to recover. It reports both the average and the worst case, so you can see the typical wait and the longest it has ever taken. A faster rebound means your money is freed up sooner.</div>
           <div class="sw-tags">
             <span class="sw-tag">Average rebound days</span>
+            <span class="sw-tag">Worst-case rebound</span>
             <span class="sw-tag">How often it recovers</span>
             <span class="sw-tag">Based on 2 years of history</span>
           </div>
@@ -951,12 +953,12 @@
               <div class="sw-sub">Putting it all together</div>
             </div>
           </div>
-          <div class="sw-body">Every stock gets a score built from its yield tier and its rebound time. Higher-yielding stocks rank first, and a fast, reliable rebound pushes a stock further up. A lower-yielding stock can still rank well if it bounces back very quickly.</div>
+          <div class="sw-body">Each stock gets a score that rewards the best use of your money over time. The idea is continuous rotation: hold a stock through the dividend, sell once it is back to even or better, then move the same money straight into the next upcoming dividend. So a high yield that also rebounds quickly scores best, because that capital can be put to work again sooner. A downward price trend or thin trading lowers the score, since those make it riskier to recover and exit.</div>
           <div class="sw-tags">
-            <span class="sw-tag">Tier 1: 8%+ yield (best)</span>
-            <span class="sw-tag">Tier 2: 7%+</span>
-            <span class="sw-tag">Tier 3: 5%+</span>
+            <span class="sw-tag">Higher yield = higher rank</span>
             <span class="sw-tag">Faster rebound = higher rank</span>
+            <span class="sw-tag">Downtrend lowers the score</span>
+            <span class="sw-tag">After-tax figures included</span>
           </div>
         </div>
 
@@ -970,17 +972,17 @@
               <div class="sw-sub">Ready to review</div>
             </div>
           </div>
-          <div class="sw-body">The top candidates are displayed in a ranked table and saved to a file so you can review and compare them each day. Each row shows the yield tier, the average rebound time, and how often the stock recovered.</div>
+          <div class="sw-body">The top candidates are displayed in a ranked table and saved to a file so you can review and compare them each day. Each row shows the yield, the average and worst-case rebound, the trend, the after-tax dividend per 100-share lot, and the overall score.</div>
           <div class="output-preview">
             <table>
               <thead>
-                <tr><th>#</th><th>Ticker</th><th>Name</th><th>Price</th><th>Tier</th><th>Annual Yield</th><th>Rebound Days</th><th>Recovered</th><th>Score</th></tr>
+                <tr><th>#</th><th>Ticker</th><th>Price</th><th>Annual Yield</th><th>Avg Reb</th><th>Max Reb</th><th>Recovered</th><th>Trend</th><th>AfterTax/100</th><th>Score</th></tr>
               </thead>
               <tbody>
-                <tr><td>1</td><td><strong>ARCC</strong></td><td>Ares Capital</td><td>$18.99</td><td>1</td><td class="yield-high">10.11%</td><td>9.6</td><td>83%</td><td>137.5</td></tr>
-                <tr><td>2</td><td><strong>TSLX</strong></td><td>Sixth Street</td><td>$17.23</td><td>1</td><td class="yield-high">9.75%</td><td>1.0</td><td>67%</td><td>136.1</td></tr>
-                <tr><td>3</td><td><strong>MAIN</strong></td><td>Main Street Capital</td><td>$51.21</td><td>1</td><td class="yield-high">8.55%</td><td>4.0</td><td>67%</td><td>132.8</td></tr>
-                <tr><td>4</td><td><strong>DOC</strong></td><td>Healthpeak</td><td>$19.15</td><td>3</td><td class="yield-mid">6.37%</td><td>1.7</td><td>100%</td><td>111.4</td></tr>
+                <tr><td>1</td><td><strong>TSLX</strong></td><td>$18.07</td><td class="yield-high">9.30%</td><td>1.8</td><td>7</td><td>75%</td><td>Down</td><td>$15.60</td><td>34.1</td></tr>
+                <tr><td>2</td><td><strong>TROW</strong></td><td>$104.59</td><td class="yield-mid">4.97%</td><td>4.3</td><td>13</td><td>88%</td><td>Mixed</td><td>$84.50</td><td>27.5</td></tr>
+                <tr><td>3</td><td><strong>GPC</strong></td><td>$98.36</td><td class="yield-mid">4.32%</td><td>2.1</td><td>5</td><td>88%</td><td>Down</td><td>$69.06</td><td>25.6</td></tr>
+                <tr><td>4</td><td><strong>DOC</strong></td><td>$19.10</td><td class="yield-high">6.39%</td><td>1.5</td><td>10</td><td>100%</td><td>Up</td><td>$6.61</td><td>24.9</td></tr>
               </tbody>
             </table>
           </div>
@@ -1018,6 +1020,10 @@
           <div class="sw-note">
             <div class="sw-note-title">Why is Interactive Brokers not connected yet?</div>
             <span class="tip" data-tip="A brokerage platform used to buy and sell stocks online. One of the most popular among active traders.">Interactive Brokers</span> does have an <span class="tip" data-tip="A way for two software systems to share data automatically, without having to visit a website manually.">API</span>, but we are waiting for access to be enabled on the account. Once that is done, the scanner can check live prices, confirm there are enough shares available to trade, and place orders directly.
+          </div>
+          <div class="sw-note">
+            <div class="sw-note-title">A note on taxes</div>
+            Because these trades are held only days, the profit is a short-term gain taxed at your ordinary income rate, not the lower long-term capital-gains rate. The scanner shows after-tax figures using a default rate of 35%, which can be changed at the top of the script to match your bracket.
           </div>
         </div>
 

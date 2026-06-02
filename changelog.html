@@ -121,7 +121,7 @@
     <a href="index.html">Home</a>
     <a href="docs.html">Documentation</a>
     <a href="changelog.html" class="active">Changelog</a>
-    <a href="dividend_scanner_v2.py" download>Download Scanner</a>
+    <a href="dividend_scanner_v3.py" download>Download Scanner</a>
   </div>
 
   <header>
@@ -132,12 +132,34 @@
 
   <div class="timeline">
 
-    <!-- v2 -->
+    <!-- v3 -->
     <div class="release" style="--dot:#4ade80;">
       <div class="release-card">
         <div class="release-head">
-          <span class="version">v2</span>
+          <span class="version">v3</span>
           <span class="badge current">Current</span>
+          <span class="release-date">June 2, 2026</span>
+        </div>
+        <div class="release-title">Refined around capital rotation and after-tax results.</div>
+        <ul class="changes">
+          <li><span class="lbl new">New</span> Worst-case rebound: alongside the average, the output now shows the longest it has ever taken a stock to recover.</li>
+          <li><span class="lbl new">New</span> Price trend signal: each stock is marked Up, Down, or Mixed. Downtrends are discouraged, since the price may not recover.</li>
+          <li><span class="lbl new">New</span> Round-lot economics: dividend dollars and capital required per 100-share lot, since round lots are far easier to sell.</li>
+          <li><span class="lbl new">New</span> After-tax figures: a configurable tax rate (default 35%) shows the dividend after tax, as these are short-term gains.</li>
+          <li><span class="lbl new">New</span> Annualised efficiency: a single number modelling continuous capital rotation, rewarding high yield plus a fast rebound.</li>
+          <li><span class="lbl new">New</span> Liquidity rating: thinly-traded names are flagged so they can be judged separately.</li>
+          <li><span class="lbl new">New</span> Universe expanded again to include closed-end funds (CEFs) and preferred stocks.</li>
+          <li><span class="lbl imp">Improved</span> Dropped the yield tier buckets in favour of a simple ranking by yield percentage.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v2 -->
+    <div class="release" style="--dot:#64748b;">
+      <div class="release-card">
+        <div class="release-head">
+          <span class="version">v2</span>
+          <span class="badge older">Older</span>
           <span class="release-date">June 1, 2026</span>
         </div>
         <div class="release-title">Built around three key selection rules.</div>

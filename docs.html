@@ -193,7 +193,7 @@
     <a href="index.html">Home</a>
     <a href="docs.html" class="active">Documentation</a>
     <a href="changelog.html">Changelog</a>
-    <a href="dividend_scanner_v2.py" download>Download Scanner</a>
+    <a href="dividend_scanner_v3.py" download>Download Scanner</a>
   </div>
 
   <header>
@@ -239,19 +239,22 @@
     <h2><span class="ic">▶️</span> 3. Running the Scanner</h2>
     <p>Open PowerShell or Command Prompt, go to the folder where you saved the scanner, and run it. Replace the path with your actual folder location.</p>
     <div class="code-block">cd "C:\Users\YourName\Documents\stock scanner"
-python dividend_scanner_v2.py</div>
+python dividend_scanner_v3.py</div>
     <p>It scans roughly 548 stocks and runs a rebound analysis on every stock that passes the filters, so it takes about 4 to 6 minutes. When it finishes, the ranked list prints in the window and is also saved as a dated spreadsheet file in the same folder.</p>
     <div class="note"><strong>Tip:</strong> Close any open <code>candidates_*.csv</code> file before running, otherwise the scanner cannot save the new one.</div>
   </section>
 
   <section id="universe">
     <h2><span class="ic">🌐</span> 4. The Stock Universe</h2>
-    <p>The scanner searches two groups of stocks combined:</p>
+    <p>The scanner searches the S&amp;P 500 plus a curated set of high-yield income names, combined:</p>
     <ul class="list">
       <li><strong>The S&amp;P 500:</strong> the 500 largest US companies, loaded fresh each run so the list is always current.</li>
-      <li><strong>A curated high-yield list:</strong> REITs, mortgage REITs, and business development companies (BDCs). These are where yields of 8% or more usually live, which the S&amp;P 500 rarely offers on its own.</li>
+      <li><strong>REITs and mortgage REITs:</strong> property and real-estate-lending companies that pay most of their income out as dividends.</li>
+      <li><strong>Business development companies (BDCs):</strong> firms that lend to mid-sized businesses, often yielding 8% or more.</li>
+      <li><strong>Closed-end funds (CEFs):</strong> exchange-traded funds that commonly pay high monthly or quarterly distributions.</li>
+      <li><strong>Preferred stocks:</strong> accessed through preferred-stock funds, which pay steady, higher dividends.</li>
     </ul>
-    <p>Together this is about 548 stocks.</p>
+    <p>Together this is about 575 stocks. Mutual funds are intentionally left out, as they rarely yield enough to be worthwhile.</p>
   </section>
 
   <section id="filters">
@@ -260,9 +263,9 @@ python dividend_scanner_v2.py</div>
     <table>
       <tr><th>Filter</th><th>Default</th><th>Why it matters</th></tr>
       <tr><td>Ex-dividend date</td><td>Next 14 days</td><td>Only shows stocks with a dividend coming up soon.</td></tr>
-      <tr><td>Annual yield</td><td>3% or higher</td><td>Keeps the dividend worth the risk. Higher tiers rank better.</td></tr>
-      <tr><td>Avg daily volume</td><td>500,000+ shares</td><td>Enough liquidity to get in and out cleanly.</td></tr>
-      <tr><td>Stock price</td><td>$10 to $500</td><td>Avoids penny stocks and keeps position sizes manageable.</td></tr>
+      <tr><td>Annual yield</td><td>3% or higher</td><td>Keeps the dividend worth the risk. Higher yields rank better.</td></tr>
+      <tr><td>Avg daily volume</td><td>100,000+ shares</td><td>Basic liquidity floor. Thinly-traded names that pass are flagged so you can judge them.</td></tr>
+      <tr><td>Stock price</td><td>$5 to $500</td><td>Avoids penny stocks and keeps position sizes manageable, while still allowing lower-priced CEFs and preferreds.</td></tr>
     </table>
   </section>
 
@@ -271,7 +274,8 @@ python dividend_scanner_v2.py</div>
     <p>This is the key part of the tool. When a stock pays a dividend, its price usually drops by about that amount on the ex-dividend date. The important question is how long it takes to climb back to the price you paid.</p>
     <p>For each stock that passes the filters, the scanner looks at the last two years of price history. For every past ex-dividend date it measures:</p>
     <ul class="list">
-      <li><strong>Rebound Days:</strong> how many trading days it took for the price to return to its pre-dividend level.</li>
+      <li><strong>Avg Reb:</strong> the average number of trading days it took for the price to return to its pre-dividend level.</li>
+      <li><strong>Max Reb:</strong> the worst case, the longest it has taken to recover over the period. This shows how bad the wait can get.</li>
       <li><strong>Recovered:</strong> how often the stock managed to recover within 60 trading days.</li>
     </ul>
     <p>A faster, more reliable rebound means your capital is freed up sooner, so it pushes the stock higher in the ranking.</p>
@@ -279,16 +283,17 @@ python dividend_scanner_v2.py</div>
 
   <section id="scoring">
     <h2><span class="ic">🏆</span> 7. How Scoring Works</h2>
-    <p>Each stock gets a single score so the list can be ranked best-first. The score combines several pieces, with yield tier being the strongest factor:</p>
+    <p>The score is built around <strong>capital rotation</strong>: the goal is to keep the same money working continuously. You hold a stock through its dividend, sell once the price is back to even or better, then move that money straight into the next upcoming dividend, over and over. The less time your money sits idle, the more dividends it can collect in a year.</p>
+    <p>So the score rewards the combination of a high yield and a fast rebound, then adjusts for risk:</p>
     <table>
       <tr><th>Factor</th><th>Effect on score</th></tr>
-      <tr><td>Yield tier</td><td>Biggest factor. Tier 1 (8%+) scores highest, then Tier 2 (7%+), Tier 3 (5%+), Tier 4 (below 5%).</td></tr>
-      <tr><td>Rebound speed</td><td>Faster rebound adds points. A very fast bounce can lift a lower-yield stock.</td></tr>
-      <tr><td>Recovery rate</td><td>Stocks that recover more consistently get a small bonus.</td></tr>
-      <tr><td>Liquidity</td><td>Higher daily volume adds a small bonus.</td></tr>
-      <tr><td>Volatility (beta)</td><td>More volatile stocks lose a few points, as a stability check.</td></tr>
+      <tr><td>Yield</td><td>Higher yield means more collected per trade. Ranked directly by percentage, no tiers.</td></tr>
+      <tr><td>Rebound speed</td><td>A faster rebound frees the money sooner, so it can be redeployed into the next dividend. This is the biggest lever.</td></tr>
+      <tr><td>Recovery rate</td><td>Stocks that recover more consistently are more dependable.</td></tr>
+      <tr><td>Price trend</td><td>A downward trend lowers the score, since the price may not recover after the dividend.</td></tr>
+      <tr><td>Liquidity</td><td>Thinly-traded names are marked down, since they are harder to exit.</td></tr>
     </table>
-    <div class="note">A lower-yielding stock can still rank well if it bounces back very quickly and reliably. That tradeoff is exactly what the score is designed to capture.</div>
+    <div class="note">The headline number is <strong>Ann.Eff%</strong>, a theoretical annualised after-tax return assuming the money is rotated continuously. It is a way to compare opportunities on an even footing, not a promise of returns. A lower-yielding stock can still rank well if it rebounds very quickly and reliably.</div>
   </section>
 
   <section id="output">
@@ -297,27 +302,39 @@ python dividend_scanner_v2.py</div>
     <table>
       <tr><th>Column</th><th>Meaning</th></tr>
       <tr><td>Ticker</td><td>The stock's trading symbol.</td></tr>
-      <tr><td>Tier</td><td>Yield tier: 1 = 8%+, 2 = 7%+, 3 = 5%+, 4 = below 5%.</td></tr>
-      <tr><td>Annual Yield</td><td>The full year's dividend as a percentage of the stock price.</td></tr>
+      <tr><td>Price</td><td>Current share price.</td></tr>
+      <tr><td>Days Until</td><td>Trading days until the ex-dividend date.</td></tr>
+      <tr><td>Annual Yield</td><td>The full year's dividend as a percentage of the stock price. The list is ranked by yield and rebound together.</td></tr>
       <tr><td>Capture Yield</td><td>The single dividend payment as a percentage of the price. This is what you actually collect per trade.</td></tr>
-      <tr><td>Div/Capture</td><td>The dollar amount of that single dividend payment per share.</td></tr>
-      <tr><td>Rebound Days</td><td>Average trading days to recover to the pre-dividend price. Lower is better.</td></tr>
+      <tr><td>Div/100sh</td><td>The dividend in dollars for one 100-share round lot.</td></tr>
+      <tr><td>Capital</td><td>The cost of buying 100 shares.</td></tr>
+      <tr><td>AfterTax/100</td><td>The dividend per 100 shares after tax (default 35%).</td></tr>
+      <tr><td>Avg Reb</td><td>Average trading days to recover to the pre-dividend price. Lower is better.</td></tr>
+      <tr><td>Max Reb</td><td>Worst-case recovery time over the period.</td></tr>
       <tr><td>Recovered</td><td>How often the stock recovered within the test window.</td></tr>
-      <tr><td>Avg Volume</td><td>Average shares traded per day.</td></tr>
+      <tr><td>Trend</td><td>Price trend: Up, Down, or Mixed. Downtrends are discouraged.</td></tr>
+      <tr><td>Liquidity</td><td>Thin, Moderate, or High, based on daily trading volume.</td></tr>
       <tr><td>Beta</td><td>How much the stock moves relative to the market. Lower is steadier.</td></tr>
-      <tr><td>Score</td><td>The overall ranking score. Higher is better.</td></tr>
+      <tr><td>Ann.Eff%</td><td>Theoretical annualised after-tax return if the capital is rotated continuously.</td></tr>
+      <tr><td>Score</td><td>Ann.Eff% adjusted down for a downtrend and thin liquidity. The list is sorted by this.</td></tr>
     </table>
+    <h3>Round lots</h3>
+    <p>The dollar figures use 100-share round lots because round numbers are far easier to sell than odd amounts.</p>
+    <h3>A note on taxes</h3>
+    <p>Dividend-capture trades are held only days, so both the dividend and any price gain are short-term, taxed at your ordinary income rate rather than the lower 15% to 20% long-term capital-gains rate (which requires holding for over a year). The after-tax columns use a default 35% rate that you can change in the settings to match your bracket.</p>
   </section>
 
   <section id="config">
     <h2><span class="ic">⚙️</span> 9. Configuration</h2>
-    <p>All the filter settings live at the top of <code>dividend_scanner_v2.py</code> and can be changed at any time:</p>
-    <div class="code-block">MIN_ANNUAL_YIELD     = 0.03     # 3% floor
-MIN_AVG_VOLUME       = 500_000  # shares per day
-MIN_STOCK_PRICE      = 10.0     # dollars
-MAX_STOCK_PRICE      = 500.0    # dollars
-EX_DATE_WINDOW_DAYS  = 14       # how far ahead to look</div>
-    <p>For example, to only see stocks paying 5% or more, change <code>MIN_ANNUAL_YIELD</code> to <code>0.05</code>.</p>
+    <p>All the filter settings live at the top of <code>dividend_scanner_v3.py</code> and can be changed at any time:</p>
+    <div class="code-block">MIN_ANNUAL_YIELD     = 0.03      # 3% floor
+MIN_AVG_VOLUME       = 100_000   # shares per day
+MIN_STOCK_PRICE      = 5.0       # dollars
+MAX_STOCK_PRICE      = 500.0     # dollars
+EX_DATE_WINDOW_DAYS  = 14        # how far ahead to look
+TAX_RATE             = 0.35      # short-term / ordinary income rate
+ROUND_LOT            = 100       # shares per lot</div>
+    <p>For example, to only see stocks paying 5% or more, change <code>MIN_ANNUAL_YIELD</code> to <code>0.05</code>. To match your own tax bracket, change <code>TAX_RATE</code> (for example <code>0.24</code> for 24%).</p>
   </section>
 
   <section id="data">
@@ -329,7 +346,7 @@ EX_DATE_WINDOW_DAYS  = 14       # how far ahead to look</div>
   </section>
 
   <footer>
-    <p>Dividend Capture Scanner v2 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
+    <p>Dividend Capture Scanner v3 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
   </footer>
 
 </div>
