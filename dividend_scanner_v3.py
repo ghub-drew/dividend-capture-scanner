@@ -237,7 +237,7 @@ def fetch_candidate(ticker: str, today: datetime) -> dict | None:
             "Capital":       round(capital, 0),
             "AfterTax/100":  round(aftertax_dollars, 2),
             "Avg Reb":       round(avg_reb, 1) if avg_reb is not None else "N/A",
-            "Max Reb":       max_reb if max_reb is not None else "N/A",
+            "Worst Reb":     max_reb if max_reb is not None else "N/A",
             "Recovered":     f"{success:.0%}" if success is not None else "N/A",
             "Trend":         trend,
             "Liquidity":     liq,
@@ -302,7 +302,7 @@ def run_scanner():
     display_cols = [
         "Ticker", "Name", "Price", "Ex-Date", "Days Until",
         "Annual Yield", "Capture Yield", "Div/100sh", "Capital", "AfterTax/100",
-        "Avg Reb", "Max Reb", "Recovered", "Trend", "Liquidity", "Beta",
+        "Avg Reb", "Worst Reb", "Recovered", "Trend", "Liquidity", "Beta",
         "Ann.Eff%", "Score",
     ]
     shown = df[display_cols]
@@ -318,7 +318,7 @@ def run_scanner():
     print(f"  Div/100sh     = dividend dollars for one 100-share round lot")
     print(f"  Capital       = cost of 100 shares")
     print(f"  AfterTax/100  = dividend dollars per 100 shares after {TAX_RATE:.0%} tax")
-    print(f"  Avg/Max Reb   = average and worst-case trading days to recover to the pre-ex price")
+    print(f"  Avg/Worst Reb = average and worst-case trading days to recover to the pre-ex price")
     print(f"  Recovered     = how often it recovered within {REBOUND_MAX_DAYS} trading days")
     print(f"  Trend         = price trend (Up / Down / Mixed). Downtrends are discouraged.")
     print(f"  Liquidity     = Thin / Moderate / High (thin = harder to exit)")

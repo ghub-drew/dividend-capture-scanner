@@ -275,7 +275,7 @@ python dividend_scanner_v3.py</div>
     <p>For each stock that passes the filters, the scanner looks at the last two years of price history. For every past ex-dividend date it measures:</p>
     <ul class="list">
       <li><strong>Avg Reb:</strong> the average number of trading days it took for the price to return to its pre-dividend level.</li>
-      <li><strong>Max Reb:</strong> the worst case, the longest it has taken to recover over the period. This shows how bad the wait can get.</li>
+      <li><strong>Worst Reb:</strong> the worst case, the longest it has taken to recover over the period. This shows how bad the wait can get.</li>
       <li><strong>Recovered:</strong> how often the stock managed to recover within 60 trading days.</li>
     </ul>
     <p>A faster, more reliable rebound means your capital is freed up sooner, so it pushes the stock higher in the ranking.</p>
@@ -310,7 +310,7 @@ python dividend_scanner_v3.py</div>
       <tr><td>Capital</td><td>The cost of buying 100 shares.</td></tr>
       <tr><td>AfterTax/100</td><td>The dividend per 100 shares after tax (default 35%).</td></tr>
       <tr><td>Avg Reb</td><td>Average trading days to recover to the pre-dividend price. Lower is better.</td></tr>
-      <tr><td>Max Reb</td><td>Worst-case recovery time over the period.</td></tr>
+      <tr><td>Worst Reb</td><td>Worst-case recovery time over the period.</td></tr>
       <tr><td>Recovered</td><td>How often the stock recovered within the test window.</td></tr>
       <tr><td>Trend</td><td>Price trend: Up, Down, or Mixed. Downtrends are discouraged.</td></tr>
       <tr><td>Liquidity</td><td>Thin, Moderate, or High, based on daily trading volume.</td></tr>
