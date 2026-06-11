@@ -1,5 +1,5 @@
 """
-Dividend Capture Scanner  (v5)
+Dividend Capture Scanner  (v6)
 Pulls upcoming ex-dividend dates from Yahoo Finance and ranks the best
 dividend-capture candidates.
 
@@ -20,18 +20,24 @@ What it looks at:
                             payers aren't unfairly flagged as falling.
   - Liquidity             : flags thinly-traded names that are harder to exit.
   - Round-lot economics   : dividend dollars and capital required per 100 shares.
-  - After-tax gain        : dividend-capture trades are short-term, taxed at the
-                            ordinary income rate (see TAX_RATE below).
+  - After-tax gain        : dividend-capture trades are short-term, taxed as
+                            ordinary income (see TAX_RATE below).
   - Annualised efficiency : models continuous capital rotation - hold for the
                             rebound, sell at even-or-better, redeploy into the
                             next dividend. Failed recoveries are charged at the
                             full 60-day wait, so unreliable stocks score lower.
+  - Rotation plan         : a chronological trade calendar showing how a fixed
+                            pot of capital (see CAPITAL) can be rolled from one
+                            dividend into the next, with estimated net dollars
+                            per trade after tax and any financing fee.
 """
 
 import yfinance as yf
 import pandas as pd
+import numpy as np
 from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from math import ceil
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -89,15 +95,21 @@ MIN_ANNUAL_YIELD     = 0.03      # 3% floor
 MIN_AVG_VOLUME       = 100_000   # lowered so CEFs/preferreds appear; thin ones get flagged
 MIN_STOCK_PRICE      = 5.0       # dollars
 MAX_STOCK_PRICE      = 500.0     # dollars
-EX_DATE_WINDOW_DAYS  = 14        # how far ahead to look
+EX_DATE_WINDOW_DAYS  = 30        # how far ahead to look (wide enough to plan rotations)
 
 # ─── Economics / tax config ───
-TAX_RATE        = 0.35   # Short-term / ordinary-income rate. Dividend-capture
+TAX_RATE        = 0.40   # Short-term / ordinary-income rate. Dividend-capture
                          # trades are too short to qualify for the lower 15-20%
                          # long-term capital-gains rate. Adjust to your bracket.
 ROUND_LOT       = 100    # shares - round lots are far easier to sell than odd lots
 BUY_BUFFER_DAYS = 2      # days capital is tied up before the ex-date (rotation calc)
 TRADING_DAYS    = 252    # trading days per year
+
+# ─── Rotation-plan config ───
+CAPITAL         = 50_000  # dollars available to rotate from trade to trade
+FINANCE_FEE     = 0.00    # cut taken by a trade-financing company, if any
+                          # (e.g. 0.10 = they keep 10% of the gross dividend)
+SETTLEMENT_DAYS = 1       # trading days for sale proceeds to settle (T+1)
 
 # ─── Liquidity rating thresholds (avg shares/day) ───
 THIN_VOLUME = 500_000
@@ -356,10 +368,16 @@ def fetch_candidate(ticker: str, today: datetime):
             "Liquidity":     liq,
             "Beta":          round(beta, 2) if beta is not None else "N/A",
             "Ann.Eff%":      round(ann_eff, 1) if ann_eff is not None else "N/A",
-            # private fields for scoring
+            # private fields for scoring and the rotation plan
             "_ann_eff":      ann_eff,
             "_trend":        trend,
             "_liq":          liq,
+            "_ex_date":      ex_date.date(),
+            "_price":        price,
+            "_div":          div_per_capture,
+            "_best_entry":   best_entry,
+            "_avg_reb":      avg_reb,
+            "_worst":        worst_display,
         }
         return row, None
     except Exception as e:
@@ -384,45 +402,131 @@ def score(row: dict) -> float:
     return ann * factor
 
 
-def save_excel(shown: pd.DataFrame, out_file: str):
-    """Formatted Excel copy of the results: bold frozen header, sized columns."""
+def build_rotation_plan(df: pd.DataFrame, today: datetime) -> pd.DataFrame:
+    """
+    Builds a chronological trade calendar that rolls one pot of CAPITAL from
+    dividend to dividend, the way the strategy is actually traded:
+
+      buy on the stock's Best Entry day -> hold through the ex-date ->
+      sell once the price is back to even (its average rebound) ->
+      one settlement day -> straight into the next candidate.
+
+    Greedy choice: whenever the capital is free, look at the candidates that
+    can be bought within the next 5 trading days and take the one with the
+    best Score, so the money never sits idle waiting for a distant trade.
+
+    Dollar figures use whole 100-share lots bought with CAPITAL, minus any
+    FINANCE_FEE on the gross dividend, then TAX_RATE on what remains.
+    """
+    entries = []
+    for _, row in df.iterrows():
+        if row["_avg_reb"] is None or row["Score"] <= 0:
+            continue  # no reliable rebound history - can't schedule it honestly
+        lots = int(CAPITAL // (row["_price"] * ROUND_LOT))
+        if lots < 1:
+            continue  # 100 shares cost more than the available capital
+        shares = lots * ROUND_LOT
+        ex = np.datetime64(row["_ex_date"], "D")
+        entry_days = row["_best_entry"] if row["_best_entry"] is not None else BUY_BUFFER_DAYS
+        buy = np.busday_offset(ex, -entry_days, roll="backward")
+        today64 = np.datetime64(today.date(), "D")
+        if buy < today64:
+            buy = np.busday_offset(today64, 0, roll="forward")  # can still buy: ex-date is ahead
+        sell = np.busday_offset(ex, ceil(row["_avg_reb"]), roll="forward")
+        free = np.busday_offset(sell, SETTLEMENT_DAYS, roll="forward")
+        gross = shares * row["_div"]
+        net = gross * (1 - FINANCE_FEE) * (1 - TAX_RATE)
+        entries.append({
+            "ticker": row["Ticker"], "buy": buy, "ex": ex, "sell": sell,
+            "free": free, "shares": shares, "cost": shares * row["_price"],
+            "gross": gross, "net": net, "score": row["Score"],
+            "worst": row["_worst"],
+        })
+
+    plan, running = [], 0.0
+    free_date = np.datetime64(today.date(), "D")
+    while True:
+        # A candidate is still buyable as long as the capital frees up at
+        # least one trading day before its ex-date. If its ideal Best Entry
+        # day has already passed, buy as soon as the cash is free instead.
+        feasible = []
+        for e in entries:
+            last_buy = np.busday_offset(e["ex"], -1, roll="backward")
+            if last_buy < free_date:
+                continue
+            actual_buy = max(e["buy"], free_date)
+            feasible.append((actual_buy, e))
+        if not feasible:
+            break
+        earliest = min(ab for ab, _ in feasible)
+        window_end = np.busday_offset(earliest, 5, roll="forward")
+        pool = [(ab, e) for ab, e in feasible if ab <= window_end]
+        actual_buy, pick = max(pool, key=lambda p: p[1]["score"])
+        running += pick["net"]
+        plan.append({
+            "Buy":        str(actual_buy),
+            "Ticker":     pick["ticker"],
+            "Ex-Date":    str(pick["ex"]),
+            "Est. Sell":  str(pick["sell"]),
+            "Cash Free":  str(pick["free"]),
+            "Worst Reb":  pick["worst"] if pick["worst"] is not None else "N/A",
+            "Shares":     pick["shares"],
+            "Cost $":     int(round(pick["cost"])),
+            "Gross Div $": round(pick["gross"], 2),
+            "Net $":      round(pick["net"], 2),
+            "Running Net $": round(running, 2),
+        })
+        free_date = pick["free"]
+        entries = [e for e in entries if e["ticker"] != pick["ticker"]]
+
+    plan_df = pd.DataFrame(plan)
+    if not plan_df.empty:
+        plan_df.index += 1
+    return plan_df
+
+
+def save_excel(shown: pd.DataFrame, plan_df: pd.DataFrame, out_file: str):
+    """Formatted Excel copy of the results: bold frozen header, sized columns,
+    centred data (long names stay left-aligned). Two sheets: the ranked
+    candidates and the rotation plan."""
     from openpyxl.styles import Font, PatternFill, Alignment
     from openpyxl.utils import get_column_letter
 
-    with pd.ExcelWriter(out_file, engine="openpyxl") as writer:
-        shown.to_excel(writer, sheet_name="Candidates", index=True, index_label="#")
-        ws = writer.sheets["Candidates"]
-
+    def style_sheet(ws, left_aligned=("Name",)):
         header_font = Font(bold=True, color="FFFFFF")
         header_fill = PatternFill(start_color="1F4E79", end_color="1F4E79", fill_type="solid")
+        skip_cols = set()
         for cell in ws[1]:
             cell.font = header_font
             cell.fill = header_fill
             cell.alignment = Alignment(horizontal="center")
+            if cell.value in left_aligned:
+                skip_cols.add(cell.column)
         ws.freeze_panes = "A2"
-
-        # Centre all data cells except the Name column (long text reads better left-aligned)
-        name_col = None
-        for cell in ws[1]:
-            if cell.value == "Name":
-                name_col = cell.column
-                break
         centre = Alignment(horizontal="center")
         for row in ws.iter_rows(min_row=2):
             for cell in row:
-                if cell.column != name_col:
+                if cell.column not in skip_cols:
                     cell.alignment = centre
-
         for col_idx, col_cells in enumerate(ws.columns, start=1):
             width = max(len(str(c.value)) if c.value is not None else 0 for c in col_cells)
             ws.column_dimensions[get_column_letter(col_idx)].width = min(width + 3, 35)
 
+    with pd.ExcelWriter(out_file, engine="openpyxl") as writer:
+        shown.to_excel(writer, sheet_name="Candidates", index=True, index_label="#")
+        style_sheet(writer.sheets["Candidates"])
+        if plan_df is not None and not plan_df.empty:
+            plan_df.to_excel(writer, sheet_name="Rotation Plan", index=True, index_label="#")
+            style_sheet(writer.sheets["Rotation Plan"])
+
 
 def run_scanner():
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    print(f"\nDividend Capture Scanner v5 - {today.strftime('%Y-%m-%d')}")
+    print(f"\nDividend Capture Scanner v6 - {today.strftime('%Y-%m-%d')}")
     print(f"Looking for ex-dates within the next {EX_DATE_WINDOW_DAYS} days")
-    print(f"Tax rate assumed: {TAX_RATE:.0%} (short-term / ordinary income)\n")
+    print(f"Tax rate assumed: {TAX_RATE:.0%} (short-term / ordinary income)")
+    fee_note = f", financing fee {FINANCE_FEE:.0%}" if FINANCE_FEE > 0 else ""
+    print(f"Rotation capital: ${CAPITAL:,}{fee_note}\n")
 
     print("Fetching universe (S&P 500 + high-yield names + CEFs + preferreds)...")
     tickers = get_universe()
@@ -494,14 +598,31 @@ def run_scanner():
     print(f"                  failed recoveries are charged at the full {REBOUND_MAX_DAYS}-day wait")
     print(f"  Score         = Ann.Eff% adjusted down for downtrend and thin liquidity")
 
+    plan_df = build_rotation_plan(df, today)
+    if not plan_df.empty:
+        total_net = plan_df["Net $"].iloc[-1] if "Running Net $" not in plan_df else plan_df["Running Net $"].iloc[-1]
+        print(f"\n{'='*130}")
+        print(f"  ROTATION PLAN  (${CAPITAL:,} rolled from trade to trade, "
+              f"{TAX_RATE:.0%} tax{', ' + format(FINANCE_FEE, '.0%') + ' financing fee' if FINANCE_FEE > 0 else ''})")
+        print(f"{'='*130}")
+        print(plan_df.to_string())
+        print(f"\n  {len(plan_df)} trades planned over the next {EX_DATE_WINDOW_DAYS} days. "
+              f"Estimated total net: ${total_net:,.2f} "
+              f"({total_net / CAPITAL:.2%} of the capital).")
+        print(f"  Buy = the stock's own back-tested Best Entry day. Est. Sell = ex-date plus its")
+        print(f"  average rebound. Cash Free = one settlement day after the sale (T+{SETTLEMENT_DAYS}).")
+        print(f"  Worst Reb shows the honest risk: the longest that stock has ever taken to recover.")
+    else:
+        print("\nNo rotation plan could be built (no candidates with reliable rebound history).")
+
     out_file = f"candidates_{today.strftime('%Y%m%d')}.csv"
     shown.to_csv(out_file, index=True)
     print(f"\nSaved to {out_file}")
 
     out_xlsx = f"candidates_{today.strftime('%Y%m%d')}.xlsx"
     try:
-        save_excel(shown, out_xlsx)
-        print(f"Saved to {out_xlsx} (formatted for Excel)")
+        save_excel(shown, plan_df, out_xlsx)
+        print(f"Saved to {out_xlsx} (formatted for Excel, includes the Rotation Plan sheet)")
     except PermissionError:
         print(f"Could not save {out_xlsx} - close the file if it is open in Excel and rerun.")
     except ImportError:

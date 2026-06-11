@@ -655,12 +655,12 @@
   <a href="index.html" class="active">Home</a>
   <a href="docs.html">Documentation</a>
   <a href="changelog.html">Changelog</a>
-  <a href="dividend_scanner_v5.py" download>Download Scanner</a>
+  <a href="dividend_scanner_v6.py" download>Download Scanner</a>
 </div>
 
 <header>
   <div class="eyebrow">Strategy Overview</div>
-  <h1>Dividend Capture Scanner <span style="font-size:0.95rem;font-weight:700;color:#4a90d9;vertical-align:middle;background:#1e3a5f33;border:1px solid #1d4ed855;border-radius:20px;padding:2px 12px;letter-spacing:0.04em;">v5</span></h1>
+  <h1>Dividend Capture Scanner <span style="font-size:0.95rem;font-weight:700;color:#4a90d9;vertical-align:middle;background:#1e3a5f33;border:1px solid #1d4ed855;border-radius:20px;padding:2px 12px;letter-spacing:0.04em;">v6</span></h1>
   <div style="font-size:0.82rem;color:#d4a017;margin-top:6px;margin-bottom:2px;letter-spacing:0.06em;font-weight:500;">Developed by Andrew D.</div>
   <p>A systematic approach to collecting <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span> income by timing stock purchases around <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend dates</span>.</p>
 </header>
@@ -772,10 +772,10 @@
     </button>
     <div class="panel-body">
 
-      <a href="dividend_scanner_v5.py" download class="download-btn">
-        <span>&#8595;</span> Download dividend_scanner_v5.py
+      <a href="dividend_scanner_v6.py" download class="download-btn">
+        <span>&#8595;</span> Download dividend_scanner_v6.py
       </a>
-      <div style="font-size:0.76rem;color:#64748b;margin-bottom:8px;">Latest version. New in v5: a back-tested best entry day for each stock, and a drop ratio showing how much of the dividend the price really gives up on the ex-date.</div>
+      <div style="font-size:0.76rem;color:#64748b;margin-bottom:8px;">Latest version. New in v6: a Rotation Plan that rolls a set amount of capital from one dividend to the next, a 30-day lookahead, and a financing fee setting.</div>
 
       <div class="run-steps">
 
@@ -802,7 +802,7 @@
           <div class="run-content">
             <div class="run-title">Run the scanner</div>
             <div class="run-desc">Scans roughly 576 stocks (the S&amp;P 500 plus high-yield names, CEFs, and preferreds). Takes about 1 to 2 minutes to complete.</div>
-            <div class="code-block">python dividend_scanner_v5.py</div>
+            <div class="code-block">python dividend_scanner_v6.py</div>
           </div>
         </div>
 
@@ -836,7 +836,7 @@ candidates_YYYYMMDD.xlsx</div>
       </div>
 
       <div class="run-note">
-        <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner_v5.py</code> and can be adjusted at any time.
+        <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner_v6.py</code> and can be adjusted at any time.
       </div>
     </div>
   </div>
@@ -904,7 +904,7 @@ candidates_YYYYMMDD.xlsx</div>
           <div class="filter-grid">
             <div class="filter-item">
               <div class="filter-label">Ex-dividend date</div>
-              <div class="filter-value">Within the next 14 days</div>
+              <div class="filter-value">Within the next 30 days</div>
             </div>
             <div class="filter-item">
               <div class="filter-label"><span class="tip" data-tip="The yearly dividend as a percentage of the stock price. A $100 stock paying $5 a year has a 5% yield.">Dividend yield</span></div>
@@ -993,23 +993,24 @@ candidates_YYYYMMDD.xlsx</div>
               <div class="sw-sub">Ready to review</div>
             </div>
           </div>
-          <div class="sw-body">The top candidates are displayed in a ranked table and saved to a file so you can review and compare them each day. Each row shows the yield, the average and worst-case rebound, the best entry timing, the real ex-date drop, the trend, the after-tax dividend per 100-share lot, and the overall score.</div>
+          <div class="sw-body">The top candidates are displayed in a ranked table and saved to a file so you can review and compare them each day. Each row shows the yield, the average and worst-case rebound, the best entry timing, the real ex-date drop, the trend, the after-tax dividend per 100-share lot, and the overall score. The scanner also builds a Rotation Plan: a trade calendar that rolls one pot of capital (default $50,000, adjustable) from one dividend into the next. It buys on each stock's best entry day, sells at its average rebound, and shows the estimated net dollars per trade after tax and any financing fee, with a running total. The plan prints below the shortlist and is saved as a second sheet in the Excel file.</div>
           <div class="output-preview">
             <table>
               <thead>
                 <tr><th>#</th><th>Ticker</th><th>Price</th><th>Annual Yield</th><th>Avg Reb</th><th>Worst Reb</th><th>Recovered</th><th>Best Entry</th><th>Drop Ratio</th><th>Trend</th><th>AfterTax/100</th><th>Score</th></tr>
               </thead>
               <tbody>
-                <tr><td>1</td><td><strong>HBAN</strong></td><td>$16.84</td><td class="yield-mid">3.68%</td><td>3.4</td><td>17</td><td>100%</td><td>3d</td><td>0.94</td><td>Mixed</td><td>$10.08</td><td>23.8</td></tr>
-                <tr><td>2</td><td><strong>DOC</strong></td><td>$20.47</td><td class="yield-high">5.96%</td><td>1.5</td><td>10</td><td>100%</td><td>10d</td><td>0.86</td><td>Up</td><td>$6.61</td><td>23.2</td></tr>
-                <tr><td>3</td><td><strong>GAIN</strong></td><td>$15.38</td><td class="yield-high">6.24%</td><td>1.9</td><td>6</td><td>100%</td><td>20d</td><td>1.20</td><td>Up</td><td>$5.20</td><td>18.7</td></tr>
-                <tr><td>4</td><td><strong>FSK</strong></td><td>$11.00</td><td class="yield-high">20.91%</td><td>10.0</td><td>&gt;60</td><td>62%</td><td>2d</td><td>0.98</td><td>Down</td><td>$37.38</td><td>16.7</td></tr>
+                <tr><td>1</td><td><strong>KRG</strong></td><td>$28.84</td><td class="yield-mid">4.02%</td><td>4.9</td><td>18</td><td>100%</td><td>1d</td><td>1.49</td><td>Up</td><td>$17.40</td><td>22.1</td></tr>
+                <tr><td>2</td><td><strong>HBAN</strong></td><td>$16.84</td><td class="yield-mid">3.68%</td><td>3.4</td><td>17</td><td>100%</td><td>3d</td><td>0.94</td><td>Mixed</td><td>$9.30</td><td>22.0</td></tr>
+                <tr><td>3</td><td><strong>DOC</strong></td><td>$20.47</td><td class="yield-high">5.96%</td><td>1.5</td><td>10</td><td>100%</td><td>10d</td><td>0.86</td><td>Up</td><td>$6.10</td><td>21.5</td></tr>
+                <tr><td>4</td><td><strong>O</strong></td><td>$62.11</td><td class="yield-high">5.23%</td><td>1.1</td><td>8</td><td>100%</td><td>15d</td><td>0.69</td><td>Up</td><td>$16.25</td><td>21.1</td></tr>
               </tbody>
             </table>
           </div>
           <div class="sw-tags" style="margin-top:12px;">
             <span class="sw-tag">Printed in terminal</span>
             <span class="sw-tag">Saved as a file</span>
+            <span class="sw-tag">Rotation Plan sheet</span>
             <span class="sw-tag">Run each morning</span>
           </div>
         </div>
@@ -1044,7 +1045,7 @@ candidates_YYYYMMDD.xlsx</div>
           </div>
           <div class="sw-note">
             <div class="sw-note-title">A note on taxes</div>
-            Because these trades are held only days, the profit is a short-term gain taxed at your ordinary income rate, not the lower long-term capital-gains rate. The scanner shows after-tax figures using a default rate of 35%, which can be changed at the top of the script to match your bracket.
+            Because these trades are held only days, the profit is a short-term gain taxed at your ordinary income rate, not the lower long-term capital-gains rate. The scanner shows after-tax figures using a default rate of 40%, which can be changed at the top of the script to match your bracket.
           </div>
         </div>
 
