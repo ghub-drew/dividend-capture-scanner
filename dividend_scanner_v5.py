@@ -380,6 +380,28 @@ def score(row: dict) -> float:
     return ann * factor
 
 
+def save_excel(shown: pd.DataFrame, out_file: str):
+    """Formatted Excel copy of the results: bold frozen header, sized columns."""
+    from openpyxl.styles import Font, PatternFill, Alignment
+    from openpyxl.utils import get_column_letter
+
+    with pd.ExcelWriter(out_file, engine="openpyxl") as writer:
+        shown.to_excel(writer, sheet_name="Candidates", index=True, index_label="#")
+        ws = writer.sheets["Candidates"]
+
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="1F4E79", end_color="1F4E79", fill_type="solid")
+        for cell in ws[1]:
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center")
+        ws.freeze_panes = "A2"
+
+        for col_idx, col_cells in enumerate(ws.columns, start=1):
+            width = max(len(str(c.value)) if c.value is not None else 0 for c in col_cells)
+            ws.column_dimensions[get_column_letter(col_idx)].width = min(width + 3, 35)
+
+
 def run_scanner():
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     print(f"\nDividend Capture Scanner v5 - {today.strftime('%Y-%m-%d')}")
@@ -459,6 +481,15 @@ def run_scanner():
     out_file = f"candidates_{today.strftime('%Y%m%d')}.csv"
     shown.to_csv(out_file, index=True)
     print(f"\nSaved to {out_file}")
+
+    out_xlsx = f"candidates_{today.strftime('%Y%m%d')}.xlsx"
+    try:
+        save_excel(shown, out_xlsx)
+        print(f"Saved to {out_xlsx} (formatted for Excel)")
+    except PermissionError:
+        print(f"Could not save {out_xlsx} - close the file if it is open in Excel and rerun.")
+    except ImportError:
+        print(f"Skipped {out_xlsx} - install openpyxl first:  pip install openpyxl")
 
 
 if __name__ == "__main__":

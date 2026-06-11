@@ -7,6 +7,7 @@ __pycache__/
 
 # Scanner output files
 candidates_*.csv
+candidates_*.xlsx
 stock_candidates_*.xlsx
 logs/
 
