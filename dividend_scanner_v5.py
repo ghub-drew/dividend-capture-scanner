@@ -330,7 +330,11 @@ def fetch_candidate(ticker: str, today: datetime):
             ann_eff = None
 
         beta = info.get("beta")
-        name = info.get("shortName", ticker)
+        # Yahoo occasionally returns junk for a name (e.g. a bare number);
+        # fall back to the long name, then the ticker itself.
+        name = info.get("shortName") or info.get("longName") or ticker
+        if str(name).replace(".", "").replace(",", "").isdigit():
+            name = info.get("longName") or ticker
 
         row = {
             "Ticker":        ticker,
