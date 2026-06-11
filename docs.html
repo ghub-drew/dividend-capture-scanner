@@ -242,6 +242,14 @@
 python dividend_scanner_v5.py</div>
     <p>It scans roughly 576 stocks in parallel and runs a rebound analysis on every stock that passes the filters, finishing in about 1 to 2 minutes. When it finishes, the ranked list prints in the window and is also saved as a dated spreadsheet file in the same folder.</p>
     <div class="note"><strong>Tip:</strong> Close any open <code>candidates_*.csv</code> file before running, otherwise the scanner cannot save the new one.</div>
+    <h3>Automatic morning run</h3>
+    <p>Instead of remembering to run the scanner each day, Windows can start it for you every morning. The helper script <a href="run_daily.ps1" download>run_daily.ps1</a> runs the scanner and saves each day's output to a dated log file in a <code>logs</code> folder, alongside the usual CSV.</p>
+    <p>Save <code>run_daily.ps1</code> in the same folder as the scanner, then register the daily task once (this example uses 8:00 AM):</p>
+    <div class="code-block">schtasks /create /tn "DividendScannerDaily" /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\Users\YourName\Documents\stock scanner\run_daily.ps1\"" /sc daily /st 08:00</div>
+    <p>The kill switch: pause or resume the morning run at any time with one command. No need to delete anything.</p>
+    <div class="code-block">schtasks /change /tn "DividendScannerDaily" /disable
+schtasks /change /tn "DividendScannerDaily" /enable</div>
+    <div class="note"><strong>Note:</strong> The path in the first command is an example. Replace it with the folder where you saved the scanner. The computer needs to be on at the scheduled time for the run to happen.</div>
   </section>
 
   <section id="universe">
