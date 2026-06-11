@@ -246,6 +246,8 @@ python dividend_scanner_v5.py</div>
     <p>Instead of remembering to run the scanner each day, Windows can start it for you every morning. The helper script <a href="run_daily.ps1" download>run_daily.ps1</a> runs the scanner and saves each day's output to a dated log file in a <code>logs</code> folder, alongside the usual CSV.</p>
     <p>Save <code>run_daily.ps1</code> in the same folder as the scanner, then register the daily task once (this example uses 8:00 AM):</p>
     <div class="code-block">schtasks /create /tn "DividendScannerDaily" /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\Users\YourName\Documents\stock scanner\run_daily.ps1\"" /sc daily /st 08:00</div>
+    <p>To check that the task is set up and see when it will run next:</p>
+    <div class="code-block">schtasks /query /tn "DividendScannerDaily"</div>
     <p>The kill switch: pause or resume the morning run at any time with one command. No need to delete anything.</p>
     <div class="code-block">schtasks /change /tn "DividendScannerDaily" /disable
 schtasks /change /tn "DividendScannerDaily" /enable</div>
