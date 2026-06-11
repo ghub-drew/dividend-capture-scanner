@@ -485,6 +485,101 @@ def build_rotation_plan(df: pd.DataFrame, today: datetime) -> pd.DataFrame:
     return plan_df
 
 
+def save_calendar_html(plan_df: pd.DataFrame, today: datetime, out_file: str = "rotation_calendar.html"):
+    """
+    Visual month-grid calendar of the rotation plan, saved as a local HTML
+    file that opens in any browser. Each trade gets its own colour; buy,
+    ex-date, sell, and cash-free days are labelled, and the days in between
+    are tinted so it is obvious when the capital is occupied.
+    """
+    import calendar as cal
+    from datetime import date as ddate, timedelta
+
+    def parse(s):
+        y, m, d = map(int, str(s).split("-"))
+        return ddate(y, m, d)
+
+    palette = ["#60a5fa", "#4ade80", "#fbbf24", "#a78bfa", "#fb7185"]
+    chips, tints = {}, {}
+    for i, row in plan_df.iterrows():
+        color = palette[(int(i) - 1) % len(palette)]
+        buy, ex = parse(row["Buy"]), parse(row["Ex-Date"])
+        sell, free = parse(row["Est. Sell"]), parse(row["Cash Free"])
+        t = row["Ticker"]
+        chips.setdefault(buy, []).append((f"BUY {t}", color))
+        chips.setdefault(ex, []).append((f"EX-DATE {t}", color))
+        chips.setdefault(sell, []).append((f"SELL {t}", color))
+        chips.setdefault(free, []).append(("CASH FREE", color))
+        cur = buy
+        while cur <= sell:
+            if cur.weekday() < 5:
+                tints.setdefault(cur, color)
+            cur += timedelta(days=1)
+
+    all_days = list(chips.keys())
+    start, end = min(all_days), max(all_days)
+    months = []
+    y, m = start.year, start.month
+    while (y, m) <= (end.year, end.month):
+        months.append((y, m))
+        m += 1
+        if m == 13:
+            y, m = y + 1, 1
+
+    total = plan_df["Running Net $"].iloc[-1]
+    parts = [f"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>Rotation Plan Calendar</title><style>
+body{{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f0;padding:30px 16px;}}
+.wrap{{max-width:900px;margin:0 auto;}}
+h1{{font-size:1.5rem;color:#f8fafc;}}
+.sub{{color:#64748b;font-size:0.9rem;margin:6px 0 20px;}}
+.legend{{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px;font-size:0.8rem;color:#94a3b8;}}
+.dot{{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle;}}
+table{{width:100%;border-collapse:collapse;margin-bottom:30px;table-layout:fixed;}}
+caption{{text-align:left;font-size:1.05rem;font-weight:700;color:#f1f5f9;padding:8px 0;}}
+th{{color:#64748b;font-size:0.7rem;text-transform:uppercase;padding:6px;border-bottom:1px solid #252d3d;}}
+td{{border:1px solid #1c2333;vertical-align:top;height:64px;padding:4px;font-size:0.78rem;color:#64748b;}}
+td .n{{font-weight:600;color:#94a3b8;}}
+.chip{{display:block;margin-top:3px;padding:1px 5px;border-radius:4px;font-size:0.66rem;font-weight:700;color:#0f1117;}}
+.we{{background:#12151e;}}
+</style></head><body><div class="wrap">
+<h1>Rotation Plan Calendar</h1>
+<div class="sub">Generated {today.strftime('%Y-%m-%d')} &middot; ${CAPITAL:,} rolled from trade to trade &middot; {TAX_RATE:.0%} tax &middot; estimated total net ${total:,.2f}</div>
+<div class="legend">"""]
+    for i, row in plan_df.iterrows():
+        color = palette[(int(i) - 1) % len(palette)]
+        parts.append(f'<span><span class="dot" style="background:{color};"></span>{row["Ticker"]} (net ${row["Net $"]:,.2f})</span>')
+    parts.append('</div>')
+
+    for (yy, mm) in months:
+        parts.append(f'<table><caption>{cal.month_name[mm]} {yy}</caption><tr>'
+                     + ''.join(f'<th>{w}</th>' for w in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]) + '</tr>')
+        for week in cal.Calendar().monthdatescalendar(yy, mm):
+            parts.append('<tr>')
+            for day in week:
+                if day.month != mm:
+                    parts.append('<td class="we"></td>')
+                    continue
+                style = ""
+                if day in tints:
+                    style = f' style="background:{tints[day]}22;"'
+                cls = ' class="we"' if day.weekday() >= 5 else ''
+                cell = f'<td{cls}{style}><span class="n">{day.day}</span>'
+                for label, color in chips.get(day, []):
+                    cell += f'<span class="chip" style="background:{color};">{label}</span>'
+                cell += '</td>'
+                parts.append(cell)
+            parts.append('</tr>')
+        parts.append('</table>')
+
+    parts.append('<div class="sub">Tinted days = the capital is occupied by that trade. '
+                 'Sell days are estimates based on each stock\'s average rebound time.</div>')
+    parts.append('</div></body></html>')
+
+    with open(out_file, "w", encoding="utf-8") as f:
+        f.write(''.join(parts))
+
+
 def save_excel(shown: pd.DataFrame, plan_df: pd.DataFrame, out_file: str):
     """Formatted Excel copy of the results: bold frozen header, sized columns,
     centred data (long names stay left-aligned). Two sheets: the ranked
@@ -612,6 +707,11 @@ def run_scanner():
         print(f"  Buy = the stock's own back-tested Best Entry day. Est. Sell = ex-date plus its")
         print(f"  average rebound. Cash Free = one settlement day after the sale (T+{SETTLEMENT_DAYS}).")
         print(f"  Worst Reb shows the honest risk: the longest that stock has ever taken to recover.")
+        try:
+            save_calendar_html(plan_df, today)
+            print(f"\nSaved to rotation_calendar.html (visual calendar - open it in any browser)")
+        except PermissionError:
+            print(f"\nCould not save rotation_calendar.html - close it in the browser/editor and rerun.")
     else:
         print("\nNo rotation plan could be built (no candidates with reliable rebound history).")
 

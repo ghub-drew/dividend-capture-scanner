@@ -9,6 +9,7 @@ __pycache__/
 candidates_*.csv
 candidates_*.xlsx
 stock_candidates_*.xlsx
+rotation_calendar.html
 logs/
 
 # Editor / tooling

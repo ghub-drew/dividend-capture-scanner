@@ -355,6 +355,8 @@ schtasks /change /tn "DividendScannerDaily" /enable</div>
       <tr><td>Running Net $</td><td>The total profit building up across the sequence of trades.</td></tr>
     </table>
     <p>When the capital is free, the plan looks at the candidates that can be bought within the next 5 trading days and takes the one with the best score, so the money never sits idle waiting for a distant trade.</p>
+    <h3>The visual calendar</h3>
+    <p>Each run also saves <code>rotation_calendar.html</code> in the same folder. Open it in any browser to see the plan as a month-grid calendar: each trade has its own colour, the buy, ex-date, sell, and cash-free days are labelled, and the days in between are tinted so you can see exactly when the money is occupied and when it is free for the next trade. Like the CSV and Excel files, it stays on your computer and is never uploaded.</p>
   </section>
 
   <section id="config">
