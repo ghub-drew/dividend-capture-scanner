@@ -397,6 +397,18 @@ def save_excel(shown: pd.DataFrame, out_file: str):
             cell.alignment = Alignment(horizontal="center")
         ws.freeze_panes = "A2"
 
+        # Centre all data cells except the Name column (long text reads better left-aligned)
+        name_col = None
+        for cell in ws[1]:
+            if cell.value == "Name":
+                name_col = cell.column
+                break
+        centre = Alignment(horizontal="center")
+        for row in ws.iter_rows(min_row=2):
+            for cell in row:
+                if cell.column != name_col:
+                    cell.alignment = centre
+
         for col_idx, col_cells in enumerate(ws.columns, start=1):
             width = max(len(str(c.value)) if c.value is not None else 0 for c in col_cells)
             ws.column_dimensions[get_column_letter(col_idx)].width = min(width + 3, 35)
