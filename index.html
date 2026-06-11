@@ -68,7 +68,7 @@
     line-height: 1.6;
   }
 
-  /* â”€â”€ Accordion â”€â”€ */
+  /* ── Accordion ── */
   .accordion {
     max-width: 780px;
     margin: 0 auto;
@@ -140,9 +140,9 @@
     border-top: 1px solid #252d3d;
   }
 
-  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  /* ────────────────────────────────
      SECTION 1 - General Workflow
-  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  ──────────────────────────────── */
   .strategy-steps {
     display: flex;
     flex-direction: column;
@@ -211,7 +211,7 @@
   }
 
   .bullets li::before {
-    content: 'â€º';
+    content: '›';
     position: absolute;
     left: 0;
     color: var(--accent);
@@ -262,9 +262,9 @@
   .g4 { --accent:#4ade80; --accent-bg:#14392222; --accent-border:#15803d44; }
   .g5 { --accent:#fb7185; --accent-bg:#3d0a1822; --accent-border:#be123c44; }
 
-  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  /* ────────────────────────────────
      SECTION 2 - How to Run
-  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  ──────────────────────────────── */
   .run-steps {
     display: flex;
     flex-direction: column;
@@ -338,9 +338,9 @@
     font-size: 0.79rem;
   }
 
-  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  /* ────────────────────────────────
      SECTION 3 - Scanner Workflow
-  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  ──────────────────────────────── */
   .scanner-workflow {
     display: flex;
     flex-direction: column;
@@ -654,6 +654,7 @@
 <div class="topnav">
   <a href="index.html" class="active">Home</a>
   <a href="docs.html">Documentation</a>
+  <a href="changelog.html">Changelog</a>
   <a href="dividend_scanner_v5.py" download>Download Scanner</a>
 </div>
 
@@ -666,9 +667,9 @@
 
 <div class="accordion">
 
-  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  <!-- ══════════════════════════════════
        PANEL 1 - Strategy Overview
-  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+  ══════════════════════════════════ -->
   <div class="panel">
     <button class="panel-toggle" onclick="togglePanel(this)">
       <div class="panel-num">1</div>
@@ -676,13 +677,13 @@
         <div class="panel-label">Strategy Overview</div>
         <div class="panel-sub">How dividend capture works - the 5-step process</div>
       </div>
-      <span class="panel-chevron">â–¼</span>
+      <span class="panel-chevron">▼</span>
     </button>
     <div class="panel-body">
       <div class="strategy-steps">
 
         <div class="sstep g1">
-          <div class="sstep-icon">ðŸ”</div>
+          <div class="sstep-icon">🔍</div>
           <div class="sstep-content">
             <div class="sstep-label">Step 1</div>
             <div class="sstep-title">Find a Good Stock</div>
@@ -695,14 +696,14 @@
               <li><strong>Plenty of liquidity:</strong> lots of <span class="tip" data-tip="How many shares of a stock are bought and sold in a single day. High volume means it is easy to buy and sell quickly.">daily trading volume</span> makes it easy to get in and out. Thinly-traded names are flagged</li>
               <li><strong>Solid quality:</strong> a stock you would be comfortable holding for a while in case the price takes time to bounce back</li>
             </ul>
-            <div class="key-callout"><span>â˜…</span> Rebound time is the most important factor. The stock that climbs back to the price you paid the fastest is ranked the highest.</div>
+            <div class="key-callout"><span>★</span> Rebound time is the most important factor. The stock that climbs back to the price you paid the fastest is ranked the highest.</div>
           </div>
         </div>
 
         <div class="sarrow" style="--next-accent:#a78bfa;"><div class="sarrow-line"></div></div>
 
         <div class="sstep g2">
-          <div class="sstep-icon">ðŸ›’</div>
+          <div class="sstep-icon">🛒</div>
           <div class="sstep-content">
             <div class="sstep-label">Step 2</div>
             <div class="sstep-title">Buy Before the <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">Ex-Dividend Date</span></div>
@@ -715,7 +716,7 @@
         <div class="sarrow" style="--next-accent:#f59e0b;"><div class="sarrow-line"></div></div>
 
         <div class="sstep g3">
-          <div class="sstep-icon">ðŸ“…</div>
+          <div class="sstep-icon">📅</div>
           <div class="sstep-content">
             <div class="sstep-label">Step 3</div>
             <div class="sstep-title"><span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">Ex-Dividend Date</span> Passes</div>
@@ -729,7 +730,7 @@
         <div class="sarrow" style="--next-accent:#4ade80;"><div class="sarrow-line"></div></div>
 
         <div class="sstep g4">
-          <div class="sstep-icon">ðŸ’°</div>
+          <div class="sstep-icon">💰</div>
           <div class="sstep-content">
             <div class="sstep-label">Step 4</div>
             <div class="sstep-title">Sell the Stock</div>
@@ -743,7 +744,7 @@
         <div class="sarrow" style="--next-accent:#fb7185;"><div class="sarrow-line"></div></div>
 
         <div class="sstep g5">
-          <div class="sstep-icon">ðŸ“Š</div>
+          <div class="sstep-icon">📊</div>
           <div class="sstep-content">
             <div class="sstep-label">Step 5</div>
             <div class="sstep-title">Track the Result</div>
@@ -757,9 +758,9 @@
     </div>
   </div>
 
-  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  <!-- ══════════════════════════════════
        PANEL 2 - How to Run the Scanner
-  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+  ══════════════════════════════════ -->
   <div class="panel">
     <button class="panel-toggle" onclick="togglePanel(this)">
       <div class="panel-num" style="background:#0e7490;">2</div>
@@ -767,7 +768,7 @@
         <div class="panel-label">How to Run the Scanner</div>
         <div class="panel-sub">Step-by-step instructions to run the script each morning</div>
       </div>
-      <span class="panel-chevron">â–¼</span>
+      <span class="panel-chevron">▼</span>
     </button>
     <div class="panel-body">
 
@@ -800,7 +801,7 @@
           <div class="run-num">3</div>
           <div class="run-content">
             <div class="run-title">Run the scanner</div>
-            <div class="run-desc">Scans all 503 S&amp;P 500 stocks. Takes 3â€“5 minutes to complete.</div>
+            <div class="run-desc">Scans all 503 S&amp;P 500 stocks. Takes 3–5 minutes to complete.</div>
             <div class="code-block">python dividend_scanner_v5.py</div>
           </div>
         </div>
@@ -822,9 +823,9 @@
     </div>
   </div>
 
-  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  <!-- ══════════════════════════════════
        PANEL 3 - Scanner Workflow
-  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+  ══════════════════════════════════ -->
   <div class="panel">
     <button class="panel-toggle" onclick="togglePanel(this)">
       <div class="panel-num" style="background:#7c3aed;">3</div>
@@ -832,7 +833,7 @@
         <div class="panel-label">Scanner Workflow</div>
         <div class="panel-sub">How the script works under the hood - from data pull to ranked output</div>
       </div>
-      <span class="panel-chevron">â–¼</span>
+      <span class="panel-chevron">▼</span>
     </button>
     <div class="panel-body">
       <div class="scanner-workflow">
