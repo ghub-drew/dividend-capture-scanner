@@ -654,12 +654,12 @@
 <div class="topnav">
   <a href="index.html" class="active">Home</a>
   <a href="docs.html">Documentation</a>
-  <a href="dividend_scanner_v3.py" download>Download Scanner</a>
+  <a href="dividend_scanner_v4.py" download>Download Scanner</a>
 </div>
 
 <header>
   <div class="eyebrow">Strategy Overview</div>
-  <h1>Dividend Capture Scanner <span style="font-size:0.95rem;font-weight:700;color:#4a90d9;vertical-align:middle;background:#1e3a5f33;border:1px solid #1d4ed855;border-radius:20px;padding:2px 12px;letter-spacing:0.04em;">v3</span></h1>
+  <h1>Dividend Capture Scanner <span style="font-size:0.95rem;font-weight:700;color:#4a90d9;vertical-align:middle;background:#1e3a5f33;border:1px solid #1d4ed855;border-radius:20px;padding:2px 12px;letter-spacing:0.04em;">v4</span></h1>
   <div style="font-size:0.82rem;color:#d4a017;margin-top:6px;margin-bottom:2px;letter-spacing:0.06em;font-weight:500;">Developed by Andrew D.</div>
   <p>A systematic approach to collecting <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span> income by timing stock purchases around <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend dates</span>.</p>
 </header>
@@ -771,10 +771,10 @@
     </button>
     <div class="panel-body">
 
-      <a href="dividend_scanner_v3.py" download class="download-btn">
-        <span>&#8595;</span> Download dividend_scanner_v3.py
+      <a href="dividend_scanner_v4.py" download class="download-btn">
+        <span>&#8595;</span> Download dividend_scanner_v4.py
       </a>
-      <div style="font-size:0.76rem;color:#64748b;margin-bottom:8px;">Latest version. Adds rebound worst-case, trend signal, round-lot dollar gain, after-tax figures, and CEFs and preferreds.</div>
+      <div style="font-size:0.76rem;color:#64748b;margin-bottom:8px;">Latest version. More honest scoring: failed recoveries now count against a stock, the trend uses total-return prices, and the scan runs several times faster.</div>
 
       <div class="run-steps">
 
@@ -801,7 +801,7 @@
           <div class="run-content">
             <div class="run-title">Run the scanner</div>
             <div class="run-desc">Scans all 503 S&amp;P 500 stocks. Takes 3–5 minutes to complete.</div>
-            <div class="code-block">python dividend_scanner_v3.py</div>
+            <div class="code-block">python dividend_scanner_v4.py</div>
           </div>
         </div>
 
@@ -817,7 +817,7 @@
       </div>
 
       <div class="run-note">
-        <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner_v3.py</code> and can be adjusted at any time.
+        <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner_v4.py</code> and can be adjusted at any time.
       </div>
     </div>
   </div>
@@ -934,7 +934,7 @@
               <div class="sw-sub">The key metric</div>
             </div>
           </div>
-          <div class="sw-body">When a stock pays a <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span>, its price usually drops by about that amount the same day. The real question is: how long does it take to climb back to the price you paid? The scanner looks at the last two years of history and, for each past <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend date</span>, measures how many trading days the stock took to recover. It reports both the average and the worst case, so you can see the typical wait and the longest it has ever taken. A faster rebound means your money is freed up sooner.</div>
+          <div class="sw-body">When a stock pays a <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span>, its price usually drops by about that amount the same day. The real question is: how long does it take to climb back to the price you paid? The scanner looks at the last two years of history and, for each past <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend date</span>, measures how many trading days the stock took to recover. It reports both the average and the worst case. If a past dividend never recovered within 60 trading days, the worst case shows "&gt;60" so that risk is never hidden. A faster rebound means your money is freed up sooner.</div>
           <div class="sw-tags">
             <span class="sw-tag">Average rebound days</span>
             <span class="sw-tag">Worst-case rebound</span>
@@ -953,7 +953,7 @@
               <div class="sw-sub">Putting it all together</div>
             </div>
           </div>
-          <div class="sw-body">Each stock gets a score that rewards the best use of your money over time. The idea is continuous rotation: hold a stock through the dividend, sell once it is back to even or better, then move the same money straight into the next upcoming dividend. So a high yield that also rebounds quickly scores best, because that capital can be put to work again sooner. A downward price trend or thin trading lowers the score, since those make it riskier to recover and exit.</div>
+          <div class="sw-body">Each stock gets a score that rewards the best use of your money over time. The idea is continuous rotation: hold a stock through the dividend, sell once it is back to even or better, then move the same money straight into the next upcoming dividend. So a high yield that also rebounds quickly scores best, because that capital can be put to work again sooner. Past dividends that never recovered are charged at the full 60-day wait, so unreliable stocks honestly score lower. The trend check uses total-return prices, so big payers are not unfairly marked as falling, and a downward trend or thin trading lowers the score.</div>
           <div class="sw-tags">
             <span class="sw-tag">Higher yield = higher rank</span>
             <span class="sw-tag">Faster rebound = higher rank</span>
@@ -979,10 +979,10 @@
                 <tr><th>#</th><th>Ticker</th><th>Price</th><th>Annual Yield</th><th>Avg Reb</th><th>Worst Reb</th><th>Recovered</th><th>Trend</th><th>AfterTax/100</th><th>Score</th></tr>
               </thead>
               <tbody>
-                <tr><td>1</td><td><strong>TSLX</strong></td><td>$18.07</td><td class="yield-high">9.30%</td><td>1.8</td><td>7</td><td>75%</td><td>Down</td><td>$15.60</td><td>34.1</td></tr>
-                <tr><td>2</td><td><strong>TROW</strong></td><td>$104.59</td><td class="yield-mid">4.97%</td><td>4.3</td><td>13</td><td>88%</td><td>Mixed</td><td>$84.50</td><td>27.5</td></tr>
-                <tr><td>3</td><td><strong>GPC</strong></td><td>$98.36</td><td class="yield-mid">4.32%</td><td>2.1</td><td>5</td><td>88%</td><td>Down</td><td>$69.06</td><td>25.6</td></tr>
-                <tr><td>4</td><td><strong>DOC</strong></td><td>$19.10</td><td class="yield-high">6.39%</td><td>1.5</td><td>10</td><td>100%</td><td>Up</td><td>$6.61</td><td>24.9</td></tr>
+                <tr><td>1</td><td><strong>HBAN</strong></td><td>$16.84</td><td class="yield-mid">3.68%</td><td>3.4</td><td>17</td><td>100%</td><td>Mixed</td><td>$10.08</td><td>23.8</td></tr>
+                <tr><td>2</td><td><strong>DOC</strong></td><td>$20.47</td><td class="yield-high">5.96%</td><td>1.5</td><td>10</td><td>100%</td><td>Up</td><td>$6.61</td><td>23.2</td></tr>
+                <tr><td>3</td><td><strong>GAIN</strong></td><td>$15.38</td><td class="yield-high">6.24%</td><td>1.9</td><td>6</td><td>100%</td><td>Up</td><td>$5.20</td><td>18.7</td></tr>
+                <tr><td>4</td><td><strong>FSK</strong></td><td>$11.00</td><td class="yield-high">20.91%</td><td>10.0</td><td>&gt;60</td><td>62%</td><td>Down</td><td>$37.38</td><td>16.7</td></tr>
               </tbody>
             </table>
           </div>

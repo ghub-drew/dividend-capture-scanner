@@ -127,7 +127,7 @@
     <a href="index.html">Home</a>
     <a href="docs.html">Documentation</a>
     <a href="changelog.html" class="active">Changelog</a>
-    <a href="dividend_scanner_v3.py" download>Download Scanner</a>
+    <a href="dividend_scanner_v4.py" download>Download Scanner</a>
   </div>
 
   <header>
@@ -138,12 +138,34 @@
 
   <div class="timeline">
 
-    <!-- v3 -->
+    <!-- v4 -->
     <div class="release" style="--dot:#4ade80;">
       <div class="release-card">
         <div class="release-head">
-          <span class="version">v3</span>
+          <span class="version">v4</span>
           <span class="badge current">Current</span>
+          <span class="release-date">June 11, 2026</span>
+        </div>
+        <div class="release-title">More honest numbers and a much faster scan.</div>
+        <ul class="changes">
+          <li><span class="lbl imp">Improved</span> Failed recoveries now count. If a past dividend never recovered within 60 days, the efficiency math charges the full 60-day wait, so unreliable stocks no longer look better than they are. <em>(Columns: Ann.Eff%, Score)</em></li>
+          <li><span class="lbl imp">Improved</span> The worst case is no longer hidden: if any past dividend never recovered, the worst-case column shows "&gt;60" instead of the longest successful recovery. <em>(Column: Worst Reb)</em></li>
+          <li><span class="lbl imp">Improved</span> The trend is now measured on total-return (dividend-adjusted) prices, so high payers whose share price naturally drifts down are no longer unfairly flagged as falling. <em>(Column: Trend)</em></li>
+          <li><span class="lbl imp">Improved</span> The scan now runs in parallel, cutting the full run from several minutes to about one or two.</li>
+          <li><span class="lbl fix">Fixed</span> Tickers written with dots (such as BRK.B) were silently skipped; they are now converted to the format the data source expects.</li>
+          <li><span class="lbl fix">Fixed</span> Data errors are now counted and reported at the end of the run instead of being silently ignored.</li>
+          <li><span class="lbl fix">Fixed</span> Removed two funds whose headline yields are mostly a return of the investor's own capital, which made them misleading for capture.</li>
+          <li><span class="lbl fix">Fixed</span> Ex-dividend dates are now read in a time-zone-safe way so the date cannot shift by a day depending on the computer's clock.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v3 -->
+    <div class="release" style="--dot:#64748b;">
+      <div class="release-card">
+        <div class="release-head">
+          <span class="version">v3</span>
+          <span class="badge older">Older</span>
           <span class="release-date">June 2, 2026</span>
         </div>
         <div class="release-title">Refined around capital rotation and after-tax results.</div>

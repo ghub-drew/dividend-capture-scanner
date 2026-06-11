@@ -193,7 +193,7 @@
     <a href="index.html">Home</a>
     <a href="docs.html" class="active">Documentation</a>
     <a href="changelog.html">Changelog</a>
-    <a href="dividend_scanner_v3.py" download>Download Scanner</a>
+    <a href="dividend_scanner_v4.py" download>Download Scanner</a>
   </div>
 
   <header>
@@ -239,8 +239,8 @@
     <h2><span class="ic">▶️</span> 3. Running the Scanner</h2>
     <p>Open PowerShell or Command Prompt, go to the folder where you saved the scanner, and run it. Replace the path with your actual folder location.</p>
     <div class="code-block">cd "C:\Users\YourName\Documents\stock scanner"
-python dividend_scanner_v3.py</div>
-    <p>It scans roughly 548 stocks and runs a rebound analysis on every stock that passes the filters, so it takes about 4 to 6 minutes. When it finishes, the ranked list prints in the window and is also saved as a dated spreadsheet file in the same folder.</p>
+python dividend_scanner_v4.py</div>
+    <p>It scans roughly 576 stocks in parallel and runs a rebound analysis on every stock that passes the filters, finishing in about 1 to 2 minutes. When it finishes, the ranked list prints in the window and is also saved as a dated spreadsheet file in the same folder.</p>
     <div class="note"><strong>Tip:</strong> Close any open <code>candidates_*.csv</code> file before running, otherwise the scanner cannot save the new one.</div>
   </section>
 
@@ -254,7 +254,7 @@ python dividend_scanner_v3.py</div>
       <li><strong>Closed-end funds (CEFs):</strong> exchange-traded funds that commonly pay high monthly or quarterly distributions.</li>
       <li><strong>Preferred stocks:</strong> accessed through preferred-stock funds, which pay steady, higher dividends.</li>
     </ul>
-    <p>Together this is about 575 stocks. Mutual funds are intentionally left out, as they rarely yield enough to be worthwhile.</p>
+    <p>Together this is about 576 stocks. Mutual funds are intentionally left out, as they rarely yield enough to be worthwhile. A couple of funds whose headline yields are mostly a return of the investor's own capital were also removed, since those numbers are misleading for capture.</p>
   </section>
 
   <section id="filters">
@@ -275,7 +275,7 @@ python dividend_scanner_v3.py</div>
     <p>For each stock that passes the filters, the scanner looks at the last two years of price history. For every past ex-dividend date it measures:</p>
     <ul class="list">
       <li><strong>Avg Reb:</strong> the average number of trading days it took for the price to return to its pre-dividend level.</li>
-      <li><strong>Worst Reb:</strong> the worst case, the longest it has taken to recover over the period. This shows how bad the wait can get.</li>
+      <li><strong>Worst Reb:</strong> the worst case, the longest it has taken to recover over the period. If a past dividend never recovered within 60 trading days, this shows "&gt;60" so the risk is never hidden.</li>
       <li><strong>Recovered:</strong> how often the stock managed to recover within 60 trading days.</li>
     </ul>
     <p>A faster, more reliable rebound means your capital is freed up sooner, so it pushes the stock higher in the ranking.</p>
@@ -289,8 +289,8 @@ python dividend_scanner_v3.py</div>
       <tr><th>Factor</th><th>Effect on score</th></tr>
       <tr><td>Yield</td><td>Higher yield means more collected per trade. Ranked directly by percentage, no tiers.</td></tr>
       <tr><td>Rebound speed</td><td>A faster rebound frees the money sooner, so it can be redeployed into the next dividend. This is the biggest lever.</td></tr>
-      <tr><td>Recovery rate</td><td>Stocks that recover more consistently are more dependable.</td></tr>
-      <tr><td>Price trend</td><td>A downward trend lowers the score, since the price may not recover after the dividend.</td></tr>
+      <tr><td>Recovery rate</td><td>Past dividends that never recovered are charged at the full 60-day wait in the efficiency math, so unreliable stocks score honestly lower.</td></tr>
+      <tr><td>Price trend</td><td>A downward trend lowers the score, since the price may not recover after the dividend. The trend is measured on total-return (dividend-adjusted) prices, so big payers are not unfairly flagged as falling.</td></tr>
       <tr><td>Liquidity</td><td>Thinly-traded names are marked down, since they are harder to exit.</td></tr>
     </table>
     <div class="note">The headline number is <strong>Ann.Eff%</strong>, a theoretical annualised after-tax return assuming the money is rotated continuously. It is a way to compare opportunities on an even footing, not a promise of returns. A lower-yielding stock can still rank well if it rebounds very quickly and reliably.</div>
@@ -310,7 +310,7 @@ python dividend_scanner_v3.py</div>
       <tr><td>Capital</td><td>The cost of buying 100 shares.</td></tr>
       <tr><td>AfterTax/100</td><td>The dividend per 100 shares after tax (default 35%).</td></tr>
       <tr><td>Avg Reb</td><td>Average trading days to recover to the pre-dividend price. Lower is better.</td></tr>
-      <tr><td>Worst Reb</td><td>Worst-case recovery time over the period.</td></tr>
+      <tr><td>Worst Reb</td><td>Worst-case recovery time over the period. Shows "&gt;60" if any past dividend never recovered in the window.</td></tr>
       <tr><td>Recovered</td><td>How often the stock recovered within the test window.</td></tr>
       <tr><td>Trend</td><td>Price trend: Up, Down, or Mixed. Downtrends are discouraged.</td></tr>
       <tr><td>Liquidity</td><td>Thin, Moderate, or High, based on daily trading volume.</td></tr>
@@ -326,7 +326,7 @@ python dividend_scanner_v3.py</div>
 
   <section id="config">
     <h2><span class="ic">⚙️</span> 9. Configuration</h2>
-    <p>All the filter settings live at the top of <code>dividend_scanner_v3.py</code> and can be changed at any time:</p>
+    <p>All the filter settings live at the top of <code>dividend_scanner_v4.py</code> and can be changed at any time:</p>
     <div class="code-block">MIN_ANNUAL_YIELD     = 0.03      # 3% floor
 MIN_AVG_VOLUME       = 100_000   # shares per day
 MIN_STOCK_PRICE      = 5.0       # dollars
@@ -346,7 +346,7 @@ ROUND_LOT            = 100       # shares per lot</div>
   </section>
 
   <footer>
-    <p>Dividend Capture Scanner v3 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
+    <p>Dividend Capture Scanner v4 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
   </footer>
 
 </div>
