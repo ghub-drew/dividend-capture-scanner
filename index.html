@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -68,7 +68,7 @@
     line-height: 1.6;
   }
 
-  /* ── Accordion ── */
+  /* â”€â”€ Accordion â”€â”€ */
   .accordion {
     max-width: 780px;
     margin: 0 auto;
@@ -140,9 +140,9 @@
     border-top: 1px solid #252d3d;
   }
 
-  /* ────────────────────────────────
+  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
      SECTION 1 - General Workflow
-  ──────────────────────────────── */
+  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .strategy-steps {
     display: flex;
     flex-direction: column;
@@ -211,7 +211,7 @@
   }
 
   .bullets li::before {
-    content: '›';
+    content: 'â€º';
     position: absolute;
     left: 0;
     color: var(--accent);
@@ -262,9 +262,9 @@
   .g4 { --accent:#4ade80; --accent-bg:#14392222; --accent-border:#15803d44; }
   .g5 { --accent:#fb7185; --accent-bg:#3d0a1822; --accent-border:#be123c44; }
 
-  /* ────────────────────────────────
+  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
      SECTION 2 - How to Run
-  ──────────────────────────────── */
+  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .run-steps {
     display: flex;
     flex-direction: column;
@@ -338,9 +338,9 @@
     font-size: 0.79rem;
   }
 
-  /* ────────────────────────────────
+  /* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
      SECTION 3 - Scanner Workflow
-  ──────────────────────────────── */
+  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
   .scanner-workflow {
     display: flex;
     flex-direction: column;
@@ -654,21 +654,21 @@
 <div class="topnav">
   <a href="index.html" class="active">Home</a>
   <a href="docs.html">Documentation</a>
-  <a href="dividend_scanner_v4.py" download>Download Scanner</a>
+  <a href="dividend_scanner_v5.py" download>Download Scanner</a>
 </div>
 
 <header>
   <div class="eyebrow">Strategy Overview</div>
-  <h1>Dividend Capture Scanner <span style="font-size:0.95rem;font-weight:700;color:#4a90d9;vertical-align:middle;background:#1e3a5f33;border:1px solid #1d4ed855;border-radius:20px;padding:2px 12px;letter-spacing:0.04em;">v4</span></h1>
+  <h1>Dividend Capture Scanner <span style="font-size:0.95rem;font-weight:700;color:#4a90d9;vertical-align:middle;background:#1e3a5f33;border:1px solid #1d4ed855;border-radius:20px;padding:2px 12px;letter-spacing:0.04em;">v5</span></h1>
   <div style="font-size:0.82rem;color:#d4a017;margin-top:6px;margin-bottom:2px;letter-spacing:0.06em;font-weight:500;">Developed by Andrew D.</div>
   <p>A systematic approach to collecting <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span> income by timing stock purchases around <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend dates</span>.</p>
 </header>
 
 <div class="accordion">
 
-  <!-- ══════════════════════════════════
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        PANEL 1 - Strategy Overview
-  ══════════════════════════════════ -->
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="panel">
     <button class="panel-toggle" onclick="togglePanel(this)">
       <div class="panel-num">1</div>
@@ -676,13 +676,13 @@
         <div class="panel-label">Strategy Overview</div>
         <div class="panel-sub">How dividend capture works - the 5-step process</div>
       </div>
-      <span class="panel-chevron">▼</span>
+      <span class="panel-chevron">â–¼</span>
     </button>
     <div class="panel-body">
       <div class="strategy-steps">
 
         <div class="sstep g1">
-          <div class="sstep-icon">🔍</div>
+          <div class="sstep-icon">ðŸ”</div>
           <div class="sstep-content">
             <div class="sstep-label">Step 1</div>
             <div class="sstep-title">Find a Good Stock</div>
@@ -695,14 +695,14 @@
               <li><strong>Plenty of liquidity:</strong> lots of <span class="tip" data-tip="How many shares of a stock are bought and sold in a single day. High volume means it is easy to buy and sell quickly.">daily trading volume</span> makes it easy to get in and out. Thinly-traded names are flagged</li>
               <li><strong>Solid quality:</strong> a stock you would be comfortable holding for a while in case the price takes time to bounce back</li>
             </ul>
-            <div class="key-callout"><span>★</span> Rebound time is the most important factor. The stock that climbs back to the price you paid the fastest is ranked the highest.</div>
+            <div class="key-callout"><span>â˜…</span> Rebound time is the most important factor. The stock that climbs back to the price you paid the fastest is ranked the highest.</div>
           </div>
         </div>
 
         <div class="sarrow" style="--next-accent:#a78bfa;"><div class="sarrow-line"></div></div>
 
         <div class="sstep g2">
-          <div class="sstep-icon">🛒</div>
+          <div class="sstep-icon">ðŸ›’</div>
           <div class="sstep-content">
             <div class="sstep-label">Step 2</div>
             <div class="sstep-title">Buy Before the <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">Ex-Dividend Date</span></div>
@@ -715,7 +715,7 @@
         <div class="sarrow" style="--next-accent:#f59e0b;"><div class="sarrow-line"></div></div>
 
         <div class="sstep g3">
-          <div class="sstep-icon">📅</div>
+          <div class="sstep-icon">ðŸ“…</div>
           <div class="sstep-content">
             <div class="sstep-label">Step 3</div>
             <div class="sstep-title"><span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">Ex-Dividend Date</span> Passes</div>
@@ -729,7 +729,7 @@
         <div class="sarrow" style="--next-accent:#4ade80;"><div class="sarrow-line"></div></div>
 
         <div class="sstep g4">
-          <div class="sstep-icon">💰</div>
+          <div class="sstep-icon">ðŸ’°</div>
           <div class="sstep-content">
             <div class="sstep-label">Step 4</div>
             <div class="sstep-title">Sell the Stock</div>
@@ -743,7 +743,7 @@
         <div class="sarrow" style="--next-accent:#fb7185;"><div class="sarrow-line"></div></div>
 
         <div class="sstep g5">
-          <div class="sstep-icon">📊</div>
+          <div class="sstep-icon">ðŸ“Š</div>
           <div class="sstep-content">
             <div class="sstep-label">Step 5</div>
             <div class="sstep-title">Track the Result</div>
@@ -757,9 +757,9 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        PANEL 2 - How to Run the Scanner
-  ══════════════════════════════════ -->
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="panel">
     <button class="panel-toggle" onclick="togglePanel(this)">
       <div class="panel-num" style="background:#0e7490;">2</div>
@@ -767,14 +767,14 @@
         <div class="panel-label">How to Run the Scanner</div>
         <div class="panel-sub">Step-by-step instructions to run the script each morning</div>
       </div>
-      <span class="panel-chevron">▼</span>
+      <span class="panel-chevron">â–¼</span>
     </button>
     <div class="panel-body">
 
-      <a href="dividend_scanner_v4.py" download class="download-btn">
-        <span>&#8595;</span> Download dividend_scanner_v4.py
+      <a href="dividend_scanner_v5.py" download class="download-btn">
+        <span>&#8595;</span> Download dividend_scanner_v5.py
       </a>
-      <div style="font-size:0.76rem;color:#64748b;margin-bottom:8px;">Latest version. More honest scoring: failed recoveries now count against a stock, the trend uses total-return prices, and the scan runs several times faster.</div>
+      <div style="font-size:0.76rem;color:#64748b;margin-bottom:8px;">Latest version. New in v5: a back-tested best entry day for each stock, and a drop ratio showing how much of the dividend the price really gives up on the ex-date.</div>
 
       <div class="run-steps">
 
@@ -800,8 +800,8 @@
           <div class="run-num">3</div>
           <div class="run-content">
             <div class="run-title">Run the scanner</div>
-            <div class="run-desc">Scans all 503 S&amp;P 500 stocks. Takes 3–5 minutes to complete.</div>
-            <div class="code-block">python dividend_scanner_v4.py</div>
+            <div class="run-desc">Scans all 503 S&amp;P 500 stocks. Takes 3â€“5 minutes to complete.</div>
+            <div class="code-block">python dividend_scanner_v5.py</div>
           </div>
         </div>
 
@@ -817,14 +817,14 @@
       </div>
 
       <div class="run-note">
-        <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner_v4.py</code> and can be adjusted at any time.
+        <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner_v5.py</code> and can be adjusted at any time.
       </div>
     </div>
   </div>
 
-  <!-- ══════════════════════════════════
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
        PANEL 3 - Scanner Workflow
-  ══════════════════════════════════ -->
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="panel">
     <button class="panel-toggle" onclick="togglePanel(this)">
       <div class="panel-num" style="background:#7c3aed;">3</div>
@@ -832,7 +832,7 @@
         <div class="panel-label">Scanner Workflow</div>
         <div class="panel-sub">How the script works under the hood - from data pull to ranked output</div>
       </div>
-      <span class="panel-chevron">▼</span>
+      <span class="panel-chevron">â–¼</span>
     </button>
     <div class="panel-body">
       <div class="scanner-workflow">
@@ -934,11 +934,13 @@
               <div class="sw-sub">The key metric</div>
             </div>
           </div>
-          <div class="sw-body">When a stock pays a <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span>, its price usually drops by about that amount the same day. The real question is: how long does it take to climb back to the price you paid? The scanner looks at the last two years of history and, for each past <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend date</span>, measures how many trading days the stock took to recover. It reports both the average and the worst case. If a past dividend never recovered within 60 trading days, the worst case shows "&gt;60" so that risk is never hidden. A faster rebound means your money is freed up sooner.</div>
+          <div class="sw-body">When a stock pays a <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span>, its price usually drops by about that amount the same day. The real question is: how long does it take to climb back to the price you paid? The scanner looks at the last two years of history and, for each past <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend date</span>, measures how many trading days the stock took to recover. It reports both the average and the worst case. If a past dividend never recovered within 60 trading days, the worst case shows "&gt;60" so that risk is never hidden. A faster rebound means your money is freed up sooner. The same history is also used to find each stock's best entry point: the scanner tests buying 1 to 20 trading days before the ex-date and reports the number of days that has worked best. And it measures the drop ratio, which is how much of the dividend the price actually gives up on the ex-date. Below 1.0 means it drops less than the dividend, which is where the capture profit comes from.</div>
           <div class="sw-tags">
             <span class="sw-tag">Average rebound days</span>
             <span class="sw-tag">Worst-case rebound</span>
             <span class="sw-tag">How often it recovers</span>
+            <span class="sw-tag">Best day to buy in</span>
+            <span class="sw-tag">Real ex-date drop</span>
             <span class="sw-tag">Based on 2 years of history</span>
           </div>
         </div>
@@ -972,17 +974,17 @@
               <div class="sw-sub">Ready to review</div>
             </div>
           </div>
-          <div class="sw-body">The top candidates are displayed in a ranked table and saved to a file so you can review and compare them each day. Each row shows the yield, the average and worst-case rebound, the trend, the after-tax dividend per 100-share lot, and the overall score.</div>
+          <div class="sw-body">The top candidates are displayed in a ranked table and saved to a file so you can review and compare them each day. Each row shows the yield, the average and worst-case rebound, the best entry timing, the real ex-date drop, the trend, the after-tax dividend per 100-share lot, and the overall score.</div>
           <div class="output-preview">
             <table>
               <thead>
-                <tr><th>#</th><th>Ticker</th><th>Price</th><th>Annual Yield</th><th>Avg Reb</th><th>Worst Reb</th><th>Recovered</th><th>Trend</th><th>AfterTax/100</th><th>Score</th></tr>
+                <tr><th>#</th><th>Ticker</th><th>Price</th><th>Annual Yield</th><th>Avg Reb</th><th>Worst Reb</th><th>Recovered</th><th>Best Entry</th><th>Drop Ratio</th><th>Trend</th><th>AfterTax/100</th><th>Score</th></tr>
               </thead>
               <tbody>
-                <tr><td>1</td><td><strong>HBAN</strong></td><td>$16.84</td><td class="yield-mid">3.68%</td><td>3.4</td><td>17</td><td>100%</td><td>Mixed</td><td>$10.08</td><td>23.8</td></tr>
-                <tr><td>2</td><td><strong>DOC</strong></td><td>$20.47</td><td class="yield-high">5.96%</td><td>1.5</td><td>10</td><td>100%</td><td>Up</td><td>$6.61</td><td>23.2</td></tr>
-                <tr><td>3</td><td><strong>GAIN</strong></td><td>$15.38</td><td class="yield-high">6.24%</td><td>1.9</td><td>6</td><td>100%</td><td>Up</td><td>$5.20</td><td>18.7</td></tr>
-                <tr><td>4</td><td><strong>FSK</strong></td><td>$11.00</td><td class="yield-high">20.91%</td><td>10.0</td><td>&gt;60</td><td>62%</td><td>Down</td><td>$37.38</td><td>16.7</td></tr>
+                <tr><td>1</td><td><strong>HBAN</strong></td><td>$16.84</td><td class="yield-mid">3.68%</td><td>3.4</td><td>17</td><td>100%</td><td>3d</td><td>0.94</td><td>Mixed</td><td>$10.08</td><td>23.8</td></tr>
+                <tr><td>2</td><td><strong>DOC</strong></td><td>$20.47</td><td class="yield-high">5.96%</td><td>1.5</td><td>10</td><td>100%</td><td>10d</td><td>0.86</td><td>Up</td><td>$6.61</td><td>23.2</td></tr>
+                <tr><td>3</td><td><strong>GAIN</strong></td><td>$15.38</td><td class="yield-high">6.24%</td><td>1.9</td><td>6</td><td>100%</td><td>20d</td><td>1.20</td><td>Up</td><td>$5.20</td><td>18.7</td></tr>
+                <tr><td>4</td><td><strong>FSK</strong></td><td>$11.00</td><td class="yield-high">20.91%</td><td>10.0</td><td>&gt;60</td><td>62%</td><td>2d</td><td>0.98</td><td>Down</td><td>$37.38</td><td>16.7</td></tr>
               </tbody>
             </table>
           </div>

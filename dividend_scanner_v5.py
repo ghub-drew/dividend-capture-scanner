@@ -1,5 +1,5 @@
 """
-Dividend Capture Scanner  (v4)
+Dividend Capture Scanner  (v5)
 Pulls upcoming ex-dividend dates from Yahoo Finance and ranks the best
 dividend-capture candidates.
 
@@ -10,6 +10,11 @@ What it looks at:
                             that never recovered show as ">60" and are counted
                             against the stock, not hidden.
   - Recovery rate         : how often it recovered within the test window.
+  - Best entry timing     : back-tests buying 1 to 20 trading days before the
+                            ex-date to find each stock's historical sweet spot.
+  - Drop ratio            : how much the price actually falls on the ex-date
+                            compared with the dividend paid. Below 1.0 means
+                            the stock gives up less than the dividend.
   - Price trend           : up / down / mixed, from moving averages on
                             dividend-adjusted (total-return) prices, so big
                             payers aren't unfairly flagged as falling.
@@ -102,6 +107,10 @@ HIGH_VOLUME = 2_000_000
 REBOUND_LOOKBACK_EVENTS = 8     # measure the last N ex-dividend events
 REBOUND_MAX_DAYS        = 60    # cap the search window per event (trading days)
 
+# ─── Entry-timing backtest config ───
+ENTRY_OFFSETS    = [1, 2, 3, 5, 7, 10, 15, 20]  # trading days before the ex-date
+MIN_ENTRY_EVENTS = 3            # need at least this many past events to call a sweet spot
+
 # ─── Scan performance ───
 MAX_WORKERS = 8                 # parallel requests to Yahoo Finance
 
@@ -162,6 +171,67 @@ def compute_rebound(hist: pd.DataFrame):
     success_rate = (measured - failures) / measured
     expected_days = (sum(rebound_days) + failures * REBOUND_MAX_DAYS) / measured
     return avg, worst_display, success_rate, expected_days, measured
+
+
+def compute_entry_and_drop(hist: pd.DataFrame):
+    """
+    Back-tests entry timing and measures the real ex-date price drop.
+
+    Entry timing: for each past ex-dividend event, simulates buying at the
+    close 1, 2, 3, 5, 7, 10, 15 or 20 trading days before the ex-date and
+    holding through it (valued at the ex-date close plus the dividend).
+    The offset with the best average return is the stock's historical
+    sweet spot for getting in.
+
+    Drop ratio: (close the day before the ex-date - open on the ex-date)
+    divided by the dividend. 1.0 means the price fell by exactly the
+    dividend; below 1.0 means it gave up less than the dividend.
+
+    Returns (best_entry_days, best_entry_avg_ret, drop_ratio) - any of them
+    None if there isn't enough history to measure.
+    """
+    if hist is None or hist.empty or "Dividends" not in hist.columns:
+        return None, None, None
+
+    closes = hist["Close"]
+    opens = hist["Open"] if "Open" in hist.columns else closes
+    divs = hist["Dividends"]
+    ex_positions = [i for i, d in enumerate(divs) if d > 0]
+    if not ex_positions:
+        return None, None, None
+    ex_positions = ex_positions[-REBOUND_LOOKBACK_EVENTS:]
+
+    entry_returns = {n: [] for n in ENTRY_OFFSETS}
+    drop_ratios = []
+
+    for pos in ex_positions:
+        div = divs.iloc[pos]
+        if pos < 1 or div <= 0:
+            continue
+        pre_close = closes.iloc[pos - 1]
+        ex_open = opens.iloc[pos]
+        if pre_close > 0 and ex_open > 0:
+            drop_ratios.append((pre_close - ex_open) / div)
+        for n in ENTRY_OFFSETS:
+            if pos - n < 0:
+                continue
+            entry_price = closes.iloc[pos - n]
+            if entry_price <= 0:
+                continue
+            ret = (closes.iloc[pos] + div - entry_price) / entry_price
+            entry_returns[n].append(ret)
+
+    best_n, best_ret = None, None
+    for n in ENTRY_OFFSETS:
+        rets = entry_returns[n]
+        if len(rets) < MIN_ENTRY_EVENTS:
+            continue
+        avg = sum(rets) / len(rets)
+        if best_ret is None or avg > best_ret:
+            best_n, best_ret = n, avg
+
+    drop_ratio = (sum(drop_ratios) / len(drop_ratios)) if drop_ratios else None
+    return best_n, best_ret, drop_ratio
 
 
 def compute_trend(hist: pd.DataFrame) -> str:
@@ -239,6 +309,7 @@ def fetch_candidate(ticker: str, today: datetime):
         capture_yield = div_per_capture / price
 
         avg_reb, worst_display, success, expected_days, events = compute_rebound(hist)
+        best_entry, best_entry_ret, drop_ratio = compute_entry_and_drop(hist)
         trend = compute_trend(hist)
         liq = liquidity_label(avg_volume)
 
@@ -275,6 +346,8 @@ def fetch_candidate(ticker: str, today: datetime):
             "Avg Reb":       round(avg_reb, 1) if avg_reb is not None else "N/A",
             "Worst Reb":     worst_display if worst_display is not None else "N/A",
             "Recovered":     f"{success:.0%}" if success is not None else "N/A",
+            "Best Entry":    f"{best_entry}d" if best_entry is not None else "N/A",
+            "Drop Ratio":    round(drop_ratio, 2) if drop_ratio is not None else "N/A",
             "Trend":         trend,
             "Liquidity":     liq,
             "Beta":          round(beta, 2) if beta is not None else "N/A",
@@ -309,15 +382,15 @@ def score(row: dict) -> float:
 
 def run_scanner():
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    print(f"\nDividend Capture Scanner v4 - {today.strftime('%Y-%m-%d')}")
+    print(f"\nDividend Capture Scanner v5 - {today.strftime('%Y-%m-%d')}")
     print(f"Looking for ex-dates within the next {EX_DATE_WINDOW_DAYS} days")
     print(f"Tax rate assumed: {TAX_RATE:.0%} (short-term / ordinary income)\n")
 
     print("Fetching universe (S&P 500 + high-yield names + CEFs + preferreds)...")
     tickers = get_universe()
     print(f"Scanning {len(tickers)} stocks with {MAX_WORKERS} parallel workers...")
-    print("(Stocks that pass the basic filters also get a rebound, trend, and")
-    print(" recovery analysis from 2 years of history.)\n")
+    print("(Stocks that pass the basic filters also get a rebound, trend,")
+    print(" entry-timing, and recovery analysis from 2 years of history.)\n")
 
     candidates, errors = [], []
     done = 0
@@ -354,14 +427,14 @@ def run_scanner():
     display_cols = [
         "Ticker", "Name", "Price", "Ex-Date", "Days Until",
         "Annual Yield", "Capture Yield", "Div/100sh", "Capital", "AfterTax/100",
-        "Avg Reb", "Worst Reb", "Recovered", "Trend", "Liquidity", "Beta",
-        "Ann.Eff%", "Score",
+        "Avg Reb", "Worst Reb", "Recovered", "Best Entry", "Drop Ratio",
+        "Trend", "Liquidity", "Beta", "Ann.Eff%", "Score",
     ]
     shown = df[display_cols]
 
-    print(f"\n{'='*120}")
+    print(f"\n{'='*130}")
     print(f"  TOP DIVIDEND CAPTURE CANDIDATES  ({len(df)} found)")
-    print(f"{'='*120}")
+    print(f"{'='*130}")
     print(shown.to_string())
 
     print(f"\nColumn guide:")
@@ -373,6 +446,10 @@ def run_scanner():
     print(f"  Avg/Worst Reb = average and worst-case trading days to recover to the pre-ex price")
     print(f"                  ('>{REBOUND_MAX_DAYS}' means at least one past event never recovered in the window)")
     print(f"  Recovered     = how often it recovered within {REBOUND_MAX_DAYS} trading days")
+    print(f"  Best Entry    = back-tested sweet spot: how many trading days before the ex-date")
+    print(f"                  buying has historically worked best for this stock")
+    print(f"  Drop Ratio    = how much of the dividend the price actually gives up on the ex-date")
+    print(f"                  (1.0 = drops the full dividend; below 1.0 = drops less, which is good)")
     print(f"  Trend         = total-return price trend (Up / Down / Mixed). Downtrends are discouraged.")
     print(f"  Liquidity     = Thin / Moderate / High (thin = harder to exit)")
     print(f"  Ann.Eff%      = theoretical annualised after-tax return with continuous rotation;")

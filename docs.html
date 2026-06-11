@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -125,7 +125,7 @@
     position: relative;
     margin-bottom: 6px;
   }
-  ul.list li::before { content: '›'; position: absolute; left: 0; color: #4a90d9; font-weight: 700; }
+  ul.list li::before { content: 'â€º'; position: absolute; left: 0; color: #4a90d9; font-weight: 700; }
 
   code {
     font-family: 'Consolas', 'Courier New', monospace;
@@ -193,7 +193,7 @@
     <a href="index.html">Home</a>
     <a href="docs.html" class="active">Documentation</a>
     <a href="changelog.html">Changelog</a>
-    <a href="dividend_scanner_v4.py" download>Download Scanner</a>
+    <a href="dividend_scanner_v5.py" download>Download Scanner</a>
   </div>
 
   <header>
@@ -219,13 +219,13 @@
   </div>
 
   <section id="overview">
-    <h2><span class="ic">📘</span> 1. Overview</h2>
+    <h2><span class="ic">ðŸ“˜</span> 1. Overview</h2>
     <p>The Dividend Capture Scanner finds and ranks stocks that are about to pay a dividend, so you can buy before the ex-dividend date, collect the dividend, and sell once the price recovers.</p>
     <p>It scans a large list of stocks each morning, keeps only the ones worth considering, measures how quickly each one has historically rebounded after past dividends, and ranks them so the best opportunities sit at the top.</p>
   </section>
 
   <section id="requirements">
-    <h2><span class="ic">🧩</span> 2. Requirements</h2>
+    <h2><span class="ic">ðŸ§©</span> 2. Requirements</h2>
     <ul class="list">
       <li>Python 3.9 or newer installed on your computer</li>
       <li>An internet connection (the scanner pulls live market data)</li>
@@ -236,16 +236,16 @@
   </section>
 
   <section id="running">
-    <h2><span class="ic">▶️</span> 3. Running the Scanner</h2>
+    <h2><span class="ic">â–¶ï¸</span> 3. Running the Scanner</h2>
     <p>Open PowerShell or Command Prompt, go to the folder where you saved the scanner, and run it. Replace the path with your actual folder location.</p>
     <div class="code-block">cd "C:\Users\YourName\Documents\stock scanner"
-python dividend_scanner_v4.py</div>
+python dividend_scanner_v5.py</div>
     <p>It scans roughly 576 stocks in parallel and runs a rebound analysis on every stock that passes the filters, finishing in about 1 to 2 minutes. When it finishes, the ranked list prints in the window and is also saved as a dated spreadsheet file in the same folder.</p>
     <div class="note"><strong>Tip:</strong> Close any open <code>candidates_*.csv</code> file before running, otherwise the scanner cannot save the new one.</div>
   </section>
 
   <section id="universe">
-    <h2><span class="ic">🌐</span> 4. The Stock Universe</h2>
+    <h2><span class="ic">ðŸŒ</span> 4. The Stock Universe</h2>
     <p>The scanner searches the S&amp;P 500 plus a curated set of high-yield income names, combined:</p>
     <ul class="list">
       <li><strong>The S&amp;P 500:</strong> the 500 largest US companies, loaded fresh each run so the list is always current.</li>
@@ -258,7 +258,7 @@ python dividend_scanner_v4.py</div>
   </section>
 
   <section id="filters">
-    <h2><span class="ic">🔎</span> 5. Filters</h2>
+    <h2><span class="ic">ðŸ”Ž</span> 5. Filters</h2>
     <p>Every stock must pass all four checks below. If it fails any one, it is skipped.</p>
     <table>
       <tr><th>Filter</th><th>Default</th><th>Why it matters</th></tr>
@@ -270,7 +270,7 @@ python dividend_scanner_v4.py</div>
   </section>
 
   <section id="rebound">
-    <h2><span class="ic">📈</span> 6. The Rebound Metric</h2>
+    <h2><span class="ic">ðŸ“ˆ</span> 6. The Rebound Metric</h2>
     <p>This is the key part of the tool. When a stock pays a dividend, its price usually drops by about that amount on the ex-dividend date. The important question is how long it takes to climb back to the price you paid.</p>
     <p>For each stock that passes the filters, the scanner looks at the last two years of price history. For every past ex-dividend date it measures:</p>
     <ul class="list">
@@ -279,10 +279,16 @@ python dividend_scanner_v4.py</div>
       <li><strong>Recovered:</strong> how often the stock managed to recover within 60 trading days.</li>
     </ul>
     <p>A faster, more reliable rebound means your capital is freed up sooner, so it pushes the stock higher in the ranking.</p>
+    <h3>Entry timing and the real drop</h3>
+    <p>The same two years of history are also used to answer two practical questions for each stock:</p>
+    <ul class="list">
+      <li><strong>Best Entry:</strong> the scanner simulates buying 1, 2, 3, 5, 7, 10, 15, or 20 trading days before each past ex-dividend date and holding through it. The number of days that gave the best average result is reported as that stock's historical sweet spot for getting in. Many companies announce dividends 20 to 45 days ahead, so there is time to act on this.</li>
+      <li><strong>Drop Ratio:</strong> how much of the dividend the price actually gives up on the ex-date morning. A value of 1.0 means the price drops by exactly the dividend; below 1.0 means it drops less, which is where the capture profit comes from. The drop is rarely exactly the dividend in practice, and this column shows each stock's real history.</li>
+    </ul>
   </section>
 
   <section id="scoring">
-    <h2><span class="ic">🏆</span> 7. How Scoring Works</h2>
+    <h2><span class="ic">ðŸ†</span> 7. How Scoring Works</h2>
     <p>The score is built around <strong>capital rotation</strong>: the goal is to keep the same money working continuously. You hold a stock through its dividend, sell once the price is back to even or better, then move that money straight into the next upcoming dividend, over and over. The less time your money sits idle, the more dividends it can collect in a year.</p>
     <p>So the score rewards the combination of a high yield and a fast rebound, then adjusts for risk:</p>
     <table>
@@ -297,7 +303,7 @@ python dividend_scanner_v4.py</div>
   </section>
 
   <section id="output">
-    <h2><span class="ic">📊</span> 8. Reading the Output</h2>
+    <h2><span class="ic">ðŸ“Š</span> 8. Reading the Output</h2>
     <p>Each row in the results represents one candidate. Here is what every column means:</p>
     <table>
       <tr><th>Column</th><th>Meaning</th></tr>
@@ -312,6 +318,8 @@ python dividend_scanner_v4.py</div>
       <tr><td>Avg Reb</td><td>Average trading days to recover to the pre-dividend price. Lower is better.</td></tr>
       <tr><td>Worst Reb</td><td>Worst-case recovery time over the period. Shows "&gt;60" if any past dividend never recovered in the window.</td></tr>
       <tr><td>Recovered</td><td>How often the stock recovered within the test window.</td></tr>
+      <tr><td>Best Entry</td><td>The back-tested sweet spot: how many trading days before the ex-date buying has historically worked best for this stock.</td></tr>
+      <tr><td>Drop Ratio</td><td>How much of the dividend the price actually gives up on the ex-date. 1.0 means the full dividend; below 1.0 means it drops less, which is good.</td></tr>
       <tr><td>Trend</td><td>Price trend: Up, Down, or Mixed. Downtrends are discouraged.</td></tr>
       <tr><td>Liquidity</td><td>Thin, Moderate, or High, based on daily trading volume.</td></tr>
       <tr><td>Beta</td><td>How much the stock moves relative to the market. Lower is steadier.</td></tr>
@@ -325,8 +333,8 @@ python dividend_scanner_v4.py</div>
   </section>
 
   <section id="config">
-    <h2><span class="ic">⚙️</span> 9. Configuration</h2>
-    <p>All the filter settings live at the top of <code>dividend_scanner_v4.py</code> and can be changed at any time:</p>
+    <h2><span class="ic">âš™ï¸</span> 9. Configuration</h2>
+    <p>All the filter settings live at the top of <code>dividend_scanner_v5.py</code> and can be changed at any time:</p>
     <div class="code-block">MIN_ANNUAL_YIELD     = 0.03      # 3% floor
 MIN_AVG_VOLUME       = 100_000   # shares per day
 MIN_STOCK_PRICE      = 5.0       # dollars
@@ -338,7 +346,7 @@ ROUND_LOT            = 100       # shares per lot</div>
   </section>
 
   <section id="data">
-    <h2><span class="ic">🔌</span> 10. Data Sources</h2>
+    <h2><span class="ic">ðŸ”Œ</span> 10. Data Sources</h2>
     <h3>Why Yahoo Finance and not Dividend.com?</h3>
     <p>Dividend.com does not offer a public data connection, and automatically pulling from its website is unreliable and against most sites' terms of service. Yahoo Finance provides the same dividend calendar data through a clean, free connection.</p>
     <h3>Why is Interactive Brokers not connected yet?</h3>
@@ -346,7 +354,7 @@ ROUND_LOT            = 100       # shares per lot</div>
   </section>
 
   <footer>
-    <p>Dividend Capture Scanner v4 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
+    <p>Dividend Capture Scanner v5 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
   </footer>
 
 </div>

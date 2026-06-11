@@ -8,6 +8,7 @@ __pycache__/
 # Scanner output files
 candidates_*.csv
 stock_candidates_*.xlsx
+logs/
 
 # Editor / tooling
 .claude/
