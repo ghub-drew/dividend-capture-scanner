@@ -826,8 +826,8 @@ candidates_YYYYMMDD.xlsx</div>
             </a>
             <div class="code-block">schtasks /create /tn "DividendScannerDaily" /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\Users\YourName\Documents\stock scanner\run_daily.ps1\"" /sc daily /st 08:00</div>
             <div class="run-desc" style="margin-top:10px;">The kill switch: pause or resume the morning run any time with one command.</div>
-            <div class="code-block">schtasks /change /tn "DividendScannerDaily" /disable
-schtasks /change /tn "DividendScannerDaily" /enable</div>
+            <div class="code-block">schtasks /change /tn "DividendScannerDaily" /disable</div>
+            <div class="code-block" style="margin-top:6px;">schtasks /change /tn "DividendScannerDaily" /enable</div>
           </div>
         </div>
 
