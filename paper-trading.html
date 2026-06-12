@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paper Trading - Dividend Capture Scanner</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+    line-height: 1.6;
+  }
+
+  .wrap { max-width: 820px; margin: 0 auto; }
+
+  /* Top nav */
+  .topnav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+
+  .topnav a {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-decoration: none;
+    padding: 6px 14px;
+    border: 1px solid #252d3d;
+    border-radius: 20px;
+    transition: all 0.15s;
+  }
+
+  .topnav a:hover { border-color: #4a90d9; color: #e2e8f0; }
+  .topnav a.active { background: #1e3a5f33; border-color: #1d4ed855; color: #60a5fa; }
+
+  header { margin-bottom: 40px; }
+
+  .eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #4a90d9;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f8fafc;
+    letter-spacing: -0.5px;
+  }
+
+  header p {
+    margin-top: 10px;
+    color: #64748b;
+    font-size: 0.95rem;
+  }
+
+  /* Sections */
+  section {
+    background: #1a1f2e;
+    border: 1px solid #252d3d;
+    border-radius: 14px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+
+  section h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  section h2 .ic { font-size: 1.2rem; }
+
+  section h3 {
+    font-size: 0.98rem;
+    font-weight: 650;
+    color: #e2e8f0;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+
+  section p { color: #94a3b8; font-size: 0.9rem; margin-bottom: 10px; }
+
+  ul.list { margin: 8px 0 12px 0; padding-left: 0; list-style: none; }
+  ul.list li {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    padding-left: 18px;
+    position: relative;
+    margin-bottom: 6px;
+  }
+  ul.list li::before { content: '›'; position: absolute; left: 0; color: #4a90d9; font-weight: 700; }
+
+  code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    background: #0f1117;
+    border: 1px solid #252d3d;
+    border-radius: 5px;
+    padding: 1px 6px;
+    color: #22d3ee;
+    font-size: 0.85em;
+  }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 12px 0; }
+  th {
+    background: #0f1117;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.68rem;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #252d3d;
+  }
+  td { padding: 8px 12px; border-bottom: 1px solid #141927; color: #cbd5e1; vertical-align: top; }
+  td:first-child { font-weight: 600; color: #e2e8f0; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+
+  .note {
+    background: #0f1117;
+    border-left: 3px solid #4a90d9;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 0.86rem;
+    color: #94a3b8;
+    margin: 12px 0;
+  }
+  .note strong { color: #cbd5e1; }
+
+  /* Status pill */
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 20px;
+    background: #2d2310;
+    border: 1px solid #b4530955;
+    color: #fbbf24;
+  }
+  .status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fbbf24;
+  }
+
+  /* Step cards */
+  .step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #1e3a5f;
+    border: 1px solid #1d4ed855;
+    color: #60a5fa;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step-body { flex: 1; }
+  .step-title { font-weight: 650; color: #e2e8f0; font-size: 0.92rem; margin-bottom: 3px; }
+  .step-desc { color: #94a3b8; font-size: 0.88rem; }
+
+  /* Tooltips */
+  .tip {
+    border-bottom: 1px dashed #4a90d9;
+    color: #93c5fd;
+    cursor: help;
+    position: relative;
+    white-space: nowrap;
+  }
+
+  .tip::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e2840;
+    border: 1px solid #4a90d9;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    color: #cbd5e1;
+    white-space: normal;
+    width: 220px;
+    text-align: center;
+    line-height: 1.5;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 10;
+  }
+
+  .tip:hover::after { opacity: 1; }
+
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 0.78rem;
+    color: #475569;
+  }
+  footer a { color: #4a90d9; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topnav">
+    <a href="index.html">Home</a>
+    <a href="docs.html">Documentation</a>
+    <a href="changelog.html">Changelog</a>
+    <a href="paper-trading.html" class="active">Paper Trading</a>
+    <a href="dividend_scanner_v7.py" download>Download Scanner</a>
+  </div>
+
+  <header>
+    <div class="eyebrow">Paper Trading</div>
+    <h1>Testing With Simulated Money</h1>
+    <p>Before real dollars are at risk, the strategy gets run forward in time with pretend money in real market conditions. This page is the plan for that test, and the honest record of how it goes.</p>
+  </header>
+
+  <section>
+    <h2><span class="ic">📊</span> Current Status</h2>
+    <p style="margin-bottom:14px;"><span class="status"><span class="dot"></span>NOT STARTED YET</span></p>
+    <p>The scanner's numbers are currently validated by <span class="tip" data-tip="Testing a strategy against past market data to see how it would have performed.">backtesting</span>: every rebound time, best entry day, and drop ratio is measured from two years of real price history. What has NOT happened yet is forward testing, where the plan is executed day by day with simulated money and the results are compared against the predictions. That is what this page tracks.</p>
+  </section>
+
+  <section>
+    <h2><span class="ic">🧪</span> What Is Paper Trading?</h2>
+    <p><span class="tip" data-tip="Trading with simulated money in real, live market conditions. No real dollars move.">Paper trading</span> means running the strategy right now, on today's actual market, but with fake money. A simulated account starts with pretend cash. Real orders are placed through a real broker's system, they fill against live market prices, the dividends arrive on schedule, and the account balance moves exactly as a real one would. The only difference is that no real dollars are at risk.</p>
+    <p>At the end of each trade, the real outcome is compared with what the scanner predicted. That comparison is the whole point.</p>
+  </section>
+
+  <section>
+    <h2><span class="ic">🔍</span> Why the Backtest Is Not Enough</h2>
+    <p>Backtesting looks backward and quietly assumes perfect conditions. Paper trading discovers the things the backtest cannot see:</p>
+    <table>
+      <tr><th>Hidden cost</th><th>What it means</th></tr>
+      <tr><td>The spread</td><td>The gap between the <span class="tip" data-tip="The highest price a buyer will pay (bid) and the lowest price a seller will accept (ask). You buy at the higher one and sell at the lower one.">buying and selling price</span>. The backtest uses one closing price; real trades pay the spread twice, once in and once out.</td></tr>
+      <tr><td>Slippage</td><td>The order fills at a slightly worse price than expected, especially on thinly-traded names.</td></tr>
+      <tr><td>Late rebounds</td><td>A stock that historically recovered in 4 days might take 12 this time, tying up the capital and pushing back the next trade.</td></tr>
+      <tr><td>Dividend changes</td><td>A company can cut or cancel a dividend after the plan was built around it.</td></tr>
+      <tr><td>Order problems</td><td>An order that does not fill at all, or only partially, before the ex-date cutoff.</td></tr>
+    </table>
+    <div class="note"><strong>Why this matters here more than usual:</strong> dividend capture earns pennies per share. A strategy targeting roughly 1% of the capital per month has a thin margin, and the costs above are exactly the kind that can quietly eat a thin margin. With this strategy, execution quality is not a detail, it is the strategy.</div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🗺️</span> The Plan</h2>
+    <p>Paper trading doubles as the first step of Stage 2, because Interactive Brokers gives every account a free simulated mode that uses the identical connection as live trading. The automation gets built once and later flips from pretend money to real money with a switch.</p>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Open the simulated account</div>
+        <div class="step-desc">An <span class="tip" data-tip="A brokerage platform used to buy and sell stocks online. One of the most popular among active traders.">Interactive Brokers</span> paper account funded with the same pretend amount the Rotation Plan uses, so the results are directly comparable.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Trade the Rotation Plan as written</div>
+        <div class="step-desc">Each morning the scanner produces its plan. The paper account follows it: buy on the planned day, hold through the <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-date</span>, sell once the price is back to even.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Record predicted vs. actual</div>
+        <div class="step-desc">For every completed trade: the fill prices, the days actually held, the dividend actually received, and the net result next to what the scanner predicted.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Review and adjust</div>
+        <div class="step-desc">If reality consistently lands below the prediction, find out which hidden cost is responsible and teach the scanner about it, so the numbers stay honest.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="ic">🎯</span> What Success Looks Like</h2>
+    <ul class="list">
+      <li>One to two months of trades executed exactly as the Rotation Plan scheduled them.</li>
+      <li>The actual net results land inside the predicted range (the 35% to 25% tax columns), or close enough that the gap is explained and priced in.</li>
+      <li>No surprises that the scanner could have known about: every miss gets a cause and, where possible, a fix.</li>
+    </ul>
+    <p>Only after that does it make sense to commit real capital, and especially borrowed capital, where a flaw would cost real interest on top of real losses.</p>
+    <div class="note"><strong>An honest caveat:</strong> a month or two of paper trading is a small sample. It cannot prove the strategy works in every market. What it can do is catch the practical flaws that backtesting is blind to, cheaply, before they cost anything.</div>
+  </section>
+
+  <section>
+    <h2><span class="ic">📒</span> Results So Far</h2>
+    <p>No paper trades have been completed yet. This section will fill in as they happen, one row per completed trade: predicted net next to actual net, and the reason for any gap.</p>
+  </section>
+
+  <footer>
+    <p>Dividend Capture Scanner v7 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
