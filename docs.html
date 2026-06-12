@@ -194,7 +194,7 @@
     <a href="docs.html" class="active">Documentation</a>
     <a href="changelog.html">Changelog</a>
     <a href="paper-trading.html">Paper Trading</a>
-    <a href="dividend_scanner_v7.py" download>Download Scanner</a>
+    <a href="dividend_scanner_v8.py" download>Download Scanner</a>
   </div>
 
   <header>
@@ -240,7 +240,7 @@
     <h2><span class="ic">▶️</span> 3. Running the Scanner</h2>
     <p>Open PowerShell or Command Prompt, go to the folder where you saved the scanner, and run it. Replace the path with your actual folder location.</p>
     <div class="code-block">cd "C:\Users\YourName\Documents\stock scanner"
-python dividend_scanner_v7.py</div>
+python dividend_scanner_v8.py</div>
     <p>It scans roughly 576 stocks in parallel and runs a rebound analysis on every stock that passes the filters, finishing in about 1 to 2 minutes. When it finishes, the ranked list prints in the window and is saved in the same folder in two formats: a plain <code>candidates_YYYYMMDD.csv</code> and a formatted <code>candidates_YYYYMMDD.xlsx</code> for Excel, with a bold locked header row and sized columns so it is easy to read.</p>
     <div class="note"><strong>Tip:</strong> Close any open <code>candidates_*.csv</code> or <code>candidates_*.xlsx</code> file before running, otherwise the scanner cannot save the new one.</div>
     <h3>Automatic morning run</h3>
@@ -358,12 +358,12 @@ schtasks /change /tn "DividendScannerDaily" /enable</div>
     </table>
     <p>When the capital is free, the plan looks at the candidates that can be bought within the next 5 trading days and takes the one with the best score, so the money never sits idle waiting for a distant trade.</p>
     <h3>The visual calendar</h3>
-    <p>Each run also saves <code>rotation_calendar.html</code> in the same folder. Open it in any browser to see the plan as a month-grid calendar: each trade has its own colour, the buy, ex-date, sell, and cash-free days are labelled, and the days in between are tinted so you can see exactly when the money is occupied and when it is free for the next trade. Like the CSV and Excel files, it stays on your computer and is never uploaded.</p>
+    <p>Each run also saves a dated <code>rotation_calendar_YYYYMMDD.html</code> in the same folder, matching the CSV and Excel filenames, so each day's plan is kept as a record. Open it in any browser to see the plan as a month-grid calendar: each trade has its own colour, the buy, ex-date, sell, and cash-free days are labelled, and the days in between are tinted so you can see exactly when the money is occupied and when it is free for the next trade. Like the CSV and Excel files, it stays on your computer and is never uploaded.</p>
   </section>
 
   <section id="config">
     <h2><span class="ic">⚙️</span> 9. Configuration</h2>
-    <p>All the filter settings live at the top of <code>dividend_scanner_v7.py</code> and can be changed at any time:</p>
+    <p>All the filter settings live at the top of <code>dividend_scanner_v8.py</code> and can be changed at any time:</p>
     <div class="code-block">MIN_ANNUAL_YIELD     = 0.03      # 3% floor
 MIN_AVG_VOLUME       = 100_000   # shares per day
 MIN_STOCK_PRICE      = 5.0       # dollars
@@ -386,7 +386,7 @@ FINANCE_FEE          = 0.00      # cut taken by a trade-financing company, if an
   </section>
 
   <footer>
-    <p>Dividend Capture Scanner v7 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
+    <p>Dividend Capture Scanner v8 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
   </footer>
 
 </div>

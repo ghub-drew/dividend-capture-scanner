@@ -656,12 +656,12 @@
   <a href="docs.html">Documentation</a>
   <a href="changelog.html">Changelog</a>
   <a href="paper-trading.html">Paper Trading</a>
-  <a href="dividend_scanner_v7.py" download>Download Scanner</a>
+  <a href="dividend_scanner_v8.py" download>Download Scanner</a>
 </div>
 
 <header>
   <div class="eyebrow">Strategy Overview</div>
-  <h1>Dividend Capture Scanner <span style="font-size:0.95rem;font-weight:700;color:#4a90d9;vertical-align:middle;background:#1e3a5f33;border:1px solid #1d4ed855;border-radius:20px;padding:2px 12px;letter-spacing:0.04em;">v7</span></h1>
+  <h1>Dividend Capture Scanner <span style="font-size:0.95rem;font-weight:700;color:#4a90d9;vertical-align:middle;background:#1e3a5f33;border:1px solid #1d4ed855;border-radius:20px;padding:2px 12px;letter-spacing:0.04em;">v8</span></h1>
   <div style="font-size:0.82rem;color:#d4a017;margin-top:6px;margin-bottom:2px;letter-spacing:0.06em;font-weight:500;">Developed by Andrew D.</div>
   <p>A systematic approach to collecting <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span> income by timing stock purchases around <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend dates</span>.</p>
 </header>
@@ -773,10 +773,10 @@
     </button>
     <div class="panel-body">
 
-      <a href="dividend_scanner_v7.py" download class="download-btn">
-        <span>&#8595;</span> Download dividend_scanner_v7.py
+      <a href="dividend_scanner_v8.py" download class="download-btn">
+        <span>&#8595;</span> Download dividend_scanner_v8.py
       </a>
-      <div style="font-size:0.76rem;color:#64748b;margin-bottom:8px;">Latest version. New in v7: every after-tax figure is shown at two tax rates side by side, 35% and 25%, since the real rate depends on deductions and the year's tax rules.</div>
+      <div style="font-size:0.76rem;color:#64748b;margin-bottom:8px;">Latest version. New in v8: the visual calendar is saved with the date in its filename (rotation_calendar_YYYYMMDD.html), matching the daily CSV and Excel files, so each day's plan is kept as a record.</div>
 
       <div class="run-steps">
 
@@ -803,7 +803,7 @@
           <div class="run-content">
             <div class="run-title">Run the scanner</div>
             <div class="run-desc">Scans roughly 576 stocks (the S&amp;P 500 plus high-yield names, CEFs, and preferreds). Takes about 1 to 2 minutes to complete.</div>
-            <div class="code-block">python dividend_scanner_v7.py</div>
+            <div class="code-block">python dividend_scanner_v8.py</div>
           </div>
         </div>
 
@@ -814,7 +814,7 @@
             <div class="run-desc">The ranked shortlist prints in the <span class="tip" data-tip="The text window where commands are typed and results are shown.">terminal</span> and is saved in the same folder in two formats: a dated <span class="tip" data-tip="A simple spreadsheet file that can be opened in Excel or Google Sheets.">CSV</span> and a formatted Excel file with a bold locked header and sized columns, ready to read.</div>
             <div class="code-block">candidates_YYYYMMDD.csv
 candidates_YYYYMMDD.xlsx
-rotation_calendar.html</div>
+rotation_calendar_YYYYMMDD.html</div>
           </div>
         </div>
 
@@ -838,7 +838,7 @@ rotation_calendar.html</div>
       </div>
 
       <div class="run-note">
-        <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner_v7.py</code> and can be adjusted at any time.
+        <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner_v8.py</code> and can be adjusted at any time.
       </div>
     </div>
   </div>
@@ -995,7 +995,7 @@ rotation_calendar.html</div>
               <div class="sw-sub">Ready to review</div>
             </div>
           </div>
-          <div class="sw-body">The top candidates are displayed in a ranked table and saved to a file so you can review and compare them each day. Each row shows the yield, the average and worst-case rebound, the best entry timing, the real ex-date drop, the trend, the after-tax dividend per 100-share lot (shown at two tax rates, 35% and 25%), and the overall score. The scanner also builds a Rotation Plan: a trade calendar that rolls one pot of capital (default $50,000, adjustable) from one dividend into the next. It buys on each stock's best entry day, sells at its average rebound, and shows the estimated net dollars per trade after tax (at both rates) and any financing fee, with running totals. The plan prints below the shortlist, is saved as a second sheet in the Excel file, and is also saved as rotation_calendar.html, a colour-coded month-grid calendar that opens in any browser.</div>
+          <div class="sw-body">The top candidates are displayed in a ranked table and saved to a file so you can review and compare them each day. Each row shows the yield, the average and worst-case rebound, the best entry timing, the real ex-date drop, the trend, the after-tax dividend per 100-share lot (shown at two tax rates, 35% and 25%), and the overall score. The scanner also builds a Rotation Plan: a trade calendar that rolls one pot of capital (default $50,000, adjustable) from one dividend into the next. It buys on each stock's best entry day, sells at its average rebound, and shows the estimated net dollars per trade after tax (at both rates) and any financing fee, with running totals. The plan prints below the shortlist, is saved as a second sheet in the Excel file, and is also saved as a dated rotation_calendar_YYYYMMDD.html, a colour-coded month-grid calendar that opens in any browser.</div>
           <div class="output-preview">
             <table>
               <thead>

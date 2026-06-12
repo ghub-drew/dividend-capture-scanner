@@ -1,5 +1,5 @@
 """
-Dividend Capture Scanner  (v7)
+Dividend Capture Scanner  (v8)
 Pulls upcoming ex-dividend dates from Yahoo Finance and ranks the best
 dividend-capture candidates.
 
@@ -508,10 +508,11 @@ def build_rotation_plan(df: pd.DataFrame, today: datetime) -> pd.DataFrame:
     return plan_df
 
 
-def save_calendar_html(plan_df: pd.DataFrame, today: datetime, out_file: str = "rotation_calendar.html"):
+def save_calendar_html(plan_df: pd.DataFrame, today: datetime, out_file: str):
     """
-    Visual month-grid calendar of the rotation plan, saved as a local HTML
-    file that opens in any browser. Each trade gets its own colour; buy,
+    Visual month-grid calendar of the rotation plan, saved as a dated local
+    HTML file (rotation_calendar_YYYYMMDD.html, matching the CSV and Excel
+    outputs) that opens in any browser. Each trade gets its own colour; buy,
     ex-date, sell, and cash-free days are labelled, and the days in between
     are tinted so it is obvious when the capital is occupied.
     """
@@ -642,7 +643,7 @@ def save_excel(shown: pd.DataFrame, plan_df: pd.DataFrame, out_file: str):
 
 def run_scanner():
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    print(f"\nDividend Capture Scanner v7 - {today.strftime('%Y-%m-%d')}")
+    print(f"\nDividend Capture Scanner v8 - {today.strftime('%Y-%m-%d')}")
     print(f"Looking for ex-dates within the next {EX_DATE_WINDOW_DAYS} days")
     print(f"After-tax figures shown at two rates: {TAX_RATE_HIGH:.0%} (conservative) and {TAX_RATE_LOW:.0%} (optimistic)")
     fee_note = f", financing fee {FINANCE_FEE:.0%}" if FINANCE_FEE > 0 else ""
@@ -737,11 +738,12 @@ def run_scanner():
         print(f"  Buy = the stock's own back-tested Best Entry day. Est. Sell = ex-date plus its")
         print(f"  average rebound. Cash Free = one settlement day after the sale (T+{SETTLEMENT_DAYS}).")
         print(f"  Worst Reb shows the honest risk: the longest that stock has ever taken to recover.")
+        cal_file = f"rotation_calendar_{today.strftime('%Y%m%d')}.html"
         try:
-            save_calendar_html(plan_df, today)
-            print(f"\nSaved to rotation_calendar.html (visual calendar - open it in any browser)")
+            save_calendar_html(plan_df, today, cal_file)
+            print(f"\nSaved to {cal_file} (visual calendar - open it in any browser)")
         except PermissionError:
-            print(f"\nCould not save rotation_calendar.html - close it in the browser/editor and rerun.")
+            print(f"\nCould not save {cal_file} - close it in the browser/editor and rerun.")
     else:
         print("\nNo rotation plan could be built (no candidates with reliable rebound history).")
 
