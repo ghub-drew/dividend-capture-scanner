@@ -336,13 +336,8 @@
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-body">
-        <div class="step-title">Install the Interactive Brokers program</div>
-        <div class="step-desc">A program from Interactive Brokers has to run on the computer. It is the doorway: trades go in through it, whether a person types them or the scanner sends them. There are two versions of the doorway, and we will use both, at different times:
-          <ul class="list" style="margin-top:8px;">
-            <li><a href="https://www.interactivebrokers.com/en/trading/tws.php" target="_blank" rel="noopener" style="color:#93c5fd;">Trader Workstation</a> is the full trading app, with charts and buy/sell buttons. We use this first, in Phase 1, when the trades are placed by hand.</li>
-            <li><a href="https://www.interactivebrokers.com/en/trading/ibgateway-stable.php" target="_blank" rel="noopener" style="color:#93c5fd;">IB Gateway</a> is the same doorway with no screens at all. We switch to this in Phase 2, when the scanner places the trades by itself and nobody needs to watch.</li>
-          </ul>
-          Both ask for the account login when they open, so this step waits on step 1. The login screen has a simple choice: Paper Trading or Live. That choice is the switch between pretend money and real money.</div>
+        <div class="step-title">Install the bridge software</div>
+        <div class="step-desc">IB Gateway is a small program that runs on the computer and connects the scanner to Interactive Brokers. The paper account and the live account use different connection ports, which is literally the switch between pretend and real money. For the manual phase, <a href="https://www.interactivebrokers.com/en/trading/tws.php" target="_blank" rel="noopener" style="color:#93c5fd;">Trader Workstation</a> is the better fit, since orders are placed by hand and it shows charts and positions. For the automation phase, the lightweight <a href="https://www.interactivebrokers.com/en/trading/ibgateway-stable.php" target="_blank" rel="noopener" style="color:#93c5fd;">IB Gateway</a> is all that is needed. Both require the account login, so this step waits on step 1.</div>
       </div>
     </div>
 
