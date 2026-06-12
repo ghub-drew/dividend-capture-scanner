@@ -275,6 +275,49 @@
     <h2><span class="ic">🗺️</span> The Plan, In Detail</h2>
     <p>Paper trading doubles as the first step of Stage 2, because Interactive Brokers gives every account a free simulated mode that uses the identical connection as live trading. The automation gets built once and later flips from pretend money to real money with a switch. The work breaks into four phases.</p>
 
+    <h3>Where the scanner fits</h3>
+    <p>The scanner is the brain of the whole plan. It is the only component that makes decisions; everything else just carries them out and measures the result. Whether the orders are placed by hand (Phase 1) or by the automation (Phase 2), the instructions always come from the scanner's morning Rotation Plan, and every actual result is compared back against what the scanner predicted.</p>
+    <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;margin:14px 0;" role="img" aria-label="Diagram: the scanner decides, the Rotation Plan carries the instructions, the execution layer places the orders at Interactive Brokers, and the results feed back to calibrate the scanner.">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a90d9"/>
+        </marker>
+        <marker id="arrowAmber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24"/>
+        </marker>
+      </defs>
+      <!-- top row boxes -->
+      <rect x="10" y="40" width="160" height="80" rx="12" fill="#1e3a5f33" stroke="#4a90d9" stroke-width="1.5"/>
+      <text x="90" y="72" text-anchor="middle" fill="#93c5fd" font-size="15" font-weight="700" font-family="Segoe UI, system-ui, sans-serif">The Scanner</text>
+      <text x="90" y="94" text-anchor="middle" fill="#94a3b8" font-size="11.5" font-family="Segoe UI, system-ui, sans-serif">decides, every morning</text>
+
+      <rect x="208" y="40" width="160" height="80" rx="12" fill="#0f1117" stroke="#252d3d" stroke-width="1.5"/>
+      <text x="288" y="72" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="700" font-family="Segoe UI, system-ui, sans-serif">Rotation Plan</text>
+      <text x="288" y="94" text-anchor="middle" fill="#94a3b8" font-size="11.5" font-family="Segoe UI, system-ui, sans-serif">the instructions</text>
+
+      <rect x="406" y="40" width="160" height="80" rx="12" fill="#0f1117" stroke="#252d3d" stroke-width="1.5"/>
+      <text x="486" y="66" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="700" font-family="Segoe UI, system-ui, sans-serif">Execution</text>
+      <text x="486" y="86" text-anchor="middle" fill="#94a3b8" font-size="11.5" font-family="Segoe UI, system-ui, sans-serif">by hand (Phase 1)</text>
+      <text x="486" y="102" text-anchor="middle" fill="#94a3b8" font-size="11.5" font-family="Segoe UI, system-ui, sans-serif">automated (Phase 2)</text>
+
+      <rect x="604" y="40" width="146" height="80" rx="12" fill="#0f1117" stroke="#252d3d" stroke-width="1.5"/>
+      <text x="677" y="66" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="700" font-family="Segoe UI, system-ui, sans-serif">IBKR</text>
+      <text x="677" y="86" text-anchor="middle" fill="#94a3b8" font-size="11.5" font-family="Segoe UI, system-ui, sans-serif">paper account,</text>
+      <text x="677" y="102" text-anchor="middle" fill="#94a3b8" font-size="11.5" font-family="Segoe UI, system-ui, sans-serif">real market prices</text>
+
+      <!-- forward arrows -->
+      <line x1="170" y1="80" x2="204" y2="80" stroke="#4a90d9" stroke-width="2" marker-end="url(#arrow)"/>
+      <line x1="368" y1="80" x2="402" y2="80" stroke="#4a90d9" stroke-width="2" marker-end="url(#arrow)"/>
+      <line x1="566" y1="80" x2="600" y2="80" stroke="#4a90d9" stroke-width="2" marker-end="url(#arrow)"/>
+
+      <!-- feedback loop -->
+      <path d="M 677 120 L 677 190 L 100 190 L 100 124" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrowAmber)"/>
+      <rect x="248" y="168" width="280" height="44" rx="10" fill="#2d2310" stroke="#b4530955" stroke-width="1.5"/>
+      <text x="388" y="186" text-anchor="middle" fill="#fbbf24" font-size="12.5" font-weight="700" font-family="Segoe UI, system-ui, sans-serif">Predicted vs. actual</text>
+      <text x="388" y="203" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="Segoe UI, system-ui, sans-serif">real costs get built back into the scanner's math</text>
+    </svg>
+    <p>This separation is deliberate. Smarter exits and trend signals get added to the scanner's logic; the execution layer stays simple forever, because simple code is the kind that can be trusted with money. And when Stage 2 eventually flips to real dollars, the only component that was ever making decisions is the one that spent months being checked against reality.</p>
+
     <h3>Phase 0: Account setup (one-time, mostly waiting)</h3>
     <div class="step">
       <div class="step-num">1</div>
