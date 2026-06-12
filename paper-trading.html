@@ -272,36 +272,111 @@
   </section>
 
   <section>
-    <h2><span class="ic">🗺️</span> The Plan</h2>
-    <p>Paper trading doubles as the first step of Stage 2, because Interactive Brokers gives every account a free simulated mode that uses the identical connection as live trading. The automation gets built once and later flips from pretend money to real money with a switch.</p>
+    <h2><span class="ic">🗺️</span> The Plan, In Detail</h2>
+    <p>Paper trading doubles as the first step of Stage 2, because Interactive Brokers gives every account a free simulated mode that uses the identical connection as live trading. The automation gets built once and later flips from pretend money to real money with a switch. The work breaks into four phases.</p>
+
+    <h3>Phase 0: Account setup (one-time, mostly waiting)</h3>
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
-        <div class="step-title">Open the simulated account</div>
-        <div class="step-desc">An <span class="tip" data-tip="A brokerage platform used to buy and sell stocks online. One of the most popular among active traders.">Interactive Brokers</span> paper account funded with the same pretend amount the Rotation Plan uses, so the results are directly comparable.</div>
+        <div class="step-title">Enable the paper account</div>
+        <div class="step-desc">Every <span class="tip" data-tip="A brokerage platform used to buy and sell stocks online. One of the most popular among active traders.">Interactive Brokers</span> account comes with a free simulated twin. It gets switched on in the account settings.</div>
       </div>
     </div>
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
-        <div class="step-title">Trade the Rotation Plan as written</div>
-        <div class="step-desc">Each morning the scanner produces its plan. The paper account follows it: buy on the planned day, hold through the <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-date</span>, sell once the price is back to even.</div>
+        <div class="step-title">Match the starting cash</div>
+        <div class="step-desc">The simulated cash is set to the same $50,000 the Rotation Plan uses. If the balances differ, the results are not comparable, and comparing is the whole point.</div>
       </div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-body">
-        <div class="step-title">Record predicted vs. actual</div>
-        <div class="step-desc">For every completed trade: the fill prices, the days actually held, the dividend actually received, and the net result next to what the scanner predicted.</div>
+        <div class="step-title">Install the bridge software</div>
+        <div class="step-desc">IB Gateway is a small program that runs on the computer and connects the scanner to Interactive Brokers. The paper account and the live account use different connection ports, which is literally the switch between pretend and real money.</div>
+      </div>
+    </div>
+
+    <h3>Phase 1: Manual paper trading (can start almost immediately)</h3>
+    <p>Nothing needs to be built to start collecting real validation data. The scanner already says what to do each morning.</p>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Follow the morning plan by hand</div>
+        <div class="step-desc">The scanner runs each morning and produces its Rotation Plan. The buys and sells are placed by hand in the paper account, exactly as the plan says: buy on the planned day, hold through the <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-date</span>, sell once the price is back to even.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Log five numbers per trade</div>
+        <div class="step-desc">Planned buy price vs. actual fill, planned sell day vs. actual sell day, the dividend received, the net result, and the scanner's predicted net. That log becomes the Results section below.</div>
+      </div>
+    </div>
+    <p>This starts producing answers in the first week, while the automation in Phase 2 is built in parallel.</p>
+
+    <h3>Phase 2: The automation (the real Stage 2 build)</h3>
+    <p>Built and tested against the paper account, piece by piece:</p>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Connector</div>
+        <div class="step-desc">The scanner connects to Interactive Brokers, reads the account balance, and sees the current positions.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Order placement</div>
+        <div class="step-desc">The day's Rotation Plan is read automatically and the buy order is placed for the scheduled trade. It starts with simple <span class="tip" data-tip="An order that only fills at your chosen price or better, so you never pay more than you intended.">limit orders</span>; smarter algorithmic order types can be added later to chase better fills.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Exit monitor</div>
+        <div class="step-desc">The position is checked every day and the sell is placed once the price is back to break even. This is also where smarter exit logic can live later, such as holding a little longer when the trend is still moving up instead of selling at the first break-even moment.</div>
       </div>
     </div>
     <div class="step">
       <div class="step-num">4</div>
       <div class="step-body">
-        <div class="step-title">Review and adjust</div>
-        <div class="step-desc">If reality consistently lands below the prediction, find out which hidden cost is responsible and teach the scanner about it, so the numbers stay honest.</div>
+        <div class="step-title">Automatic trade log</div>
+        <div class="step-desc">Every fill is written down automatically: predicted vs. actual, with the gap. No memory, no spreadsheet discipline required.</div>
       </div>
     </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Safety rails</div>
+        <div class="step-desc">The boring but critical part: what happens if an order does not fill before the ex-date cutoff (cancel, do not chase), if the data sources disagree on a price, or if the computer was off that morning.</div>
+      </div>
+    </div>
+
+    <h3>Phase 3: Evaluate and decide (after 1 to 2 months of completed trades)</h3>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Compare against the prediction</div>
+        <div class="step-desc">The actual net per trade is held up against the predicted range (the 35% and 25% tax columns).</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Explain every gap</div>
+        <div class="step-desc">Each miss gets a cause: the spread, slippage, a slow rebound, a dividend change. Costs that turn out to be real and repeatable get built into the scanner's math so the predictions stay honest.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">The decision gate</div>
+        <div class="step-desc">If the actual results land inside or near the predicted range, the switch flips to real money, starting small. If they consistently miss, the flaw was found for free, and it gets fixed or rethought before any real dollars, and especially before any borrowed ones.</div>
+      </div>
+    </div>
+    <div class="note"><strong>The one dependency:</strong> Phase 0 needs an Interactive Brokers account to exist. Everything after that can proceed without risking a cent.</div>
   </section>
 
   <section>
