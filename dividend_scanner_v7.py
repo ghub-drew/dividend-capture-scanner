@@ -1,5 +1,5 @@
 """
-Dividend Capture Scanner  (v6)
+Dividend Capture Scanner  (v7)
 Pulls upcoming ex-dividend dates from Yahoo Finance and ranks the best
 dividend-capture candidates.
 
@@ -21,7 +21,10 @@ What it looks at:
   - Liquidity             : flags thinly-traded names that are harder to exit.
   - Round-lot economics   : dividend dollars and capital required per 100 shares.
   - After-tax gain        : dividend-capture trades are short-term, taxed as
-                            ordinary income (see TAX_RATE below).
+                            ordinary income. The exact rate depends on
+                            deductions and the year's tax rules, so every
+                            after-tax figure is shown at two rates side by
+                            side (see TAX_RATE_HIGH / TAX_RATE_LOW below).
   - Annualised efficiency : models continuous capital rotation - hold for the
                             rebound, sell at even-or-better, redeploy into the
                             next dividend. Failed recoveries are charged at the
@@ -98,12 +101,23 @@ MAX_STOCK_PRICE      = 500.0     # dollars
 EX_DATE_WINDOW_DAYS  = 30        # how far ahead to look (wide enough to plan rotations)
 
 # ─── Economics / tax config ───
-TAX_RATE        = 0.40   # Short-term / ordinary-income rate. Dividend-capture
-                         # trades are too short to qualify for the lower 15-20%
-                         # long-term capital-gains rate. Adjust to your bracket.
+# Dividend-capture trades are too short for the lower long-term capital-gains
+# rate, so they are taxed as ordinary income. The exact rate depends on
+# deductions and the year's tax rules, so every after-tax figure is shown at
+# TWO rates side by side. The scoring math uses the higher (conservative) one.
+TAX_RATE_HIGH   = 0.35   # conservative estimate of the effective rate
+TAX_RATE_LOW    = 0.25   # optimistic estimate of the effective rate
 ROUND_LOT       = 100    # shares - round lots are far easier to sell than odd lots
 BUY_BUFFER_DAYS = 2      # days capital is tied up before the ex-date (rotation calc)
 TRADING_DAYS    = 252    # trading days per year
+
+# Column labels follow the rates above, so changing a rate renames the columns.
+COL_AT_HIGH  = f"AfterTax{int(TAX_RATE_HIGH * 100)}/100"
+COL_AT_LOW   = f"AfterTax{int(TAX_RATE_LOW * 100)}/100"
+COL_NET_HIGH = f"Net {int(TAX_RATE_HIGH * 100)}% $"
+COL_NET_LOW  = f"Net {int(TAX_RATE_LOW * 100)}% $"
+COL_RUN_HIGH = f"Running {int(TAX_RATE_HIGH * 100)}% $"
+COL_RUN_LOW  = f"Running {int(TAX_RATE_LOW * 100)}% $"
 
 # ─── Rotation-plan config ───
 CAPITAL         = 50_000  # dollars available to rotate from trade to trade
@@ -325,17 +339,19 @@ def fetch_candidate(ticker: str, today: datetime):
         trend = compute_trend(hist)
         liq = liquidity_label(avg_volume)
 
-        # Round-lot economics
+        # Round-lot economics, after tax at both rates
         capital = price * ROUND_LOT
         div_dollars = div_per_capture * ROUND_LOT
-        aftertax_dollars = div_dollars * (1 - TAX_RATE)
+        aftertax_high = div_dollars * (1 - TAX_RATE_HIGH)
+        aftertax_low = div_dollars * (1 - TAX_RATE_LOW)
 
         # Annualised efficiency (models continuous capital rotation).
         # Uses expected_days, which charges failed recoveries at the full
         # 60-day wait, so unreliable rebounds drag the number down honestly.
+        # Taxed at the higher (conservative) rate.
         if expected_days is not None:
             holding = expected_days + BUY_BUFFER_DAYS
-            per_cycle = (div_per_capture * (1 - TAX_RATE)) / price
+            per_cycle = (div_per_capture * (1 - TAX_RATE_HIGH)) / price
             cycles = TRADING_DAYS / max(holding, 1)
             ann_eff = per_cycle * cycles * 100
         else:
@@ -358,7 +374,8 @@ def fetch_candidate(ticker: str, today: datetime):
             "Capture Yield": f"{capture_yield:.2%}",
             "Div/100sh":     round(div_dollars, 2),
             "Capital":       int(round(capital, 0)),
-            "AfterTax/100":  round(aftertax_dollars, 2),
+            COL_AT_HIGH:     round(aftertax_high, 2),
+            COL_AT_LOW:      round(aftertax_low, 2),
             "Avg Reb":       round(avg_reb, 1) if avg_reb is not None else "N/A",
             "Worst Reb":     worst_display if worst_display is not None else "N/A",
             "Recovered":     f"{success:.0%}" if success is not None else "N/A",
@@ -416,7 +433,8 @@ def build_rotation_plan(df: pd.DataFrame, today: datetime) -> pd.DataFrame:
     best Score, so the money never sits idle waiting for a distant trade.
 
     Dollar figures use whole 100-share lots bought with CAPITAL, minus any
-    FINANCE_FEE on the gross dividend, then TAX_RATE on what remains.
+    FINANCE_FEE on the gross dividend, then tax on what remains. Net dollars
+    are shown at both tax rates side by side.
     """
     entries = []
     for _, row in df.iterrows():
@@ -435,15 +453,17 @@ def build_rotation_plan(df: pd.DataFrame, today: datetime) -> pd.DataFrame:
         sell = np.busday_offset(ex, ceil(row["_avg_reb"]), roll="forward")
         free = np.busday_offset(sell, SETTLEMENT_DAYS, roll="forward")
         gross = shares * row["_div"]
-        net = gross * (1 - FINANCE_FEE) * (1 - TAX_RATE)
+        after_fee = gross * (1 - FINANCE_FEE)
+        net_high = after_fee * (1 - TAX_RATE_HIGH)
+        net_low = after_fee * (1 - TAX_RATE_LOW)
         entries.append({
             "ticker": row["Ticker"], "buy": buy, "ex": ex, "sell": sell,
             "free": free, "shares": shares, "cost": shares * row["_price"],
-            "gross": gross, "net": net, "score": row["Score"],
-            "worst": row["_worst"],
+            "gross": gross, "net_high": net_high, "net_low": net_low,
+            "score": row["Score"], "worst": row["_worst"],
         })
 
-    plan, running = [], 0.0
+    plan, running_high, running_low = [], 0.0, 0.0
     free_date = np.datetime64(today.date(), "D")
     while True:
         # A candidate is still buyable as long as the capital frees up at
@@ -462,7 +482,8 @@ def build_rotation_plan(df: pd.DataFrame, today: datetime) -> pd.DataFrame:
         window_end = np.busday_offset(earliest, 5, roll="forward")
         pool = [(ab, e) for ab, e in feasible if ab <= window_end]
         actual_buy, pick = max(pool, key=lambda p: p[1]["score"])
-        running += pick["net"]
+        running_high += pick["net_high"]
+        running_low += pick["net_low"]
         plan.append({
             "Buy":        str(actual_buy),
             "Ticker":     pick["ticker"],
@@ -473,8 +494,10 @@ def build_rotation_plan(df: pd.DataFrame, today: datetime) -> pd.DataFrame:
             "Shares":     pick["shares"],
             "Cost $":     int(round(pick["cost"])),
             "Gross Div $": round(pick["gross"], 2),
-            "Net $":      round(pick["net"], 2),
-            "Running Net $": round(running, 2),
+            COL_NET_HIGH: round(pick["net_high"], 2),
+            COL_NET_LOW:  round(pick["net_low"], 2),
+            COL_RUN_HIGH: round(running_high, 2),
+            COL_RUN_LOW:  round(running_low, 2),
         })
         free_date = pick["free"]
         entries = [e for e in entries if e["ticker"] != pick["ticker"]]
@@ -526,7 +549,8 @@ def save_calendar_html(plan_df: pd.DataFrame, today: datetime, out_file: str = "
         if m == 13:
             y, m = y + 1, 1
 
-    total = plan_df["Running Net $"].iloc[-1]
+    total_high = plan_df[COL_RUN_HIGH].iloc[-1]
+    total_low = plan_df[COL_RUN_LOW].iloc[-1]
     parts = [f"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <title>Rotation Plan Calendar</title><style>
 body{{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f0;padding:30px 16px;}}
@@ -544,11 +568,11 @@ td .n{{font-weight:600;color:#94a3b8;}}
 .we{{background:#12151e;}}
 </style></head><body><div class="wrap">
 <h1>Rotation Plan Calendar</h1>
-<div class="sub">Generated {today.strftime('%Y-%m-%d')} &middot; ${CAPITAL:,} rolled from trade to trade &middot; {TAX_RATE:.0%} tax &middot; estimated total net ${total:,.2f}</div>
+<div class="sub">Generated {today.strftime('%Y-%m-%d')} &middot; ${CAPITAL:,} rolled from trade to trade &middot; estimated total net ${total_high:,.2f} at {TAX_RATE_HIGH:.0%} tax, ${total_low:,.2f} at {TAX_RATE_LOW:.0%} tax</div>
 <div class="legend">"""]
     for i, row in plan_df.iterrows():
         color = palette[(int(i) - 1) % len(palette)]
-        parts.append(f'<span><span class="dot" style="background:{color};"></span>{row["Ticker"]} (net ${row["Net $"]:,.2f})</span>')
+        parts.append(f'<span><span class="dot" style="background:{color};"></span>{row["Ticker"]} (net ${row[COL_NET_HIGH]:,.2f} to ${row[COL_NET_LOW]:,.2f})</span>')
     parts.append('</div>')
 
     for (yy, mm) in months:
@@ -573,7 +597,8 @@ td .n{{font-weight:600;color:#94a3b8;}}
         parts.append('</table>')
 
     parts.append('<div class="sub">Tinted days = the capital is occupied by that trade. '
-                 'Sell days are estimates based on each stock\'s average rebound time.</div>')
+                 'Sell days are estimates based on each stock\'s average rebound time. '
+                 f'Net figures show a range: taxed at {TAX_RATE_HIGH:.0%} (conservative) to {TAX_RATE_LOW:.0%} (optimistic).</div>')
     parts.append('</div></body></html>')
 
     with open(out_file, "w", encoding="utf-8") as f:
@@ -617,9 +642,9 @@ def save_excel(shown: pd.DataFrame, plan_df: pd.DataFrame, out_file: str):
 
 def run_scanner():
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    print(f"\nDividend Capture Scanner v6 - {today.strftime('%Y-%m-%d')}")
+    print(f"\nDividend Capture Scanner v7 - {today.strftime('%Y-%m-%d')}")
     print(f"Looking for ex-dates within the next {EX_DATE_WINDOW_DAYS} days")
-    print(f"Tax rate assumed: {TAX_RATE:.0%} (short-term / ordinary income)")
+    print(f"After-tax figures shown at two rates: {TAX_RATE_HIGH:.0%} (conservative) and {TAX_RATE_LOW:.0%} (optimistic)")
     fee_note = f", financing fee {FINANCE_FEE:.0%}" if FINANCE_FEE > 0 else ""
     print(f"Rotation capital: ${CAPITAL:,}{fee_note}\n")
 
@@ -663,7 +688,8 @@ def run_scanner():
 
     display_cols = [
         "Ticker", "Name", "Price", "Ex-Date", "Days Until",
-        "Annual Yield", "Capture Yield", "Div/100sh", "Capital", "AfterTax/100",
+        "Annual Yield", "Capture Yield", "Div/100sh", "Capital",
+        COL_AT_HIGH, COL_AT_LOW,
         "Avg Reb", "Worst Reb", "Recovered", "Best Entry", "Drop Ratio",
         "Trend", "Liquidity", "Beta", "Ann.Eff%", "Score",
     ]
@@ -679,7 +705,8 @@ def run_scanner():
     print(f"  Capture Yield = single dividend payment as % of price (what you collect per trade)")
     print(f"  Div/100sh     = dividend dollars for one 100-share round lot")
     print(f"  Capital       = cost of 100 shares")
-    print(f"  AfterTax/100  = dividend dollars per 100 shares after {TAX_RATE:.0%} tax")
+    print(f"  {COL_AT_HIGH}= dividend dollars per 100 shares after {TAX_RATE_HIGH:.0%} tax (the conservative estimate)")
+    print(f"  {COL_AT_LOW}= the same after {TAX_RATE_LOW:.0%} tax (the optimistic estimate)")
     print(f"  Avg/Worst Reb = average and worst-case trading days to recover to the pre-ex price")
     print(f"                  ('>{REBOUND_MAX_DAYS}' means at least one past event never recovered in the window)")
     print(f"  Recovered     = how often it recovered within {REBOUND_MAX_DAYS} trading days")
@@ -689,21 +716,24 @@ def run_scanner():
     print(f"                  (1.0 = drops the full dividend; below 1.0 = drops less, which is good)")
     print(f"  Trend         = total-return price trend (Up / Down / Mixed). Downtrends are discouraged.")
     print(f"  Liquidity     = Thin / Moderate / High (thin = harder to exit)")
-    print(f"  Ann.Eff%      = theoretical annualised after-tax return with continuous rotation;")
-    print(f"                  failed recoveries are charged at the full {REBOUND_MAX_DAYS}-day wait")
+    print(f"  Ann.Eff%      = theoretical annualised after-tax return with continuous rotation,")
+    print(f"                  taxed at {TAX_RATE_HIGH:.0%}; failed recoveries are charged at the full {REBOUND_MAX_DAYS}-day wait")
     print(f"  Score         = Ann.Eff% adjusted down for downtrend and thin liquidity")
 
     plan_df = build_rotation_plan(df, today)
     if not plan_df.empty:
-        total_net = plan_df["Net $"].iloc[-1] if "Running Net $" not in plan_df else plan_df["Running Net $"].iloc[-1]
+        total_high = plan_df[COL_RUN_HIGH].iloc[-1]
+        total_low = plan_df[COL_RUN_LOW].iloc[-1]
         print(f"\n{'='*130}")
-        print(f"  ROTATION PLAN  (${CAPITAL:,} rolled from trade to trade, "
-              f"{TAX_RATE:.0%} tax{', ' + format(FINANCE_FEE, '.0%') + ' financing fee' if FINANCE_FEE > 0 else ''})")
+        print(f"  ROTATION PLAN  (${CAPITAL:,} rolled from trade to trade, net shown at "
+              f"{TAX_RATE_HIGH:.0%} and {TAX_RATE_LOW:.0%} tax"
+              f"{', ' + format(FINANCE_FEE, '.0%') + ' financing fee' if FINANCE_FEE > 0 else ''})")
         print(f"{'='*130}")
         print(plan_df.to_string())
-        print(f"\n  {len(plan_df)} trades planned over the next {EX_DATE_WINDOW_DAYS} days. "
-              f"Estimated total net: ${total_net:,.2f} "
-              f"({total_net / CAPITAL:.2%} of the capital).")
+        print(f"\n  {len(plan_df)} trades planned over the next {EX_DATE_WINDOW_DAYS} days.")
+        print(f"  Estimated total net: ${total_high:,.2f} at {TAX_RATE_HIGH:.0%} tax "
+              f"({total_high / CAPITAL:.2%} of the capital) to "
+              f"${total_low:,.2f} at {TAX_RATE_LOW:.0%} tax ({total_low / CAPITAL:.2%}).")
         print(f"  Buy = the stock's own back-tested Best Entry day. Est. Sell = ex-date plus its")
         print(f"  average rebound. Cash Free = one settlement day after the sale (T+{SETTLEMENT_DAYS}).")
         print(f"  Worst Reb shows the honest risk: the longest that stock has ever taken to recover.")

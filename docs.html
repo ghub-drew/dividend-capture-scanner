@@ -193,7 +193,7 @@
     <a href="index.html">Home</a>
     <a href="docs.html" class="active">Documentation</a>
     <a href="changelog.html">Changelog</a>
-    <a href="dividend_scanner_v6.py" download>Download Scanner</a>
+    <a href="dividend_scanner_v7.py" download>Download Scanner</a>
   </div>
 
   <header>
@@ -239,7 +239,7 @@
     <h2><span class="ic">▶️</span> 3. Running the Scanner</h2>
     <p>Open PowerShell or Command Prompt, go to the folder where you saved the scanner, and run it. Replace the path with your actual folder location.</p>
     <div class="code-block">cd "C:\Users\YourName\Documents\stock scanner"
-python dividend_scanner_v6.py</div>
+python dividend_scanner_v7.py</div>
     <p>It scans roughly 576 stocks in parallel and runs a rebound analysis on every stock that passes the filters, finishing in about 1 to 2 minutes. When it finishes, the ranked list prints in the window and is saved in the same folder in two formats: a plain <code>candidates_YYYYMMDD.csv</code> and a formatted <code>candidates_YYYYMMDD.xlsx</code> for Excel, with a bold locked header row and sized columns so it is easy to read.</p>
     <div class="note"><strong>Tip:</strong> Close any open <code>candidates_*.csv</code> or <code>candidates_*.xlsx</code> file before running, otherwise the scanner cannot save the new one.</div>
     <h3>Automatic morning run</h3>
@@ -324,7 +324,8 @@ schtasks /change /tn "DividendScannerDaily" /enable</div>
       <tr><td>Capture Yield</td><td>The single dividend payment as a percentage of the price. This is what you actually collect per trade.</td></tr>
       <tr><td>Div/100sh</td><td>The dividend in dollars for one 100-share round lot.</td></tr>
       <tr><td>Capital</td><td>The cost of buying 100 shares.</td></tr>
-      <tr><td>AfterTax/100</td><td>The dividend per 100 shares after tax (default 40%).</td></tr>
+      <tr><td>AfterTax35/100</td><td>The dividend per 100 shares after 35% tax (the conservative estimate).</td></tr>
+      <tr><td>AfterTax25/100</td><td>The dividend per 100 shares after 25% tax (the optimistic estimate).</td></tr>
       <tr><td>Avg Reb</td><td>Average trading days to recover to the pre-dividend price. Lower is better.</td></tr>
       <tr><td>Worst Reb</td><td>Worst-case recovery time over the period. Shows "&gt;60" if any past dividend never recovered in the window.</td></tr>
       <tr><td>Recovered</td><td>How often the stock recovered within the test window.</td></tr>
@@ -333,13 +334,13 @@ schtasks /change /tn "DividendScannerDaily" /enable</div>
       <tr><td>Trend</td><td>Price trend: Up, Down, or Mixed. Downtrends are discouraged.</td></tr>
       <tr><td>Liquidity</td><td>Thin, Moderate, or High, based on daily trading volume.</td></tr>
       <tr><td>Beta</td><td>How much the stock moves relative to the market. Lower is steadier.</td></tr>
-      <tr><td>Ann.Eff%</td><td>Theoretical annualised after-tax return if the capital is rotated continuously.</td></tr>
+      <tr><td>Ann.Eff%</td><td>Theoretical annualised after-tax return if the capital is rotated continuously, taxed at the conservative 35% rate.</td></tr>
       <tr><td>Score</td><td>Ann.Eff% adjusted down for a downtrend and thin liquidity. The list is sorted by this.</td></tr>
     </table>
     <h3>Round lots</h3>
     <p>The dollar figures use 100-share round lots because round numbers are far easier to sell than odd amounts.</p>
     <h3>A note on taxes</h3>
-    <p>Dividend-capture trades are held only days, so both the dividend and any price gain are short-term, taxed at your ordinary income rate rather than the lower 15% to 20% long-term capital-gains rate (which requires holding for over a year). The after-tax columns use a default 40% rate that you can change in the settings to match your bracket.</p>
+    <p>Dividend-capture trades are held only days, so both the dividend and any price gain are short-term, taxed at your ordinary income rate rather than the lower 15% to 20% long-term capital-gains rate (which requires holding for over a year). The exact rate depends on deductions and the year's tax rules, so every after-tax figure is shown at two rates side by side: 35% as the conservative estimate and 25% as the optimistic one. Both rates can be changed in the settings.</p>
     <h3>The Rotation Plan sheet</h3>
     <p>The Excel file has a second sheet called Rotation Plan. It is a trade calendar that rolls one pot of capital (default $50,000) from one dividend into the next, so the same money is reused as often as possible:</p>
     <table>
@@ -351,8 +352,8 @@ schtasks /change /tn "DividendScannerDaily" /enable</div>
       <tr><td>Worst Reb</td><td>The honest risk: the longest that stock has ever taken to recover.</td></tr>
       <tr><td>Shares / Cost $</td><td>Whole 100-share lots bought with the available capital, and what they cost.</td></tr>
       <tr><td>Gross Div $</td><td>The dividend collected before tax and fees.</td></tr>
-      <tr><td>Net $</td><td>What is kept after any financing fee and the tax rate.</td></tr>
-      <tr><td>Running Net $</td><td>The total profit building up across the sequence of trades.</td></tr>
+      <tr><td>Net 35% $ / Net 25% $</td><td>What is kept after any financing fee and tax, shown at both tax rates.</td></tr>
+      <tr><td>Running 35% $ / Running 25% $</td><td>The total profit building up across the sequence of trades, at each tax rate.</td></tr>
     </table>
     <p>When the capital is free, the plan looks at the candidates that can be bought within the next 5 trading days and takes the one with the best score, so the money never sits idle waiting for a distant trade.</p>
     <h3>The visual calendar</h3>
@@ -361,17 +362,18 @@ schtasks /change /tn "DividendScannerDaily" /enable</div>
 
   <section id="config">
     <h2><span class="ic">⚙️</span> 9. Configuration</h2>
-    <p>All the filter settings live at the top of <code>dividend_scanner_v6.py</code> and can be changed at any time:</p>
+    <p>All the filter settings live at the top of <code>dividend_scanner_v7.py</code> and can be changed at any time:</p>
     <div class="code-block">MIN_ANNUAL_YIELD     = 0.03      # 3% floor
 MIN_AVG_VOLUME       = 100_000   # shares per day
 MIN_STOCK_PRICE      = 5.0       # dollars
 MAX_STOCK_PRICE      = 500.0     # dollars
 EX_DATE_WINDOW_DAYS  = 30        # how far ahead to look
-TAX_RATE             = 0.40      # short-term / ordinary income rate
+TAX_RATE_HIGH        = 0.35      # conservative estimate of the tax rate
+TAX_RATE_LOW         = 0.25      # optimistic estimate of the tax rate
 ROUND_LOT            = 100       # shares per lot
 CAPITAL              = 50_000    # dollars rotated in the Rotation Plan
 FINANCE_FEE          = 0.00      # cut taken by a trade-financing company, if any</div>
-    <p>For example, to only see stocks paying 5% or more, change <code>MIN_ANNUAL_YIELD</code> to <code>0.05</code>. To match your own tax bracket, change <code>TAX_RATE</code> (for example <code>0.24</code> for 24%).</p>
+    <p>For example, to only see stocks paying 5% or more, change <code>MIN_ANNUAL_YIELD</code> to <code>0.05</code>. To change the tax estimates, adjust <code>TAX_RATE_HIGH</code> and <code>TAX_RATE_LOW</code> (for example <code>0.24</code> for 24%); the column names follow automatically.</p>
   </section>
 
   <section id="data">
@@ -383,7 +385,7 @@ FINANCE_FEE          = 0.00      # cut taken by a trade-financing company, if an
   </section>
 
   <footer>
-    <p>Dividend Capture Scanner v6 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
+    <p>Dividend Capture Scanner v7 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
   </footer>
 
 </div>

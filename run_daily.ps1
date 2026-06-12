@@ -7,4 +7,4 @@
 Set-Location $PSScriptRoot
 if (-not (Test-Path "logs")) { New-Item -ItemType Directory "logs" | Out-Null }
 $log = "logs\scan_$(Get-Date -Format yyyyMMdd).log"
-python dividend_scanner_v6.py *> $log
+python dividend_scanner_v7.py *> $log
