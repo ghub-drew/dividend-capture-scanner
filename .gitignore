@@ -18,3 +18,7 @@ logs/
 
 # Local project context (mentions the client by name - must not be published)
 CLAUDE.md
+HANDBOOK.md
+
+# Local deliverables (sent by email, not part of the site)
+Dividend_Capture_Scanner_*.pdf
