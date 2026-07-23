@@ -7,8 +7,6 @@ __pycache__/
 
 # Scanner output files
 candidates_*.csv
-candidates_*.xlsx
-stock_candidates_*.xlsx
 rotation_calendar*.html
 ~$*
 logs/
@@ -16,9 +14,11 @@ logs/
 # Editor / tooling
 .claude/
 
-# Local project context (mentions the client by name - must not be published)
+# Local project context - must not be published
 CLAUDE.md
 HANDBOOK.md
 
-# Local deliverables (sent by email, not part of the site)
-Dividend_Capture_Scanner_*.pdf
+# Local spreadsheets, PDFs, and working files - never publish
+*.xlsx
+*.xlsm
+*.pdf
