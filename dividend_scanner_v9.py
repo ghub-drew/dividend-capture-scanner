@@ -1,5 +1,5 @@
 """
-Dividend Capture Scanner  (v8)
+Dividend Capture Scanner  (v9)
 Pulls upcoming ex-dividend dates from Yahoo Finance and ranks the best
 dividend-capture candidates.
 
@@ -33,6 +33,10 @@ What it looks at:
                             pot of capital (see CAPITAL) can be rolled from one
                             dividend into the next, with estimated net dollars
                             per trade after tax and any financing fee.
+  - Preferred list        : a quality whitelist (see FAVORED_TICKERS) of names
+                            judged safe to keep holding if a rebound takes far
+                            longer than expected. They are flagged in the
+                            output and win close calls in the Rotation Plan.
 """
 
 import yfinance as yf
@@ -86,6 +90,19 @@ CEF_TICKERS = [
 # Preferred-stock exposure via clean ETF tickers (individual preferred symbols
 # are unreliable on Yahoo; these are a dependable proxy for the asset class).
 PREFERRED_TICKERS = ["PFF", "PFFA", "PFFD", "PGX", "PGF", "FPE", "PFXF"]
+
+# ─── Preferred names (quality whitelist) ───
+# Companies and funds judged safe to keep holding for an extended period if a
+# rebound takes far longer than expected (the "would you be comfortable being
+# stuck with it in a crash" test). They get a Pref flag in the output and win
+# close calls in the Rotation Plan (see PREFERRED_EDGE below). The displayed
+# Score is NOT changed - the preference only applies when picking trades.
+FAVORED_TICKERS = [
+    "NLY", "HBAN", "O", "ARCC", "BTI", "VZ", "MO", "HRL", "ARES", "DTE",
+    "TROW", "CSWC", "ETV", "CPB", "EVT", "DSL", "GOF", "ETY",
+]
+PREFERRED_EDGE = 0.10   # a preferred name wins the plan pick unless a
+                        # non-preferred candidate scores >10% higher
 
 def get_universe():
     """S&P 500 + high-yield names + CEFs + preferreds, de-duplicated."""
@@ -367,6 +384,7 @@ def fetch_candidate(ticker: str, today: datetime):
         row = {
             "Ticker":        ticker,
             "Name":          name,
+            "Pref":          "Yes" if ticker in FAVORED_TICKERS else "",
             "Price":         round(price, 2),
             "Ex-Date":       ex_date.strftime("%Y-%m-%d"),
             "Days Until":    days_until,
@@ -461,6 +479,7 @@ def build_rotation_plan(df: pd.DataFrame, today: datetime) -> pd.DataFrame:
             "free": free, "shares": shares, "cost": shares * row["_price"],
             "gross": gross, "net_high": net_high, "net_low": net_low,
             "score": row["Score"], "worst": row["_worst"],
+            "pref": row["Ticker"] in FAVORED_TICKERS,
         })
 
     plan, running_high, running_low = [], 0.0, 0.0
@@ -481,12 +500,18 @@ def build_rotation_plan(df: pd.DataFrame, today: datetime) -> pd.DataFrame:
         earliest = min(ab for ab, _ in feasible)
         window_end = np.busday_offset(earliest, 5, roll="forward")
         pool = [(ab, e) for ab, e in feasible if ab <= window_end]
-        actual_buy, pick = max(pool, key=lambda p: p[1]["score"])
+        # Preferred names win close calls: their score gets a selection-only
+        # edge (PREFERRED_EDGE). The displayed Score stays untouched.
+        actual_buy, pick = max(
+            pool,
+            key=lambda p: p[1]["score"] * (1 + PREFERRED_EDGE if p[1]["pref"] else 0),
+        )
         running_high += pick["net_high"]
         running_low += pick["net_low"]
         plan.append({
             "Buy":        str(actual_buy),
             "Ticker":     pick["ticker"],
+            "Pref":       "Yes" if pick["pref"] else "",
             "Ex-Date":    str(pick["ex"]),
             "Est. Sell":  str(pick["sell"]),
             "Cash Free":  str(pick["free"]),
@@ -573,7 +598,8 @@ td .n{{font-weight:600;color:#94a3b8;}}
 <div class="legend">"""]
     for i, row in plan_df.iterrows():
         color = palette[(int(i) - 1) % len(palette)]
-        parts.append(f'<span><span class="dot" style="background:{color};"></span>{row["Ticker"]} (net ${row[COL_NET_HIGH]:,.2f} to ${row[COL_NET_LOW]:,.2f})</span>')
+        star = "&#9733; " if row.get("Pref") == "Yes" else ""
+        parts.append(f'<span><span class="dot" style="background:{color};"></span>{star}{row["Ticker"]} (net ${row[COL_NET_HIGH]:,.2f} to ${row[COL_NET_LOW]:,.2f})</span>')
     parts.append('</div>')
 
     for (yy, mm) in months:
@@ -597,7 +623,8 @@ td .n{{font-weight:600;color:#94a3b8;}}
             parts.append('</tr>')
         parts.append('</table>')
 
-    parts.append('<div class="sub">Tinted days = the capital is occupied by that trade. '
+    parts.append('<div class="sub">&#9733; = a preferred name: judged safe to keep holding if the rebound runs long. '
+                 'Tinted days = the capital is occupied by that trade. '
                  'Sell days are estimates based on each stock\'s average rebound time. '
                  f'Net figures show a range: taxed at {TAX_RATE_HIGH:.0%} (conservative) to {TAX_RATE_LOW:.0%} (optimistic).</div>')
     parts.append('</div></body></html>')
@@ -643,11 +670,12 @@ def save_excel(shown: pd.DataFrame, plan_df: pd.DataFrame, out_file: str):
 
 def run_scanner():
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    print(f"\nDividend Capture Scanner v8 - {today.strftime('%Y-%m-%d')}")
+    print(f"\nDividend Capture Scanner v9 - {today.strftime('%Y-%m-%d')}")
     print(f"Looking for ex-dates within the next {EX_DATE_WINDOW_DAYS} days")
     print(f"After-tax figures shown at two rates: {TAX_RATE_HIGH:.0%} (conservative) and {TAX_RATE_LOW:.0%} (optimistic)")
     fee_note = f", financing fee {FINANCE_FEE:.0%}" if FINANCE_FEE > 0 else ""
-    print(f"Rotation capital: ${CAPITAL:,}{fee_note}\n")
+    print(f"Rotation capital: ${CAPITAL:,}{fee_note}")
+    print(f"Preferred list: {len(FAVORED_TICKERS)} names flagged and favored in the plan\n")
 
     print("Fetching universe (S&P 500 + high-yield names + CEFs + preferreds)...")
     tickers = get_universe()
@@ -688,7 +716,7 @@ def run_scanner():
     df.index += 1
 
     display_cols = [
-        "Ticker", "Name", "Price", "Ex-Date", "Days Until",
+        "Ticker", "Name", "Pref", "Price", "Ex-Date", "Days Until",
         "Annual Yield", "Capture Yield", "Div/100sh", "Capital",
         COL_AT_HIGH, COL_AT_LOW,
         "Avg Reb", "Worst Reb", "Recovered", "Best Entry", "Drop Ratio",
@@ -702,6 +730,9 @@ def run_scanner():
     print(shown.to_string())
 
     print(f"\nColumn guide:")
+    print(f"  Pref          = on the preferred list: names judged safe to keep holding if a")
+    print(f"                  rebound takes far longer than expected; they win close calls")
+    print(f"                  in the Rotation Plan (see FAVORED_TICKERS at the top of the script)")
     print(f"  Annual Yield  = full year's dividend as % of price (ranked by this, higher is better)")
     print(f"  Capture Yield = single dividend payment as % of price (what you collect per trade)")
     print(f"  Div/100sh     = dividend dollars for one 100-share round lot")

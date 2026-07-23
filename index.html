@@ -656,12 +656,12 @@
   <a href="docs.html">Documentation</a>
   <a href="changelog.html">Changelog</a>
   <a href="paper-trading.html">Paper Trading</a>
-  <a href="dividend_scanner_v8.py" download>Download Scanner</a>
+  <a href="dividend_scanner_v9.py" download>Download Scanner</a>
 </div>
 
 <header>
   <div class="eyebrow">Strategy Overview</div>
-  <h1>Dividend Capture Scanner <span style="font-size:0.95rem;font-weight:700;color:#4a90d9;vertical-align:middle;background:#1e3a5f33;border:1px solid #1d4ed855;border-radius:20px;padding:2px 12px;letter-spacing:0.04em;">v8</span></h1>
+  <h1>Dividend Capture Scanner <span style="font-size:0.95rem;font-weight:700;color:#4a90d9;vertical-align:middle;background:#1e3a5f33;border:1px solid #1d4ed855;border-radius:20px;padding:2px 12px;letter-spacing:0.04em;">v9</span></h1>
   <div style="font-size:0.82rem;color:#d4a017;margin-top:6px;margin-bottom:2px;letter-spacing:0.06em;font-weight:500;">Developed by Andrew D.</div>
   <p>A systematic approach to collecting <span class="tip" data-tip="A cash payment a company makes to its shareholders, usually every quarter.">dividend</span> income by timing stock purchases around <span class="tip" data-tip="The cutoff date. You must own the stock before this date to receive the dividend.">ex-dividend dates</span>.</p>
 </header>
@@ -773,10 +773,10 @@
     </button>
     <div class="panel-body">
 
-      <a href="dividend_scanner_v8.py" download class="download-btn">
-        <span>&#8595;</span> Download dividend_scanner_v8.py
+      <a href="dividend_scanner_v9.py" download class="download-btn">
+        <span>&#8595;</span> Download dividend_scanner_v9.py
       </a>
-      <div style="font-size:0.76rem;color:#64748b;margin-bottom:8px;">Latest version. New in v8: the visual calendar is saved with the date in its filename (rotation_calendar_YYYYMMDD.html), matching the daily CSV and Excel files, so each day's plan is kept as a record.</div>
+      <div style="font-size:0.76rem;color:#64748b;margin-bottom:8px;">Latest version. New in v9: a preferred list of quality names, judged safe to keep holding if a rebound runs long, is flagged in the output (<em>Pref</em> column) and wins close calls in the Rotation Plan.</div>
 
       <div class="run-steps">
 
@@ -803,7 +803,7 @@
           <div class="run-content">
             <div class="run-title">Run the scanner</div>
             <div class="run-desc">Scans roughly 576 stocks (the S&amp;P 500 plus high-yield names, CEFs, and preferreds). Takes about 1 to 2 minutes to complete.</div>
-            <div class="code-block">python dividend_scanner_v8.py</div>
+            <div class="code-block">python dividend_scanner_v9.py</div>
           </div>
         </div>
 
@@ -838,7 +838,7 @@ rotation_calendar_YYYYMMDD.html</div>
       </div>
 
       <div class="run-note">
-        <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner_v8.py</code> and can be adjusted at any time.
+        <strong>Tip:</strong> All filter thresholds (minimum yield, price range, volume, ex-date window) are set at the top of <code>dividend_scanner_v9.py</code> and can be adjusted at any time.
       </div>
     </div>
   </div>

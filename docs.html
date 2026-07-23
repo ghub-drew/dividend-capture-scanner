@@ -194,7 +194,7 @@
     <a href="docs.html" class="active">Documentation</a>
     <a href="changelog.html">Changelog</a>
     <a href="paper-trading.html">Paper Trading</a>
-    <a href="dividend_scanner_v8.py" download>Download Scanner</a>
+    <a href="dividend_scanner_v9.py" download>Download Scanner</a>
   </div>
 
   <header>
@@ -240,7 +240,7 @@
     <h2><span class="ic">▶️</span> 3. Running the Scanner</h2>
     <p>Open PowerShell or Command Prompt, go to the folder where you saved the scanner, and run it. Replace the path with your actual folder location.</p>
     <div class="code-block">cd "C:\Users\YourName\Documents\stock scanner"
-python dividend_scanner_v8.py</div>
+python dividend_scanner_v9.py</div>
     <p>It scans roughly 576 stocks in parallel and runs a rebound analysis on every stock that passes the filters, finishing in about 1 to 2 minutes. When it finishes, the ranked list prints in the window and is saved in the same folder in two formats: a plain <code>candidates_YYYYMMDD.csv</code> and a formatted <code>candidates_YYYYMMDD.xlsx</code> for Excel, with a bold locked header row and sized columns so it is easy to read.</p>
     <div class="note"><strong>Tip:</strong> Close any open <code>candidates_*.csv</code> or <code>candidates_*.xlsx</code> file before running, otherwise the scanner cannot save the new one.</div>
     <h3>Automatic morning run</h3>
@@ -311,6 +311,8 @@ schtasks /change /tn "DividendScannerDaily" /enable</div>
       <tr><td>Liquidity</td><td>Thinly-traded names are marked down, since they are harder to exit.</td></tr>
     </table>
     <div class="note">The headline number is <strong>Ann.Eff%</strong>, a theoretical annualised after-tax return assuming the money is rotated continuously. It is a way to compare opportunities on an even footing, not a promise of returns. A lower-yielding stock can still rank well if it rebounds very quickly and reliably.</div>
+    <h3>The preferred list</h3>
+    <p>Some names are pre-approved as quality holdings: companies and funds you would be comfortable keeping for an extended period if a rebound takes far longer than expected. They show "Yes" in the <em>Pref</em> column, and when two candidates score within 10% of each other in the Rotation Plan, the preferred one gets the slot. The displayed Score itself is never changed, so the ranking stays honest; the preference only decides close calls when picking trades.</p>
   </section>
 
   <section id="output">
@@ -319,6 +321,7 @@ schtasks /change /tn "DividendScannerDaily" /enable</div>
     <table>
       <tr><th>Column</th><th>Meaning</th></tr>
       <tr><td>Ticker</td><td>The stock's trading symbol.</td></tr>
+      <tr><td>Pref</td><td>"Yes" if the stock is on the preferred list: quality names judged safe to keep holding if a rebound takes far longer than expected. Preferred names also win close calls in the Rotation Plan. The list is set at the top of the script.</td></tr>
       <tr><td>Price</td><td>Current share price.</td></tr>
       <tr><td>Days Until</td><td>Trading days until the ex-dividend date.</td></tr>
       <tr><td>Annual Yield</td><td>The full year's dividend as a percentage of the stock price. The list is ranked by yield and rebound together.</td></tr>
@@ -347,6 +350,7 @@ schtasks /change /tn "DividendScannerDaily" /enable</div>
     <table>
       <tr><th>Column</th><th>Meaning</th></tr>
       <tr><td>Buy</td><td>The day to buy, based on that stock's back-tested Best Entry day. If the money is still tied up then, the plan buys as soon as the cash is free.</td></tr>
+      <tr><td>Pref</td><td>"Yes" if the trade is a preferred-list name. When two candidates score within 10% of each other, the preferred one gets the slot.</td></tr>
       <tr><td>Ex-Date</td><td>The ex-dividend date you hold through to earn the dividend.</td></tr>
       <tr><td>Est. Sell</td><td>The expected sell day: the ex-date plus that stock's average rebound time.</td></tr>
       <tr><td>Cash Free</td><td>When the money is ready for the next trade (one settlement day after the sale).</td></tr>
@@ -363,7 +367,7 @@ schtasks /change /tn "DividendScannerDaily" /enable</div>
 
   <section id="config">
     <h2><span class="ic">⚙️</span> 9. Configuration</h2>
-    <p>All the filter settings live at the top of <code>dividend_scanner_v8.py</code> and can be changed at any time:</p>
+    <p>All the filter settings live at the top of <code>dividend_scanner_v9.py</code> and can be changed at any time:</p>
     <div class="code-block">MIN_ANNUAL_YIELD     = 0.03      # 3% floor
 MIN_AVG_VOLUME       = 100_000   # shares per day
 MIN_STOCK_PRICE      = 5.0       # dollars
@@ -373,7 +377,9 @@ TAX_RATE_HIGH        = 0.35      # conservative estimate of the tax rate
 TAX_RATE_LOW         = 0.25      # optimistic estimate of the tax rate
 ROUND_LOT            = 100       # shares per lot
 CAPITAL              = 50_000    # dollars rotated in the Rotation Plan
-FINANCE_FEE          = 0.00      # cut taken by a trade-financing company, if any</div>
+FINANCE_FEE          = 0.00      # cut taken by a trade-financing company, if any
+FAVORED_TICKERS      = [...]     # the preferred list: names safe to hold long
+PREFERRED_EDGE       = 0.10      # preferred names win plan picks within 10%</div>
     <p>For example, to only see stocks paying 5% or more, change <code>MIN_ANNUAL_YIELD</code> to <code>0.05</code>. To change the tax estimates, adjust <code>TAX_RATE_HIGH</code> and <code>TAX_RATE_LOW</code> (for example <code>0.24</code> for 24%); the column names follow automatically.</p>
   </section>
 
@@ -386,7 +392,7 @@ FINANCE_FEE          = 0.00      # cut taken by a trade-financing company, if an
   </section>
 
   <footer>
-    <p>Dividend Capture Scanner v8 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
+    <p>Dividend Capture Scanner v9 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
   </footer>
 
 </div>
