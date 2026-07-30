@@ -10,6 +10,7 @@ candidates_*.csv
 rotation_calendar*.html
 ~$*
 logs/
+LAST_RUN.txt
 
 # Editor / tooling
 .claude/
