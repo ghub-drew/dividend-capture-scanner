@@ -194,7 +194,7 @@
     <a href="docs.html" class="active">Documentation</a>
     <a href="changelog.html">Changelog</a>
     <a href="paper-trading.html">Paper Trading</a>
-    <a href="dividend_scanner_v9.py" download>Download Scanner</a>
+    <a href="dividend_scanner_v10.py" download>Download Scanner</a>
   </div>
 
   <header>
@@ -240,7 +240,7 @@
     <h2><span class="ic">▶️</span> 3. Running the Scanner</h2>
     <p>Open PowerShell or Command Prompt, go to the folder where you saved the scanner, and run it. Replace the path with your actual folder location.</p>
     <div class="code-block">cd "C:\Users\YourName\Documents\stock scanner"
-python dividend_scanner_v9.py</div>
+python dividend_scanner_v10.py</div>
     <p>It scans roughly 576 stocks in parallel and runs a rebound analysis on every stock that passes the filters, finishing in about 1 to 2 minutes. When it finishes, the ranked list prints in the window and is saved in the same folder in two formats: a plain <code>candidates_YYYYMMDD.csv</code> and a formatted <code>candidates_YYYYMMDD.xlsx</code> for Excel, with a bold locked header row and sized columns so it is easy to read.</p>
     <div class="note"><strong>Tip:</strong> Close any open <code>candidates_*.csv</code> or <code>candidates_*.xlsx</code> file before running, otherwise the scanner cannot save the new one.</div>
     <h3>Automatic morning run</h3>
@@ -322,6 +322,7 @@ schtasks /change /tn "DividendScannerDaily" /enable</div>
       <tr><th>Column</th><th>Meaning</th></tr>
       <tr><td>Ticker</td><td>The stock's trading symbol.</td></tr>
       <tr><td>Pref</td><td>"Yes" if the stock is on the preferred list: quality names judged safe to keep holding if a rebound takes far longer than expected. Preferred names also win close calls in the Rotation Plan. The list is set at the top of the script.</td></tr>
+      <tr><td>Sector</td><td>The part of the market the stock belongs to, for example Utilities or Financial Services. Whole sectors can be ruled out in the settings, and the Rotation Plan uses this to warn when several pots of capital would hold the same sector at the same time. Funds and ETFs have no sector, so they are labelled by type instead.</td></tr>
       <tr><td>Price</td><td>Current share price.</td></tr>
       <tr><td>Days Until</td><td>Trading days until the ex-dividend date.</td></tr>
       <tr><td>Annual Yield</td><td>The full year's dividend as a percentage of the stock price. The list is ranked by yield and rebound together.</td></tr>
@@ -346,11 +347,13 @@ schtasks /change /tn "DividendScannerDaily" /enable</div>
     <h3>A note on taxes</h3>
     <p>Dividend-capture trades are held only days, so both the dividend and any price gain are short-term, taxed at your ordinary income rate rather than the lower 15% to 20% long-term capital-gains rate (which requires holding for over a year). The exact rate depends on deductions and the year's tax rules, so every after-tax figure is shown at two rates side by side: 35% as the conservative estimate and 25% as the optimistic one. Both rates can be changed in the settings.</p>
     <h3>The Rotation Plan sheet</h3>
-    <p>The Excel file has a second sheet called Rotation Plan. It is a trade calendar that rolls one pot of capital (default $50,000) from one dividend into the next, so the same money is reused as often as possible:</p>
+    <p>The Excel file has a second sheet called Rotation Plan. It is a trade calendar that rolls capital from one dividend into the next, so the same money is reused as often as possible. It can run several pots at once: each pot, called a slice, is the same size (default $50,000) and holds one position at a time, so a trade that gets stuck freezes its own slice while the others keep working.</p>
     <table>
       <tr><th>Column</th><th>Meaning</th></tr>
+      <tr><td>Slice</td><td>Which pot of capital pays for the trade. Each slice rotates on its own clock, and no two slices are ever put in the same stock.</td></tr>
       <tr><td>Buy</td><td>The day to buy, based on that stock's back-tested Best Entry day. If the money is still tied up then, the plan buys as soon as the cash is free.</td></tr>
       <tr><td>Pref</td><td>"Yes" if the trade is a preferred-list name. When two candidates score within 10% of each other, the preferred one gets the slot.</td></tr>
+      <tr><td>Sector</td><td>The trade's sector, so it is obvious at a glance when the plan is leaning on one part of the market.</td></tr>
       <tr><td>Ex-Date</td><td>The ex-dividend date you hold through to earn the dividend.</td></tr>
       <tr><td>Est. Sell</td><td>The expected sell day: the ex-date plus that stock's average rebound time.</td></tr>
       <tr><td>Cash Free</td><td>When the money is ready for the next trade (one settlement day after the sale).</td></tr>
@@ -360,14 +363,18 @@ schtasks /change /tn "DividendScannerDaily" /enable</div>
       <tr><td>Net 35% $ / Net 25% $</td><td>What is kept after any financing fee and tax, shown at both tax rates.</td></tr>
       <tr><td>Running 35% $ / Running 25% $</td><td>The total profit building up across the sequence of trades, at each tax rate.</td></tr>
     </table>
-    <p>When the capital is free, the plan looks at the candidates that can be bought within the next 5 trading days and takes the one with the best score, so the money never sits idle waiting for a distant trade.</p>
+    <p>When a slice's capital is free, the plan looks at the candidates that can be bought within the next 5 trading days and takes the one with the best score, so the money never sits idle waiting for a distant trade.</p>
+    <h3>What the plan already knows you hold</h3>
+    <p>The settings include a list of the positions the account is holding right now, and the plan reads it before doing anything else. Two things follow from that. A stock already owned is never proposed again, so the plan cannot tell you to double up on a position you are already sitting in. And a slice whose money is still tied up gets no trade until the cash is expected back. If a position has no sell date because it is still below the price it was bought at, its slice is marked blocked and left out of the plan entirely, which is the honest answer: pretending that money is available is what turns a plan into one that cannot actually be funded. The run prints the status of every slice above the plan, so it is always clear how much of the capital is genuinely free.</p>
+    <h3>The sector concentration warning</h3>
+    <p>Running several slices is meant to spread risk. It only does that if the slices are in different parts of the market, and high dividend yields are concentrated in a handful of rate-sensitive sectors, so picking the top few names off the list can quietly put every pot into the same bet. Whenever two or more slices would hold the same sector at the same time, the plan prints a warning naming the sector and the stocks involved.</p>
     <h3>The visual calendar</h3>
-    <p>Each run also saves a dated <code>rotation_calendar_YYYYMMDD.html</code> in the same folder, matching the CSV and Excel filenames, so each day's plan is kept as a record. Open it in any browser to see the plan as a month-grid calendar: each trade has its own colour, the buy, ex-date, sell, and cash-free days are labelled, and the days in between are tinted so you can see exactly when the money is occupied and when it is free for the next trade. Like the CSV and Excel files, it stays on your computer and is never uploaded.</p>
+    <p>Each run also saves a dated <code>rotation_calendar_YYYYMMDD.html</code> in the same folder, matching the CSV and Excel filenames, so each day's plan is kept as a record. Open it in any browser to see the plan as a month-grid calendar: each slice of capital has its own colour, the buy, ex-date, sell, and cash-free days are labelled, and the days in between are tinted so you can see exactly when each slice is occupied and when it is free for the next trade. Any slice that is blocked or still holding a position is noted at the top. Like the CSV and Excel files, it stays on your computer and is never uploaded.</p>
   </section>
 
   <section id="config">
     <h2><span class="ic">⚙️</span> 9. Configuration</h2>
-    <p>All the filter settings live at the top of <code>dividend_scanner_v9.py</code> and can be changed at any time:</p>
+    <p>All the filter settings live at the top of <code>dividend_scanner_v10.py</code> and can be changed at any time:</p>
     <div class="code-block">MIN_ANNUAL_YIELD     = 0.03      # 3% floor
 MIN_AVG_VOLUME       = 100_000   # shares per day
 MIN_STOCK_PRICE      = 5.0       # dollars
@@ -376,11 +383,17 @@ EX_DATE_WINDOW_DAYS  = 30        # how far ahead to look
 TAX_RATE_HIGH        = 0.35      # conservative estimate of the tax rate
 TAX_RATE_LOW         = 0.25      # optimistic estimate of the tax rate
 ROUND_LOT            = 100       # shares per lot
-CAPITAL              = 50_000    # dollars rotated in the Rotation Plan
+CAPITAL              = 50_000    # dollars in ONE slice, not the whole account
+N_SLICES             = 4         # how many independent pots run at once
 FINANCE_FEE          = 0.00      # cut taken by a trade-financing company, if any
+EXCLUDED_SECTORS     = [...]     # sectors dropped from the results entirely
+HOLDINGS             = [...]     # what the account is holding right now
 FAVORED_TICKERS      = [...]     # the preferred list: names safe to hold long
 PREFERRED_EDGE       = 0.10      # preferred names win plan picks within 10%</div>
     <p>For example, to only see stocks paying 5% or more, change <code>MIN_ANNUAL_YIELD</code> to <code>0.05</code>. To change the tax estimates, adjust <code>TAX_RATE_HIGH</code> and <code>TAX_RATE_LOW</code> (for example <code>0.24</code> for 24%); the column names follow automatically.</p>
+    <p><code>CAPITAL</code> is the size of one slice, not the total. Four slices of $50,000 means $200,000 committed in four pots that trade independently. Raising <code>CAPITAL</code> on its own makes each individual position bigger, which is a real risk in thinly traded names, so it is usually better to add slices than to enlarge them.</p>
+    <p><code>EXCLUDED_SECTORS</code> drops whole sectors from the results, and the run reports how many names were removed so an excluded sector is never silently missing. Worth knowing before using it: excluding a sector removes the names, not the risk behind them. Interest rates move real estate, utilities, lending companies and bond funds alike, so ruling out one of them narrows the list without removing the exposure that comes with high yields.</p>
+    <p><code>HOLDINGS</code> is the list of positions the account currently owns, with the slice each one sits in and the date its cash is expected back. Leaving the date out marks the position as stuck and blocks that slice. Keeping this list current matters: an out-of-date list produces a plan that looks fine and cannot be funded.</p>
   </section>
 
   <section id="data">
@@ -392,7 +405,7 @@ PREFERRED_EDGE       = 0.10      # preferred names win plan picks within 10%</di
   </section>
 
   <footer>
-    <p>Dividend Capture Scanner v9 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
+    <p>Dividend Capture Scanner v10 &middot; Developed by Andrew D. &middot; <a href="index.html">Back to home</a></p>
   </footer>
 
 </div>

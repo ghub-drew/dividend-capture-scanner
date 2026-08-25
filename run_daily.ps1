@@ -17,8 +17,33 @@ $log = "logs\scan_$(Get-Date -Format yyyyMMdd).log"
 # the cause of the zero-byte logs on 06-14, 06-17, 06-21, 06-28, 07-26, 07-29 and 07-30.
 $python = "C:\Users\andre\AppData\Local\Python\pythoncore-3.14-64\python.exe"
 
-& $python dividend_scanner_v9.py *> $log
-$code = $LASTEXITCODE
+# Keep-awake. The scan takes 2 to 4 minutes and the laptop was going back to sleep
+# partway through, killing the task with exit 0xC000013A and leaving a zero-byte log
+# (08-04, and the same mode on 07-26 and 08-03). SetThreadExecutionState tells Windows
+# a job is in progress so the sleep timer does not fire. ES_CONTINUOUS keeps the request
+# alive until it is cleared, ES_SYSTEM_REQUIRED blocks sleep, ES_AWAYMODE_REQUIRED covers
+# the away mode used on some sleep settings. The display is deliberately left alone, so
+# the screen can still switch off. Cleared in the finally block below.
+$sig = @"
+[DllImport("kernel32.dll", SetLastError = true)]
+public static extern uint SetThreadExecutionState(uint esFlags);
+"@
+try { Add-Type -MemberDefinition $sig -Name Power -Namespace Win32 -ErrorAction Stop } catch {}
+$ES_CONTINUOUS = [uint32]"0x80000000"
+$ES_SYSTEM_REQUIRED = [uint32]"0x00000001"
+$ES_AWAYMODE_REQUIRED = [uint32]"0x00000040"
+
+try {
+    [Win32.Power]::SetThreadExecutionState($ES_CONTINUOUS -bor $ES_SYSTEM_REQUIRED -bor $ES_AWAYMODE_REQUIRED) | Out-Null
+} catch {}
+
+try {
+    & $python dividend_scanner_v10.py *> $log
+    $code = $LASTEXITCODE
+} finally {
+    # Hand sleep control back to Windows whether the scan succeeded or not.
+    try { [Win32.Power]::SetThreadExecutionState($ES_CONTINUOUS) | Out-Null } catch {}
+}
 
 $stamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $csv   = "candidates_$(Get-Date -Format yyyyMMdd).csv"

@@ -128,7 +128,7 @@
     <a href="docs.html">Documentation</a>
     <a href="changelog.html" class="active">Changelog</a>
     <a href="paper-trading.html">Paper Trading</a>
-    <a href="dividend_scanner_v9.py" download>Download Scanner</a>
+    <a href="dividend_scanner_v10.py" download>Download Scanner</a>
   </div>
 
   <header>
@@ -139,12 +139,31 @@
 
   <div class="timeline">
 
-    <!-- v9 -->
+    <!-- v10 -->
     <div class="release" style="--dot:#4ade80;">
       <div class="release-card">
         <div class="release-head">
-          <span class="version">v9</span>
+          <span class="version">v10</span>
           <span class="badge current">Current</span>
+          <span class="release-date">August 23, 2026</span>
+        </div>
+        <div class="release-title">Several pots of capital, and a plan that knows what is already held.</div>
+        <ul class="changes">
+          <li><span class="lbl new">New</span> The Rotation Plan can run several independent pots of capital at once. Each pot, called a slice, is the same size and holds one position at a time, so a trade that gets stuck freezes its own slice while the others keep trading. No two slices are ever put in the same stock. <em>(Column: Slice)</em></li>
+          <li><span class="lbl fix">Fix</span> The plan now knows what the account is already holding. Before this it could propose buying a stock already owned, and it assumed every dollar was free even when the money was tied up in an open position. Positions already held are excluded, a slice waiting on cash starts from the date that cash is due back, and a position with no sell date blocks its slice outright instead of quietly invalidating the whole estimate.</li>
+          <li><span class="lbl new">New</span> Every candidate now carries its sector, and whole sectors can be ruled out in the settings. The run reports how many names an exclusion removed, so nothing goes missing silently. <em>(Column: Sector)</em></li>
+          <li><span class="lbl new">New</span> A sector concentration warning. Running several slices only spreads risk if they are in different parts of the market, and high yields cluster in a few rate-sensitive sectors, so the plan now names any sector that two or more slices would hold at the same time.</li>
+          <li><span class="lbl imp">Improved</span> The visual calendar colours by slice rather than by trade, and notes any slice that is blocked or still holding a position.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v9 -->
+    <div class="release" style="--dot:#64748b;">
+      <div class="release-card">
+        <div class="release-head">
+          <span class="version">v9</span>
+          <span class="badge older">Older</span>
           <span class="release-date">July 23, 2026</span>
         </div>
         <div class="release-title">A preferred list of names worth holding.</div>

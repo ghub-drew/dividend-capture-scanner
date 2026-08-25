@@ -1,5 +1,5 @@
 """
-Dividend Capture Scanner  (v9)
+Dividend Capture Scanner  (v10)
 Pulls upcoming ex-dividend dates from Yahoo Finance and ranks the best
 dividend-capture candidates.
 
@@ -18,6 +18,9 @@ What it looks at:
   - Price trend           : up / down / mixed, from moving averages on
                             dividend-adjusted (total-return) prices, so big
                             payers aren't unfairly flagged as falling.
+  - Sector                : each name's sector, so whole sectors can be ruled
+                            out (see EXCLUDED_SECTORS) and so the plan can warn
+                            when several trades pile into the same one.
   - Liquidity             : flags thinly-traded names that are harder to exit.
   - Round-lot economics   : dividend dollars and capital required per 100 shares.
   - After-tax gain        : dividend-capture trades are short-term, taxed as
@@ -29,10 +32,13 @@ What it looks at:
                             rebound, sell at even-or-better, redeploy into the
                             next dividend. Failed recoveries are charged at the
                             full 60-day wait, so unreliable stocks score lower.
-  - Rotation plan         : a chronological trade calendar showing how a fixed
-                            pot of capital (see CAPITAL) can be rolled from one
-                            dividend into the next, with estimated net dollars
-                            per trade after tax and any financing fee.
+  - Rotation plan         : a chronological trade calendar for one or more
+                            independent pots of capital (see CAPITAL and
+                            N_SLICES), with estimated net dollars per trade
+                            after tax and any financing fee. The plan knows
+                            what is already held (see HOLDINGS) so it never
+                            proposes a stock the account already owns and never
+                            schedules a pot whose money is still tied up.
   - Preferred list        : a quality whitelist (see FAVORED_TICKERS) of names
                             judged safe to keep holding if a rebound takes far
                             longer than expected. They are flagged in the
@@ -73,7 +79,7 @@ HIGH_YIELD_TICKERS = [
     "O", "WPC", "STAG", "NNN", "EPR", "GLPI", "OHI", "LTC", "SBRA", "ADC",
     "IRM", "VICI", "KRG", "GNL",
     # Energy infrastructure (6-8%)
-    "KMI", "OKE", "WES", "ET", "EPD", "MPLX", "ENB",
+    "KMI", "OKE", "WES", "ET", "EPD", "PAA", "MPLX", "ENB",
     # Other high-yield blue chips
     "BTI", "VZ", "T", "MO", "PFE",
 ]
@@ -117,6 +123,21 @@ MIN_STOCK_PRICE      = 5.0       # dollars
 MAX_STOCK_PRICE      = 500.0     # dollars
 EX_DATE_WINDOW_DAYS  = 30        # how far ahead to look (wide enough to plan rotations)
 
+# ─── Sector config ───
+# Sectors listed here are dropped from the results entirely. The scan reports
+# how many names were removed, so an excluded sector is never silently missing.
+#
+# Honest caveat, worth keeping in mind before adding to this list: excluding a
+# sector removes the names, not the risk behind them. Interest rates move
+# Real Estate, Utilities, the BDCs (which Yahoo files under Financial Services)
+# and bond funds alike, so ruling out one of them narrows the candidate list
+# without removing the exposure that comes with high yields.
+EXCLUDED_SECTORS = ["Real Estate"]
+
+# Funds and ETFs have no sector on Yahoo, so they are labelled by type here.
+FUND_SECTORS = {t: "Fund - CEF" for t in CEF_TICKERS}
+FUND_SECTORS.update({t: "Fund - Preferred" for t in PREFERRED_TICKERS})
+
 # ─── Economics / tax config ───
 # Dividend-capture trades are too short for the lower long-term capital-gains
 # rate, so they are taxed as ordinary income. The exact rate depends on
@@ -137,10 +158,30 @@ COL_RUN_HIGH = f"Running {int(TAX_RATE_HIGH * 100)}% $"
 COL_RUN_LOW  = f"Running {int(TAX_RATE_LOW * 100)}% $"
 
 # ─── Rotation-plan config ───
-CAPITAL         = 50_000  # dollars available to rotate from trade to trade
+# CAPITAL is the size of ONE slice, not the whole account. A slice is a pot of
+# money that holds one position at a time and rotates independently of the
+# others, so a position that gets stuck below its entry price freezes its own
+# slice and leaves the rest still trading.
+CAPITAL         = 50_000  # dollars per slice
+N_SLICES        = 4       # independent pots (total committed = CAPITAL x N_SLICES)
 FINANCE_FEE     = 0.00    # cut taken by a trade-financing company, if any
                           # (e.g. 0.10 = they keep 10% of the gross dividend)
 SETTLEMENT_DAYS = 1       # trading days for sale proceeds to settle (T+1)
+
+# ─── Current holdings ───
+# What the account is holding RIGHT NOW. The plan reads this so it cannot
+# propose a stock already owned and cannot schedule a slice whose money is
+# still tied up. Keep it current: an out-of-date list produces a plan that
+# looks fine and is not fundable.
+#   slice  : which pot the position sits in (1 to N_SLICES)
+#   free   : the date the cash is expected back (YYYY-MM-DD), or None if the
+#            position is stuck below its entry price with no sell date, which
+#            blocks that slice until it is sold.
+HOLDINGS = [
+    {"slice": 1, "ticker": "O",    "shares": 700,  "entry": 65.74, "free": None},
+    {"slice": 3, "ticker": "KHC",  "shares": 1900, "entry": 25.44, "free": "2026-09-08"},
+    {"slice": 4, "ticker": "AMCR", "shares": 1000, "entry": 45.40, "free": "2026-09-08"},
+]
 
 # ─── Liquidity rating thresholds (avg shares/day) ───
 THIN_VOLUME = 500_000
@@ -308,8 +349,9 @@ def liquidity_label(avg_volume: float) -> str:
 
 
 def fetch_candidate(ticker: str, today: datetime):
-    """Returns (row_dict, error_str). Exactly one of the two is None;
-    both None means the stock was simply filtered out."""
+    """Returns (row_dict, note). Exactly one of the two is None; both None
+    means the stock was simply filtered out. A note starting with 'EXCLUDED:'
+    means the name was dropped for its sector rather than for a data error."""
     try:
         stock = yf.Ticker(ticker)
         info = stock.info
@@ -334,6 +376,11 @@ def fetch_candidate(ticker: str, today: datetime):
         annual_yield = div_rate / price
         if annual_yield < MIN_ANNUAL_YIELD:
             return None, None
+
+        # Sector, with a fund/ETF fallback since Yahoo leaves those blank.
+        sector = info.get("sector") or FUND_SECTORS.get(ticker) or "Unknown"
+        if sector in EXCLUDED_SECTORS:
+            return None, f"EXCLUDED:{ticker} ({sector})"
 
         avg_volume = info.get("averageVolume") or 0
         if avg_volume < MIN_AVG_VOLUME:
@@ -385,6 +432,7 @@ def fetch_candidate(ticker: str, today: datetime):
             "Ticker":        ticker,
             "Name":          name,
             "Pref":          "Yes" if ticker in FAVORED_TICKERS else "",
+            "Sector":        sector,
             "Price":         round(price, 2),
             "Ex-Date":       ex_date.strftime("%Y-%m-%d"),
             "Days Until":    days_until,
@@ -407,6 +455,7 @@ def fetch_candidate(ticker: str, today: datetime):
             "_ann_eff":      ann_eff,
             "_trend":        trend,
             "_liq":          liq,
+            "_sector":       sector,
             "_ex_date":      ex_date.date(),
             "_price":        price,
             "_div":          div_per_capture,
@@ -437,81 +486,140 @@ def score(row: dict) -> float:
     return ann * factor
 
 
-def build_rotation_plan(df: pd.DataFrame, today: datetime) -> pd.DataFrame:
+def slice_states(today64):
     """
-    Builds a chronological trade calendar that rolls one pot of CAPITAL from
-    dividend to dividend, the way the strategy is actually traded:
+    Turns HOLDINGS into the starting state of each slice.
+
+    Every slice is a pot of CAPITAL that holds one position at a time. A slice
+    holding a position with a known sell date is busy until the cash settles;
+    a slice holding a position with no sell date (stuck below its entry price)
+    is BLOCKED and gets no trades scheduled at all, because pretending the
+    money is available is what makes a plan unfundable.
+    """
+    states = {s: {"free": today64, "blocked": None, "holding": None, "hold_until": None}
+              for s in range(1, N_SLICES + 1)}
+    for h in HOLDINGS:
+        s = h.get("slice")
+        if s not in states:
+            continue
+        states[s]["holding"] = h["ticker"]
+        if h.get("free"):
+            free = np.datetime64(h["free"], "D")
+            if free > states[s]["free"]:
+                states[s]["free"] = free
+            # kept separately: "free" moves as trades are scheduled, this does not
+            states[s]["hold_until"] = states[s]["free"]
+        else:
+            states[s]["blocked"] = h["ticker"]
+    return states
+
+
+def build_rotation_plan(df: pd.DataFrame, today: datetime):
+    """
+    Builds a chronological trade calendar for N_SLICES independent pots of
+    CAPITAL, the way the strategy is actually traded:
 
       buy on the stock's Best Entry day -> hold through the ex-date ->
       sell once the price is back to even (its average rebound) ->
       one settlement day -> straight into the next candidate.
 
-    Greedy choice: whenever the capital is free, look at the candidates that
-    can be bought within the next 5 trading days and take the one with the
-    best Score, so the money never sits idle waiting for a distant trade.
+    Each slice rotates on its own clock, so one position that gets stuck does
+    not stall the others. Greedy choice: whenever a slice's capital is free,
+    look at the candidates it could buy within the next 5 trading days and take
+    the one with the best Score. No two slices are ever put in the same stock,
+    and anything already in HOLDINGS is off the table.
 
-    Dollar figures use whole 100-share lots bought with CAPITAL, minus any
-    FINANCE_FEE on the gross dividend, then tax on what remains. Net dollars
-    are shown at both tax rates side by side.
+    Dollar figures use whole 100-share lots bought with one slice of CAPITAL,
+    minus any FINANCE_FEE on the gross dividend, then tax on what remains. Net
+    dollars are shown at both tax rates side by side.
+
+    Returns (plan_df, states) so the caller can report blocked slices.
     """
+    today64 = np.datetime64(today.date(), "D")
+    states = slice_states(today64)
+    held = {h["ticker"] for h in HOLDINGS}
+
     entries = []
     for _, row in df.iterrows():
+        if row["Ticker"] in held:
+            continue  # already own it - the account does not double up
         if row["_avg_reb"] is None or row["Score"] <= 0:
             continue  # no reliable rebound history - can't schedule it honestly
         lots = int(CAPITAL // (row["_price"] * ROUND_LOT))
         if lots < 1:
-            continue  # 100 shares cost more than the available capital
+            continue  # 100 shares cost more than one slice of capital
         shares = lots * ROUND_LOT
         ex = np.datetime64(row["_ex_date"], "D")
         entry_days = row["_best_entry"] if row["_best_entry"] is not None else BUY_BUFFER_DAYS
         buy = np.busday_offset(ex, -entry_days, roll="backward")
-        today64 = np.datetime64(today.date(), "D")
         if buy < today64:
             buy = np.busday_offset(today64, 0, roll="forward")  # can still buy: ex-date is ahead
         sell = np.busday_offset(ex, ceil(row["_avg_reb"]), roll="forward")
         free = np.busday_offset(sell, SETTLEMENT_DAYS, roll="forward")
         gross = shares * row["_div"]
         after_fee = gross * (1 - FINANCE_FEE)
-        net_high = after_fee * (1 - TAX_RATE_HIGH)
-        net_low = after_fee * (1 - TAX_RATE_LOW)
         entries.append({
             "ticker": row["Ticker"], "buy": buy, "ex": ex, "sell": sell,
             "free": free, "shares": shares, "cost": shares * row["_price"],
-            "gross": gross, "net_high": net_high, "net_low": net_low,
-            "score": row["Score"], "worst": row["_worst"],
+            "gross": gross,
+            "net_high": after_fee * (1 - TAX_RATE_HIGH),
+            "net_low": after_fee * (1 - TAX_RATE_LOW),
+            "score": row["Score"], "worst": row["_worst"], "sector": row["_sector"],
             "pref": row["Ticker"] in FAVORED_TICKERS,
         })
 
-    plan, running_high, running_low = [], 0.0, 0.0
-    free_date = np.datetime64(today.date(), "D")
-    while True:
-        # A candidate is still buyable as long as the capital frees up at
-        # least one trading day before its ex-date. If its ideal Best Entry
-        # day has already passed, buy as soon as the cash is free instead.
+    def best_for(free_date):
+        """The trade this slice would take next, or None."""
         feasible = []
         for e in entries:
+            # Still buyable as long as the cash frees at least one trading day
+            # before the ex-date. If the ideal Best Entry day has already
+            # passed, buy as soon as the money is free instead.
             last_buy = np.busday_offset(e["ex"], -1, roll="backward")
             if last_buy < free_date:
                 continue
-            actual_buy = max(e["buy"], free_date)
-            feasible.append((actual_buy, e))
+            feasible.append((max(e["buy"], free_date), e))
         if not feasible:
-            break
+            return None
         earliest = min(ab for ab, _ in feasible)
         window_end = np.busday_offset(earliest, 5, roll="forward")
         pool = [(ab, e) for ab, e in feasible if ab <= window_end]
         # Preferred names win close calls: their score gets a selection-only
         # edge (PREFERRED_EDGE). The displayed Score stays untouched.
-        actual_buy, pick = max(
-            pool,
-            key=lambda p: p[1]["score"] * (1 + PREFERRED_EDGE if p[1]["pref"] else 0),
-        )
+        return max(pool, key=lambda p: p[1]["score"] * (1 + PREFERRED_EDGE if p[1]["pref"] else 0))
+
+    booked = []
+    while True:
+        # Whichever free slice can act soonest goes first.
+        best = None
+        for s, st in sorted(states.items()):
+            if st["blocked"] is not None:
+                continue
+            choice = best_for(st["free"])
+            if choice is None:
+                continue
+            buy_date, pick = choice
+            if best is None or buy_date < best[0]:
+                best = (buy_date, s, pick)
+        if best is None:
+            break
+        buy_date, s, pick = best
+        booked.append({"slice": s, "buy": buy_date, "pick": pick})
+        states[s]["free"] = pick["free"]
+        entries = [e for e in entries if e["ticker"] != pick["ticker"]]
+
+    booked.sort(key=lambda b: (b["buy"], b["slice"]))
+    plan, running_high, running_low = [], 0.0, 0.0
+    for b in booked:
+        pick = b["pick"]
         running_high += pick["net_high"]
         running_low += pick["net_low"]
         plan.append({
-            "Buy":        str(actual_buy),
+            "Slice":      b["slice"],
+            "Buy":        str(b["buy"]),
             "Ticker":     pick["ticker"],
             "Pref":       "Yes" if pick["pref"] else "",
+            "Sector":     pick["sector"],
             "Ex-Date":    str(pick["ex"]),
             "Est. Sell":  str(pick["sell"]),
             "Cash Free":  str(pick["free"]),
@@ -524,22 +632,45 @@ def build_rotation_plan(df: pd.DataFrame, today: datetime) -> pd.DataFrame:
             COL_RUN_HIGH: round(running_high, 2),
             COL_RUN_LOW:  round(running_low, 2),
         })
-        free_date = pick["free"]
-        entries = [e for e in entries if e["ticker"] != pick["ticker"]]
 
     plan_df = pd.DataFrame(plan)
     if not plan_df.empty:
         plan_df.index += 1
-    return plan_df
+    return plan_df, states
 
 
-def save_calendar_html(plan_df: pd.DataFrame, today: datetime, out_file: str):
+def sector_overlaps(plan_df: pd.DataFrame):
+    """
+    Finds dates where two or more slices would be holding the same sector at
+    the same time. Four pots picking from a list dominated by rate-sensitive
+    income names can quietly turn into one big bet on interest rates, which is
+    the opposite of what running separate slices is for.
+
+    Returns a list of (sector, [tickers]) for each overlapping sector.
+    """
+    if plan_df.empty:
+        return []
+    rows = []
+    for _, r in plan_df.iterrows():
+        rows.append((r["Sector"], r["Ticker"],
+                     np.datetime64(r["Buy"], "D"), np.datetime64(r["Cash Free"], "D")))
+    flagged = {}
+    for i, (sec_a, tick_a, buy_a, free_a) in enumerate(rows):
+        for sec_b, tick_b, buy_b, free_b in rows[i + 1:]:
+            if sec_a != sec_b:
+                continue
+            if buy_a <= free_b and buy_b <= free_a:   # the holds overlap in time
+                flagged.setdefault(sec_a, set()).update([tick_a, tick_b])
+    return [(sec, sorted(ticks)) for sec, ticks in sorted(flagged.items())]
+
+
+def save_calendar_html(plan_df: pd.DataFrame, today: datetime, out_file: str, states=None):
     """
     Visual month-grid calendar of the rotation plan, saved as a dated local
     HTML file (rotation_calendar_YYYYMMDD.html, matching the CSV and Excel
-    outputs) that opens in any browser. Each trade gets its own colour; buy,
+    outputs) that opens in any browser. Each slice gets its own colour; buy,
     ex-date, sell, and cash-free days are labelled, and the days in between
-    are tinted so it is obvious when the capital is occupied.
+    are tinted so it is obvious when that slice's capital is occupied.
     """
     import calendar as cal
     from datetime import date as ddate, timedelta
@@ -550,15 +681,16 @@ def save_calendar_html(plan_df: pd.DataFrame, today: datetime, out_file: str):
 
     palette = ["#60a5fa", "#4ade80", "#fbbf24", "#a78bfa", "#fb7185"]
     chips, tints = {}, {}
-    for i, row in plan_df.iterrows():
-        color = palette[(int(i) - 1) % len(palette)]
+    for _, row in plan_df.iterrows():
+        sl = int(row["Slice"])
+        color = palette[(sl - 1) % len(palette)]
         buy, ex = parse(row["Buy"]), parse(row["Ex-Date"])
         sell, free = parse(row["Est. Sell"]), parse(row["Cash Free"])
-        t = row["Ticker"]
+        t = f'{row["Ticker"]} S{sl}'
         chips.setdefault(buy, []).append((f"BUY {t}", color))
         chips.setdefault(ex, []).append((f"EX-DATE {t}", color))
         chips.setdefault(sell, []).append((f"SELL {t}", color))
-        chips.setdefault(free, []).append(("CASH FREE", color))
+        chips.setdefault(free, []).append((f"CASH FREE S{sl}", color))
         cur = buy
         while cur <= sell:
             if cur.weekday() < 5:
@@ -577,6 +709,7 @@ def save_calendar_html(plan_df: pd.DataFrame, today: datetime, out_file: str):
 
     total_high = plan_df[COL_RUN_HIGH].iloc[-1]
     total_low = plan_df[COL_RUN_LOW].iloc[-1]
+    total_capital = CAPITAL * N_SLICES
     parts = [f"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <title>Rotation Plan Calendar</title><style>
 body{{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f0;padding:30px 16px;}}
@@ -585,6 +718,7 @@ h1{{font-size:1.5rem;color:#f8fafc;}}
 .sub{{color:#64748b;font-size:0.9rem;margin:6px 0 20px;}}
 .legend{{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px;font-size:0.8rem;color:#94a3b8;}}
 .dot{{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle;}}
+.note{{background:#1c1508;border-left:3px solid #fbbf24;color:#cbb994;padding:10px 14px;margin-bottom:22px;font-size:0.82rem;}}
 table{{width:100%;border-collapse:collapse;margin-bottom:30px;table-layout:fixed;}}
 caption{{text-align:left;font-size:1.05rem;font-weight:700;color:#f1f5f9;padding:8px 0;}}
 th{{color:#64748b;font-size:0.7rem;text-transform:uppercase;padding:6px;border-bottom:1px solid #252d3d;}}
@@ -594,12 +728,29 @@ td .n{{font-weight:600;color:#94a3b8;}}
 .we{{background:#12151e;}}
 </style></head><body><div class="wrap">
 <h1>Rotation Plan Calendar</h1>
-<div class="sub">Generated {today.strftime('%Y-%m-%d')} &middot; ${CAPITAL:,} rolled from trade to trade &middot; estimated total net ${total_high:,.2f} at {TAX_RATE_HIGH:.0%} tax, ${total_low:,.2f} at {TAX_RATE_LOW:.0%} tax</div>
-<div class="legend">"""]
-    for i, row in plan_df.iterrows():
-        color = palette[(int(i) - 1) % len(palette)]
+<div class="sub">Generated {today.strftime('%Y-%m-%d')} &middot; {N_SLICES} slices of ${CAPITAL:,} (${total_capital:,} in total) &middot; estimated total net ${total_high:,.2f} at {TAX_RATE_HIGH:.0%} tax, ${total_low:,.2f} at {TAX_RATE_LOW:.0%} tax</div>
+"""]
+
+    blocked = [(s, st) for s, st in sorted((states or {}).items()) if st["blocked"]]
+    busy = [(s, st) for s, st in sorted((states or {}).items())
+            if st["blocked"] is None and st["holding"]]
+    if blocked or busy:
+        lines = []
+        for s, st in blocked:
+            lines.append(f'Slice {s} is blocked: it still holds {st["blocked"]}, '
+                         f'which has no sell date yet. No trades are scheduled for it.')
+        for s, st in busy:
+            lines.append(f'Slice {s} holds {st["holding"]} until {str(st["hold_until"])}, '
+                         f'so its first trade below starts from that date.')
+        parts.append('<div class="note">' + '<br>'.join(lines) + '</div>')
+
+    parts.append('<div class="legend">')
+    for _, row in plan_df.iterrows():
+        sl = int(row["Slice"])
+        color = palette[(sl - 1) % len(palette)]
         star = "&#9733; " if row.get("Pref") == "Yes" else ""
-        parts.append(f'<span><span class="dot" style="background:{color};"></span>{star}{row["Ticker"]} (net ${row[COL_NET_HIGH]:,.2f} to ${row[COL_NET_LOW]:,.2f})</span>')
+        parts.append(f'<span><span class="dot" style="background:{color};"></span>'
+                     f'{star}S{sl} {row["Ticker"]} (net ${row[COL_NET_HIGH]:,.2f} to ${row[COL_NET_LOW]:,.2f})</span>')
     parts.append('</div>')
 
     for (yy, mm) in months:
@@ -623,8 +774,10 @@ td .n{{font-weight:600;color:#94a3b8;}}
             parts.append('</tr>')
         parts.append('</table>')
 
-    parts.append('<div class="sub">&#9733; = a preferred name: judged safe to keep holding if the rebound runs long. '
-                 'Tinted days = the capital is occupied by that trade. '
+    parts.append('<div class="sub">S1 to S4 = which slice of capital pays for the trade. Each slice holds '
+                 'one position at a time and rotates on its own clock. '
+                 '&#9733; = a preferred name: judged safe to keep holding if the rebound runs long. '
+                 'Tinted days = that slice\'s capital is occupied. '
                  'Sell days are estimates based on each stock\'s average rebound time. '
                  f'Net figures show a range: taxed at {TAX_RATE_HIGH:.0%} (conservative) to {TAX_RATE_LOW:.0%} (optimistic).</div>')
     parts.append('</div></body></html>')
@@ -670,11 +823,18 @@ def save_excel(shown: pd.DataFrame, plan_df: pd.DataFrame, out_file: str):
 
 def run_scanner():
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    print(f"\nDividend Capture Scanner v9 - {today.strftime('%Y-%m-%d')}")
+    total_capital = CAPITAL * N_SLICES
+    print(f"\nDividend Capture Scanner v10 - {today.strftime('%Y-%m-%d')}")
     print(f"Looking for ex-dates within the next {EX_DATE_WINDOW_DAYS} days")
     print(f"After-tax figures shown at two rates: {TAX_RATE_HIGH:.0%} (conservative) and {TAX_RATE_LOW:.0%} (optimistic)")
     fee_note = f", financing fee {FINANCE_FEE:.0%}" if FINANCE_FEE > 0 else ""
-    print(f"Rotation capital: ${CAPITAL:,}{fee_note}")
+    print(f"Rotation capital: {N_SLICES} slices of ${CAPITAL:,} = ${total_capital:,}{fee_note}")
+    if HOLDINGS:
+        print(f"Currently held ({len(HOLDINGS)}): "
+              + ", ".join(f"{h['ticker']} in slice {h['slice']}" for h in HOLDINGS)
+              + " - these are excluded from the plan")
+    if EXCLUDED_SECTORS:
+        print(f"Excluded sectors: {', '.join(EXCLUDED_SECTORS)}")
     print(f"Preferred list: {len(FAVORED_TICKERS)} names flagged and favored in the plan\n")
 
     print("Fetching universe (S&P 500 + high-yield names + CEFs + preferreds)...")
@@ -683,19 +843,24 @@ def run_scanner():
     print("(Stocks that pass the basic filters also get a rebound, trend,")
     print(" entry-timing, and recovery analysis from 2 years of history.)\n")
 
-    candidates, errors = [], []
+    candidates, errors, excluded = [], [], []
     done = 0
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
         futures = {pool.submit(fetch_candidate, t, today): t for t in tickers}
         for future in as_completed(futures):
             done += 1
-            row, err = future.result()
+            row, note = future.result()
             if row:
                 candidates.append(row)
-            elif err:
-                errors.append(err)
+            elif note and note.startswith("EXCLUDED:"):
+                excluded.append(note[len("EXCLUDED:"):])
+            elif note:
+                errors.append(note)
             if done % 100 == 0:
                 print(f"  {done}/{len(tickers)} scanned, {len(candidates)} candidates so far...")
+
+    if excluded:
+        print(f"\nExcluded by sector ({len(excluded)}): {', '.join(sorted(excluded))}")
 
     if errors:
         print(f"\nNote: {len(errors)} tickers were skipped due to data errors.")
@@ -716,7 +881,7 @@ def run_scanner():
     df.index += 1
 
     display_cols = [
-        "Ticker", "Name", "Pref", "Price", "Ex-Date", "Days Until",
+        "Ticker", "Name", "Pref", "Sector", "Price", "Ex-Date", "Days Until",
         "Annual Yield", "Capture Yield", "Div/100sh", "Capital",
         COL_AT_HIGH, COL_AT_LOW,
         "Avg Reb", "Worst Reb", "Recovered", "Best Entry", "Drop Ratio",
@@ -724,15 +889,17 @@ def run_scanner():
     ]
     shown = df[display_cols]
 
-    print(f"\n{'='*130}")
+    print(f"\n{'='*140}")
     print(f"  TOP DIVIDEND CAPTURE CANDIDATES  ({len(df)} found)")
-    print(f"{'='*130}")
+    print(f"{'='*140}")
     print(shown.to_string())
 
     print(f"\nColumn guide:")
     print(f"  Pref          = on the preferred list: names judged safe to keep holding if a")
     print(f"                  rebound takes far longer than expected; they win close calls")
     print(f"                  in the Rotation Plan (see FAVORED_TICKERS at the top of the script)")
+    print(f"  Sector        = the stock's sector. Whole sectors can be ruled out (see")
+    print(f"                  EXCLUDED_SECTORS); the plan also warns when slices overlap in one")
     print(f"  Annual Yield  = full year's dividend as % of price (ranked by this, higher is better)")
     print(f"  Capture Yield = single dividend payment as % of price (what you collect per trade)")
     print(f"  Div/100sh     = dividend dollars for one 100-share round lot")
@@ -752,31 +919,62 @@ def run_scanner():
     print(f"                  taxed at {TAX_RATE_HIGH:.0%}; failed recoveries are charged at the full {REBOUND_MAX_DAYS}-day wait")
     print(f"  Score         = Ann.Eff% adjusted down for downtrend and thin liquidity")
 
-    plan_df = build_rotation_plan(df, today)
+    plan_df, states = build_rotation_plan(df, today)
+
+    blocked = [(s, st) for s, st in sorted(states.items()) if st["blocked"]]
+    busy = [(s, st) for s, st in sorted(states.items())
+            if st["blocked"] is None and st["holding"]]
+    if blocked or busy:
+        print(f"\n{'='*140}")
+        print("  SLICE STATUS")
+        print(f"{'='*140}")
+        for s, st in blocked:
+            print(f"  Slice {s}: BLOCKED - still holds {st['blocked']} with no sell date. "
+                  f"No trades scheduled for this slice.")
+        for s, st in busy:
+            print(f"  Slice {s}: holds {st['holding']} until {str(st['hold_until'])}. "
+                  f"Its first trade below starts from that date.")
+        free_now = N_SLICES - len(blocked) - len(busy)
+        print(f"  {free_now} of {N_SLICES} slices are free today "
+              f"(${free_now * CAPITAL:,} of ${total_capital:,}).")
+
     if not plan_df.empty:
         total_high = plan_df[COL_RUN_HIGH].iloc[-1]
         total_low = plan_df[COL_RUN_LOW].iloc[-1]
-        print(f"\n{'='*130}")
-        print(f"  ROTATION PLAN  (${CAPITAL:,} rolled from trade to trade, net shown at "
+        tradeable = (N_SLICES - len(blocked)) * CAPITAL
+        print(f"\n{'='*140}")
+        print(f"  ROTATION PLAN  ({N_SLICES} slices of ${CAPITAL:,}, net shown at "
               f"{TAX_RATE_HIGH:.0%} and {TAX_RATE_LOW:.0%} tax"
               f"{', ' + format(FINANCE_FEE, '.0%') + ' financing fee' if FINANCE_FEE > 0 else ''})")
-        print(f"{'='*130}")
+        print(f"{'='*140}")
         print(plan_df.to_string())
-        print(f"\n  {len(plan_df)} trades planned over the next {EX_DATE_WINDOW_DAYS} days.")
+        print(f"\n  {len(plan_df)} trades planned over the next {EX_DATE_WINDOW_DAYS} days "
+              f"across {plan_df['Slice'].nunique()} slices.")
         print(f"  Estimated total net: ${total_high:,.2f} at {TAX_RATE_HIGH:.0%} tax "
-              f"({total_high / CAPITAL:.2%} of the capital) to "
-              f"${total_low:,.2f} at {TAX_RATE_LOW:.0%} tax ({total_low / CAPITAL:.2%}).")
-        print(f"  Buy = the stock's own back-tested Best Entry day. Est. Sell = ex-date plus its")
-        print(f"  average rebound. Cash Free = one settlement day after the sale (T+{SETTLEMENT_DAYS}).")
+              f"({total_high / tradeable:.2%} of the ${tradeable:,} actually tradeable) to "
+              f"${total_low:,.2f} at {TAX_RATE_LOW:.0%} tax ({total_low / tradeable:.2%}).")
+        print(f"  Slice = which pot pays for the trade. Buy = the stock's own back-tested Best")
+        print(f"  Entry day. Est. Sell = ex-date plus its average rebound. Cash Free = one")
+        print(f"  settlement day after the sale (T+{SETTLEMENT_DAYS}).")
         print(f"  Worst Reb shows the honest risk: the longest that stock has ever taken to recover.")
+
+        overlaps = sector_overlaps(plan_df)
+        if overlaps:
+            print(f"\n  SECTOR CONCENTRATION WARNING")
+            for sec, ticks in overlaps:
+                print(f"    {sec}: {', '.join(ticks)} would be held at the same time.")
+            print(f"    Separate slices are meant to spread risk. Holding one sector in several")
+            print(f"    of them at once turns the whole allocation back into a single bet.")
+
         cal_file = f"rotation_calendar_{today.strftime('%Y%m%d')}.html"
         try:
-            save_calendar_html(plan_df, today, cal_file)
+            save_calendar_html(plan_df, today, cal_file, states)
             print(f"\nSaved to {cal_file} (visual calendar - open it in any browser)")
         except PermissionError:
             print(f"\nCould not save {cal_file} - close it in the browser/editor and rerun.")
     else:
-        print("\nNo rotation plan could be built (no candidates with reliable rebound history).")
+        print("\nNo rotation plan could be built. Either no candidates have reliable")
+        print("rebound history, or every slice is already committed.")
 
     out_file = f"candidates_{today.strftime('%Y%m%d')}.csv"
     shown.to_csv(out_file, index=True)
