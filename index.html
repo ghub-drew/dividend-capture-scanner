@@ -822,7 +822,7 @@ rotation_calendar_YYYYMMDD.html</div>
           <div class="run-num">5</div>
           <div class="run-content">
             <div class="run-title">Optional: run it automatically every morning</div>
-            <div class="run-desc">Windows can start the scanner for you each day, so there is nothing to remember. Download the helper script below, save it in the same folder as the scanner, and register the daily task once (this example uses 8:00 AM). Each day's output is saved to a dated log file in a logs folder, alongside the usual CSV. The computer needs to be on at the scheduled time.</div>
+            <div class="run-desc">Windows can start the scanner for you each day, so there is nothing to remember. Download the helper script below, save it in the same folder as the scanner, and register the daily task once (this example uses 8:00 AM). Each day's output is saved to a dated log file in a logs folder, alongside the usual CSV, and every run records whether it worked in a file called LAST_RUN.txt, so a scan that fails cannot be mistaken for one that worked.</div>
             <a href="run_daily.ps1" download class="download-btn" style="margin:8px 0;">
               <span>&#8595;</span> Download run_daily.ps1
             </a>
@@ -832,6 +832,8 @@ rotation_calendar_YYYYMMDD.html</div>
             <div class="run-desc" style="margin-top:10px;">The kill switch: pause or resume the morning run any time with one command.</div>
             <div class="code-block">schtasks /change /tn "DividendScannerDaily" /disable</div>
             <div class="code-block" style="margin-top:6px;">schtasks /change /tn "DividendScannerDaily" /enable</div>
+            <div class="run-desc" style="margin-top:10px;">A laptop that is asleep at 8:00 AM cannot run anything, and letting Windows catch up on the missed run does not work: the catch-up starts while you are still signing in and the scan is killed before it gets anywhere. Leave that option off and add a second trigger that fires five minutes after you sign in instead. The script only scans once a day, so whichever trigger gets there first does the work and the other exits.</div>
+            <div class="code-block">schtasks /create /tn "DividendScannerLogon" /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\Users\YourName\Documents\stock scanner\run_daily.ps1\"" /sc onlogon /delay 0005:00</div>
           </div>
         </div>
 

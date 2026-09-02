@@ -252,7 +252,18 @@ python dividend_scanner_v10.py</div>
     <p>The kill switch: pause or resume the morning run at any time with one command. No need to delete anything.</p>
     <div class="code-block">schtasks /change /tn "DividendScannerDaily" /disable
 schtasks /change /tn "DividendScannerDaily" /enable</div>
-    <div class="note"><strong>Note:</strong> The path in the first command is an example. Replace it with the folder where you saved the scanner. The computer needs to be on at the scheduled time for the run to happen.</div>
+    <div class="note"><strong>Note:</strong> The path in the first command is an example. Replace it with the folder where you saved the scanner.</div>
+
+    <h3>If the computer is off at that time</h3>
+    <p>A laptop that is asleep or shut down at 8:00 AM cannot run anything. Windows offers to catch up on a missed run as soon as the machine comes back, but that catch-up starts while you are still signing in, and a scan started that early is killed before it gets anywhere. The result is the worst kind of failure: an empty log file that looks like the scan happened.</p>
+    <p>The reliable arrangement is to leave the catch-up option off and add a second trigger that fires a few minutes after you sign in, once the computer has settled. Add it once with this command:</p>
+    <div class="code-block">schtasks /create /tn "DividendScannerLogon" /tr "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\Users\YourName\Documents\stock scanner\run_daily.ps1\"" /sc onlogon /delay 0005:00</div>
+    <p>Two triggers do not mean two scans. The helper script checks first whether today's <code>candidates_YYYYMMDD.csv</code> already exists and stops immediately if it does, so whichever trigger gets there first does the work and the other simply exits. This matters: repeated full scans in a short space of time can get the data feed to start refusing requests.</p>
+
+    <h3>Knowing the run actually happened</h3>
+    <p>Every automatic run writes a one-line file called <code>LAST_RUN.txt</code> in the scanner folder, recording the time it finished and whether it worked:</p>
+    <div class="code-block">OK   2026-08-30 08:01:07  scan finished, candidates_20260830.csv written</div>
+    <p>A failed run writes a FAIL line with the error code instead. Without this, a scan that dies leaves nothing behind but silence, and silence looks exactly like success. Glancing at this one file each morning is the quickest way to know the plan on screen is today's.</p>
   </section>
 
   <section id="universe">

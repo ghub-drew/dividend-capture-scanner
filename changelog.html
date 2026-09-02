@@ -154,6 +154,8 @@
           <li><span class="lbl new">New</span> Every candidate now carries its sector, and whole sectors can be ruled out in the settings. The run reports how many names an exclusion removed, so nothing goes missing silently. <em>(Column: Sector)</em></li>
           <li><span class="lbl new">New</span> A sector concentration warning. Running several slices only spreads risk if they are in different parts of the market, and high yields cluster in a few rate-sensitive sectors, so the plan now names any sector that two or more slices would hold at the same time.</li>
           <li><span class="lbl imp">Improved</span> The visual calendar colours by slice rather than by trade, and notes any slice that is blocked or still holding a position.</li>
+          <li><span class="lbl fix">Fix</span> The automatic morning run no longer fails silently on a computer that was asleep. Windows catches up on a missed run as soon as the machine comes back, but that catch-up starts during sign-in and the scan was being killed seconds later, leaving an empty log file that looked like success. The catch-up option is replaced by a second trigger a few minutes after sign-in, and the helper script now stops immediately if today's scan has already run, so two triggers cannot mean two scans.</li>
+          <li><span class="lbl new">New</span> Every automatic run records the finish time and the result in a file called LAST_RUN.txt, so a scan that dies leaves evidence instead of silence.</li>
         </ul>
       </div>
     </div>
